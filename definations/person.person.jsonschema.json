@@ -1,0 +1,121 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "object",
+      "required":["firstName"],
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "format": "chinese-name",
+          "examples": [
+            "my"
+          ]
+        },
+        "lastName": {
+          "type": "string",
+          "examples": [
+            "name"
+          ]
+        }
+      }
+    },
+    "age": {
+      "type": "integer",
+      "examples": [
+        2222
+      ]
+    },
+    "email": {
+      "type": "string",
+      "examples": [
+        "myname@a.com"
+      ],
+      "format": "email"
+    },
+    "dob": {
+      "type": "string",
+      "examples": [
+        "2023-08-15"
+      ],
+      "format": "date"
+    },
+    "hobbies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": [
+          "golf",
+          "movie",
+          "dance"
+        ]
+      }
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stid",
+          "street",
+          "postcode",
+          "updated"
+        ],
+        "properties": {
+          "stid": {
+            "type": "string",
+            "examples": [
+              "695.3939499698714"
+            ]
+          },
+          "street": {
+            "type": "object",
+            "required": [
+              "st1",
+              "st2"
+            ],
+            "properties": {
+              "st1": {
+                "type": "string",
+                "examples": [
+                  "st1"
+                ]
+              },
+              "st2": {
+                "type": "string",
+                "examples": [
+                  "st2"
+                ]
+              }
+            }
+          },
+          "postcode": {
+            "type": "integer",
+            "examples": [
+              232323
+            ]
+          },
+          "updated": {
+            "type": "string",
+            "format": "date",
+            "examples": [
+              "2000-01-01"
+            ]
+          }
+        }
+      }
+    },
+    "_id": {
+      "type": "string",
+      "examples": [
+        ""
+      ]
+    },
+    "doctype": {
+      "type": "string",
+      "examples": [
+        "Person"
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+    "definationsFolder":"./definations",
+    "backendFolder":"./backend", 
+    "frontendFolder":"./apiclient"
+}

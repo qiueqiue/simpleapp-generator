@@ -1,0 +1,111 @@
+import {
+  Controller,
+  Get,
+  Put,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Type,
+} from '@nestjs/common';
+import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
+
+// import { personService } from './person.service';
+// import * as persontype from './person.type';
+import * as personapischema from '../docs/person/person.apischema';
+
+const doctype = 'person'.toUpperCase();
+type ServiceType = {
+  list: Function;
+  create: Function;
+  update: Function;
+  delete: Function;
+  findById: Function;
+  findIdThenDelete: Function;
+  findIdThenUpdate: Function;
+  setData: Function;
+};
+
+// @ApiTags(doctype)
+// @Controller(doctype.toLowerCase())
+export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
+  protected service: TService;
+  protected tryno: number;
+  //   protected apiSchemaClass=
+
+  constructor(service: TService) {
+    this.service = service;
+  }
+
+  /********************ok*****************/
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Found',
+  })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiOperation({ operationId: 'runList' })
+  async list() {
+    return this.service.list();
+  }
+  /********************ok*****************/
+  @Get(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Founds',
+  })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiOperation({ operationId: 'runFindOne' })
+  async findOne(@Param('id') id: string) {
+    const result = (await this.service.findById(id)) as TApiSchema;
+
+    return result as Type<TApiSchema>;
+  }
+
+  /********************ok*****************/
+  @Post()
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+  })
+  @ApiResponse({ status: 400, description: 'bad request' })
+  @ApiResponse({ status: 500, description: 'internal error' })
+  @ApiBody({ description: 'Data' })
+  @ApiOperation({ operationId: 'runCreate' })
+  async create(@Body() data: TApiSchema) {
+    //const newdata: persontype.Person = { ...data };
+    const newdata: T = {} as T; //= { ...data };
+    Object.assign(newdata, data); //
+    return this.service.setData(newdata).create() as TApiSchema;
+  }
+
+  /********************ok*****************/
+  @Put(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+  })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiBody({ description: 'Data' })
+  @ApiOperation({ operationId: 'runUpdate' })
+  async update(@Param('id') id: string, @Body() data: TApiSchema) {
+    const newdata: T = {} as T; //= { ...data };
+    Object.assign(newdata, data); //
+    return this.service.findIdThenUpdate(id, newdata) as TApiSchema;
+  }
+
+  /********************ok*****************/
+  @Delete(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+  })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiOperation({ operationId: 'runDelete' })
+  async delete(@Param('id') id: string) {
+    return this.service.findIdThenDelete(id);
+  }
+}

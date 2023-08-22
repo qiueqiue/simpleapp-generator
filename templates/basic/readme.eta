@@ -1,0 +1,3 @@
+Installation
+1. copy `import { <%= it.typename%>Module } from './docs/<%= it.doctype%>/<%= it.doctype%>.module';` into src/app.module.ts
+2. append `<%= it.typename%>Module` into array `imports`

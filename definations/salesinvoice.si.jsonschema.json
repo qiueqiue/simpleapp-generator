@@ -1,0 +1,140 @@
+{
+  "type": "object",
+  "properties": {
+    "document_no": {
+      "type": "string",
+      "examples": [
+        "SI001"
+      ]
+    },
+    "document_type": {
+      "type": "string",
+      "examples": [
+        "SI"
+      ]
+    },
+    "document_date": {
+      "type": "string",
+      "examples": [
+        "2000-01-01"
+      ],
+      "format": "date"
+    },
+    "document_preparedby": {
+      "type": "string",
+      "examples": [
+        "ali"
+      ]
+    },
+    "currency_code": {
+      "type": "string",
+      "examples": [
+        "MYR"
+      ]
+    },
+    "exchangerate": {
+      "type": "integer",
+      "examples": [
+        1
+      ]
+    },
+    "amount": {
+      "type": "number",
+      "examples": [
+        10.15
+      ]
+    },
+    "taxamt": {
+      "type": "number",
+      "examples": [
+        0.5
+      ]
+    },
+    "itemcount": {
+      "type": "integer",
+      "examples": [
+        1
+      ]
+    },
+    "details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_code",
+          "item_name",
+          "qty",
+          "unitprice",
+          "discount",
+          "subtotal",
+          "tax",
+          "taxpercent",
+          "taxamt",
+          "linetotal"
+        ],
+        "properties": {
+          "item_code": {
+            "type": "string",
+            "examples": [
+              "apple"
+            ]
+          },
+          "item_name": {
+            "type": "string",
+            "examples": [
+              "Red Apple"
+            ]
+          },
+          "qty": {
+            "type": "integer",
+            "examples": [
+              10
+            ]
+          },
+          "unitprice": {
+            "type": "number",
+            "examples": [
+              1.5
+            ]
+          },
+          "discount": {
+            "type": "string",
+            "examples": [
+              "10%"
+            ]
+          },
+          "subtotal": {
+            "type": "integer",
+            "examples": [
+              0
+            ]
+          },
+          "tax": {
+            "type": "string",
+            "examples": [
+              "sst6"
+            ]
+          },
+          "taxpercent": {
+            "type": "integer",
+            "examples": [
+              6
+            ]
+          },
+          "taxamt": {
+            "type": "number",
+            "examples": [
+              0.5
+            ]
+          },
+          "linetotal": {
+            "type": "number",
+            "examples": [
+              10.15
+            ]
+          }
+        }
+      }
+    }
+  }
+}
