@@ -1,0 +1,15 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+
+<% for(let i=0;i<it.length; i++){ %>
+import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
+<%}%>
+
+@Module({
+    //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
+  imports: [ConfigModule.forRoot(),MongooseModule.forRoot(process.env.MONGODB_URL),<% for(let i=0;i<it.length; i++){ %><%= it[i].docname %>Module,<%}%>],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}

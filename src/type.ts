@@ -34,3 +34,9 @@ export type JsonSchemaProperties= {
   [key: string]: JSONSchema7Definition
   // JSONSchema7Definition ,JSONSchema7
 }
+
+
+export type ModuleObject = {
+  doctype:string
+  docname:string
+}

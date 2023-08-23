@@ -7,15 +7,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 <%Object.keys(it.models).forEach(function(name) { %>
     <% let schema = it.models[name].model %>        
-        export class <%= name %>{
-            /*
-            <% if(it.apiSchemaName == name ) {%>
-            @ApiProperty({example: 'xxxxx',description: 'record id',required: false,})
-            _id?: string;
-            
-            @ApiProperty({ example: '<%= it.doctype.toUpperCase() %>', description: 'Document type', required: true })
-            doctype?: string;
-            <% } %>*/
+        export class <%= name %>{            
 
             <% Object.keys(schema).forEach(function(key){%>
                 <% let obj = schema[key] %>

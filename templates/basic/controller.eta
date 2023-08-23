@@ -13,7 +13,7 @@ import {
   Param,
   Type,
 } from '@nestjs/common';
-import { SimpleAppController } from '../../../src/plugins/SimpleAppController';
+import { SimpleAppController } from '../../class/SimpleAppController';
 import { <%= it.typename %>Service } from './<%= it.doctype %>.service';
 import * as <%= it.doctype %>type from './<%= it.doctype %>.type';
 import * as <%= it.doctype %>apischema from './<%= it.doctype %>.apischema';

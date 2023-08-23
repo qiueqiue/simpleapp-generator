@@ -3,9 +3,14 @@
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
 // import { compile } from 'json-schema-to-typescript';
 // import { Fieldtypes, SchemaModel, ChildModels } from './type';
-import { Fieldtypes, SchemaModel, ChildModels } from './type'
+import { Fieldtypes, SchemaModel, ChildModels,ModuleObject } from './type'
+import { Logger, ILogObj } from "tslog";
+const log: Logger<ILogObj> = new Logger();
+const clc = require("cli-color");
+
+
 const path = require('path');
-const {mkdirSync,readdir,readFileSync,writeFileSync,existsSync} = require('fs');
+import {mkdirSync,readdir,readFileSync,writeFileSync,existsSync,copyFileSync} from 'fs'
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
 const extFb = '.xfb.json';
@@ -15,8 +20,11 @@ let jsonschemas = {};
 const docs = [];
 
 export const initialize = async (defFolder:string,backendfolder:string,frontendfolder:string) => {
+  prepareEnvironments(backendfolder)
+let activatemodules:ModuleObject[]=[]
   await readdir(defFolder, (err, files) => {
     files.forEach((file) => {
+      
       const filearr = file.split('.');
       let rendertype = 'basic';
       const docname = filearr[0].toLowerCase();
@@ -25,29 +33,23 @@ export const initialize = async (defFolder:string,backendfolder:string,frontendf
       const jsondata = JSON.parse(jsonstring);
       let allmodels: ChildModels = {} as ChildModels;
       
-      if (file.endsWith(extFb)) {
-        rendertype = 'fb';
-        // schema = readFormBuilder(doctype, docname, jsondata);
-      } else if (file.endsWith(extjsonschema)) {
+      if (file.endsWith(extjsonschema)) {
+        log.info(`Load `+clc.green(file))
         rendertype = 'basic';
         jsonschemas[docname] = jsondata;
         allmodels = readJsonSchemaBuilder(doctype, docname, jsondata);
-      } else if (file.endsWith(extHfb)) {
-        rendertype = 'hfv';
-        console.error(file + ' is hfb and not supported yet');
+        generate(docname, doctype, rendertype, allmodels,backendfolder,frontendfolder);        
+        activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname)})
+        
       } else {
-        console.error(file + ' is not supported');
+        log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
       }
-
-      if (allmodels) {
-        generate(docname, doctype, rendertype, allmodels,backendfolder,frontendfolder);
-      }
+      
     });
+    console.log("activatemodules",activatemodules)
+    loadSimpleAppModules(activatemodules,backendfolder)
   });
   
-  console.log(
-    'all document generate successfully, refer src/docs/<docs>/README.md to understand how to activate each document api',
-  );
 };
 
 const generate = (
@@ -58,8 +60,8 @@ const generate = (
   backendfolder:string,
   frontendfolder:string
 ) => {
-  const targetfolder = `${backendfolder}/${doctype}`;
-
+  const targetfolder = `${backendfolder}/docs/${doctype}`;
+  
   try {
     
     mkdirSync(targetfolder,{ recursive: true });
@@ -69,14 +71,14 @@ const generate = (
     //do nothing if folder exists
   } finally {
     const templatefolder = `./templates/${rendertype}`;
-    console.log('Generate ', docname, doctype, templatefolder);
+    log.info(`- Generate ${docname}, ${doctype}, ${templatefolder}`)
     const eta = new Eta({
       views: templatefolder,
       functionHeader:
         'const capitalizeFirstLetter = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);' +
         'const initType=(str)=>{console.log(str);return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}',
     });
-    console.log('generate 1');
+    
     const variables = {
       name: docname,
       doctype: doctype,
@@ -142,16 +144,12 @@ const generate = (
         /\/\/<begin-backend-code>([\s\S]*?)\/\/<end-backend-code>/g;
       const bothendresult = servicecodes.match(regex1);
       const backendresult = servicecodes.match(regex2);
-      console.log('bothendresult', bothendresult);
-      console.log('backendresult', backendresult);
       if (bothendresult) {
         bothEndCode = bothendresult[0];
-        console.log('bothEndCode=======', bothEndCode);
       }
 
       if (backendresult) {
         backEndCode = backendresult[0];
-        console.log('backEndCode=======', backEndCode);
       }
     }
 
@@ -188,7 +186,6 @@ const generate = (
 
       if (frontendresult) {
         frontEndCode = frontendresult[0];
-        console.log('frontEndCode=======', frontEndCode);
       }
     }
     variables.frontEndCode = frontEndCode ?? '';
@@ -196,8 +193,8 @@ const generate = (
     writeFileSync(frontendfile, txtDocClient);
 
     // // fs.writeFileSync(`${targetfolder}/${doctype}.uischema.ts`, txtUISchema);
-
-    console.log('write done: ', doctype);
+    log.info(`- write completed: `+clc.green(doctype))
+    
     //create type
     //create service
     //create controller
@@ -208,5 +205,27 @@ const generate = (
   }
 };
 
+const prepareEnvironments = (backendfolder:string)=>{
+  const targetfolder = `${backendfolder}/class`
+  mkdirSync(targetfolder,{ recursive: true });
+
+  //copy over backend service class
+  copyFileSync('./templates/SimpleAppService.eta',`${targetfolder}/SimpleAppService.ts`)
+  
+  //copy over backend controller
+  copyFileSync('./templates/SimpleAppController.eta',`${targetfolder}/SimpleAppController.ts`)
+
+  //prepare backend config.ts
+
+  //copy over frontend apiabstract class
+  //copy over frontend config.ts
+}
 
 
+const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
+  console.log(modules)
+  const eta = new Eta({views: './templates'});
+  const txtMainModule = eta.render('app.module.eta', modules);
+  writeFileSync(`${targetfolder}/app.module.ts`, txtMainModule);
+
+}

@@ -10,10 +10,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
-// import { personService } from './person.service';
-// import * as persontype from './person.type';
-import * as personapischema from '../docs/person/person.apischema';
-
 const doctype = 'person'.toUpperCase();
 type ServiceType = {
   list: Function;
