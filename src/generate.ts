@@ -40,7 +40,6 @@ let activatemodules:ModuleObject[]=[]
         allmodels = readJsonSchemaBuilder(doctype, docname, jsondata);
         generate(docname, doctype, rendertype, allmodels,backendfolder,frontendfolder);        
         activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname)})
-        
       } else {
         log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
       }
@@ -94,6 +93,7 @@ const generate = (
       bothEndCode: '',
       frontEndCode: '',
       backEndCode: '',
+      controllerCode:''
     };
 
     // console.log('generate 2', JSON.stringify(variables));
@@ -154,17 +154,26 @@ const generate = (
       }
     }
 
-    variables.bothEndCode = bothEndCode ?? '';
-    variables.backEndCode = backEndCode ?? '';
+    variables.bothEndCode = bothEndCode ?? "//<begin-bothend-code>\n//<end-bothend-code>";
+    variables.backEndCode = backEndCode ?? "//<begin-backend-code>\n//<end-backend-code>";
     const txtService = eta.render('./service', variables);
     writeFileSync(`${targetfolder}/${doctype}.service.ts`, txtService);
 
     // prepare api router, allow add more api and wont override after regenerate
     const controllerfile = `${targetfolder}/${doctype}.controller.ts`;
-    // if (!existsSync(controllerfile)) {
-      const txtController = eta.render('./controller', variables);
-      writeFileSync(controllerfile, txtController);
-    // }
+    let controllerCode = ''
+    if (existsSync(controllerfile)) {
+      /* extract customized controller, put in back */
+      const controllersourcecodes = readFileSync(controllerfile).toString();        
+      const controllerregex = /\/\/<begin-controller-code>([\s\S]*?)\/\/<end-controller-code>/g;
+      const controllerresult = controllersourcecodes.match(controllerregex);
+      if (controllerresult) {
+        controllerCode = controllerresult[0];
+      }
+    }
+    variables.controllerCode = controllerCode!='' ? controllerCode : "\n//<begin-controller-code>\n//<end-controller-code>";
+    const txtController = eta.render('./controller', variables);
+    writeFileSync(controllerfile, txtController);
 
     // prepare module
     const txtModule = eta.render('./module', variables);

@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/node': ^20.5.2
+  child_process: ^1.0.2
   cli-color: ^2.0.3
   commander: ^11.0.0
   eta: ^3.1.0
@@ -14,6 +15,7 @@ specifiers:
   typescript: ^5.1.6
 
 dependencies:
+  child_process: 1.0.2
   cli-color: 2.0.3
   commander: 11.0.0
   eta: 3.1.0
@@ -33,6 +35,10 @@ packages:
   /@types/node/20.5.2:
     resolution: {integrity: sha512-5j/lXt7unfPOUlrKC34HIaedONleyLtwkKggiD/0uuMfT8gg2EOpg0dz4lCD15Ga7muC+1WzJZAjIB9simWd6Q==}
     dev: true
+
+  /child_process/1.0.2:
+    resolution: {integrity: sha512-Wmza/JzL0SiWz7kl6MhIKT5ceIlnFPJX+lwUGj7Clhy5MMldsSoJR0+uvRzOS5Kv45Mq7t1PoE8TsOA9bzvb6g==}
+    dev: false
 
   /cli-color/2.0.3:
     resolution: {integrity: sha512-OkoZnxyC4ERN3zLzZaY9Emb7f/MhBOIpePv0Ycok0fJYT+Ouo00UBEIwsVsr0yoow++n5YWlSUgST9GKhNHiRQ==}

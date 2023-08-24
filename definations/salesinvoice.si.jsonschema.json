@@ -1,140 +1,84 @@
 {
-  "type": "object",
-  "properties": {
-    "document_no": {
-      "type": "string",
-      "examples": [
-        "SI001"
-      ]
-    },
-    "document_type": {
-      "type": "string",
-      "examples": [
-        "SI"
-      ]
-    },
-    "document_date": {
-      "type": "string",
-      "examples": [
-        "2000-01-01"
-      ],
-      "format": "date"
-    },
-    "document_preparedby": {
-      "type": "string",
-      "examples": [
-        "ali"
-      ]
-    },
-    "currency_code": {
-      "type": "string",
-      "examples": [
-        "MYR"
-      ]
-    },
-    "exchangerate": {
-      "type": "integer",
-      "examples": [
-        1
-      ]
-    },
-    "amount": {
-      "type": "number",
-      "examples": [
-        10.15
-      ]
-    },
-    "taxamt": {
-      "type": "number",
-      "examples": [
-        0.5
-      ]
-    },
-    "itemcount": {
-      "type": "integer",
-      "examples": [
-        1
-      ]
-    },
-    "details": {
-      "type": "array",
-      "items": {
+    "type": "object",
+    "properties": {
+      "name": {
         "type": "object",
-        "required": [
-          "item_code",
-          "item_name",
-          "qty",
-          "unitprice",
-          "discount",
-          "subtotal",
-          "tax",
-          "taxpercent",
-          "taxamt",
-          "linetotal"
-        ],
         "properties": {
-          "item_code": {
+          "firstName": {
             "type": "string",
             "examples": [
-              "apple"
+              "John"
             ]
           },
-          "item_name": {
+          "lastName": {
             "type": "string",
             "examples": [
-              "Red Apple"
+              "Fox"
             ]
-          },
-          "qty": {
-            "type": "integer",
-            "examples": [
-              10
-            ]
-          },
-          "unitprice": {
-            "type": "number",
-            "examples": [
-              1.5
-            ]
-          },
-          "discount": {
-            "type": "string",
-            "examples": [
-              "10%"
-            ]
-          },
-          "subtotal": {
-            "type": "integer",
-            "examples": [
-              0
-            ]
-          },
-          "tax": {
-            "type": "string",
-            "examples": [
-              "sst6"
-            ]
-          },
-          "taxpercent": {
-            "type": "integer",
-            "examples": [
-              6
-            ]
-          },
-          "taxamt": {
-            "type": "number",
-            "examples": [
-              0.5
-            ]
-          },
-          "linetotal": {
-            "type": "number",
-            "examples": [
-              10.15
-            ]
+          }
+        }
+      },
+      "age": {
+        "type": "integer",
+        "examples": [
+          20
+        ]
+      },
+      "email": {
+        "type": "string",
+        "examples": [
+          "john@example.com"
+        ],
+        "format": "email"
+      },
+      "dob": {
+        "type": "string",
+        "examples": [
+          "2000-01-01"
+        ],
+        "format": "date"
+      },
+      "hobbies": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "examples": [
+            "badminton",
+            "dota",
+            "reading"
+          ]
+        }
+      },
+      "addresses": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "street1",
+            "street2",
+            "postcode"
+          ],
+          "properties": {
+            "street1": {
+              "type": "string",
+              "examples": [
+                "11, Fox Road"
+              ]
+            },
+            "street2": {
+              "type": "string",
+              "examples": [
+                "My Home Town"
+              ]
+            },
+            "postcode": {
+              "type": "integer",
+              "examples": [
+                12345
+              ]
+            }
           }
         }
       }
     }
   }
-}

@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "child_process": "^1.0.2",
     "cli-color": "^2.0.3",
     "commander": "^11.0.0",
     "eta": "^3.1.0",

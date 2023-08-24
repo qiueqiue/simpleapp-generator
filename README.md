@@ -53,6 +53,9 @@ it involve 3 major scope of work:
 ```sh
 MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
 HTTP_PORT=8000
+PROJECT_NAME='SimpleApp Demo1'
+PROJECT_DESCRIPTION='Try CRUD'
+PROJECT_Version='1.0.0'
 ```
 7. change `src/main.ts`, allow openapi document:
 ```ts
@@ -64,9 +67,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   const config = new DocumentBuilder()
-    .setTitle('Formbuilder API')
-    .setDescription('The cats API description')
-    .setVersion('1.0')
+    .setTitle(process.env.PROJECT_NAME)
+    .setDescription(process.env.PROJECT_DESCRIPTION)
+    .setVersion(process.env.PROJECT_VERSION)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
@@ -230,7 +233,7 @@ Below is the sample of jsonschema:
     "definationsFolder":"./definations",
     "backendFolder":"../backend", 
     "frontendFolder":"../frontend",
-    "openapi":"openapi.yaml"
+    "openapi3Yaml":"openapi.yaml"
 }
 ```
 5. run `simpleapp-generator -c ./config.json`

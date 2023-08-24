@@ -30,7 +30,7 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   constructor(service: <%= it.typename %>Service) {
     super(service);
   }
-  /********************ok*****************/
+  
   @Get()
   @ApiResponse({
     status: 200,
@@ -42,7 +42,7 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   async list() {
     return this._list();
   }
-  /********************ok*****************/
+  
   @Get(':id')
   @ApiResponse({
     status: 200,
@@ -56,7 +56,6 @@ export class <%= it.typename %>Controller extends SimpleAppController<
     return await this._findOne(id);
   }
 
-  /********************ok*****************/
   @Post()
   @ApiResponse({
     status: 201,
@@ -71,7 +70,6 @@ export class <%= it.typename %>Controller extends SimpleAppController<
     return await this._create(data)
   }
 
-  /********************ok*****************/
   @Put(':id')
   @ApiResponse({
     status: 200,
@@ -85,7 +83,6 @@ export class <%= it.typename %>Controller extends SimpleAppController<
     return await this._update(id, data) ;
   }
 
-  /********************ok*****************/
   @Delete(':id')
   @ApiResponse({
     status: 200,
@@ -98,5 +95,9 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   async delete(@Param('id') id: string) {
     return this._delete(id);
   }
+ 
+
+   /*****************************customized code begin here *****************************************/
+  <%~ it.controllerCode %>
  
 }
