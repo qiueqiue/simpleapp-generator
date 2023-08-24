@@ -24,8 +24,9 @@ export const readJsonSchemaBuilder = (
   
   if (jsondata && jsondata.type == 'object') {
     //no _id then need add
+    // console.log(jsondata)
     schema = processObject(doctype,docname, jsondata)
-    
+    // console.log("schema",schema)
   } else if (jsondata.type == 'array') {
     throw(`unsupport array type for ${docname}.${doctype}`)
   }
@@ -64,10 +65,10 @@ const genSchema = (
   
   for (let i = 0; i < props.length; i++) {    
     const key = props[i];
-
+    
     //below is Object.assign use for force datatype compatibility
     const obj:JSONSchema7={}
-    Object.assign(obj,jsondata?[key]:{});
+    Object.assign(obj,jsondata[key]);
     const objectitem:JSONSchema7= {} as JSONSchema7    
     Object.assign(objectitem,obj.items);
 
@@ -77,11 +78,13 @@ const genSchema = (
     const newName: string = docname + capitalizeFirstLetter(key);
     // console.log(key);
     //need create sub model
+    // console.log("----",key,obj.type,objectitem.type)
     if (obj.type == 'object') {
       genSchema(newName, obj.type, obj.properties, obj.required);
       newmodel[key] = newName;
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
       //array need submodel
+      // console.log("======",newName,key)
       genSchema(newName, obj.type, objectitem?.properties, obj.required);
       newmodel[key] = [newName];
     } else if (obj.type == 'array' && objectitem?.type != 'object') {

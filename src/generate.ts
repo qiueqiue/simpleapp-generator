@@ -46,7 +46,8 @@ let activatemodules:ModuleObject[]=[]
       }
       
     });
-    console.log("activatemodules",activatemodules)
+    log.info("Activated backend modules: ")
+    log.info(activatemodules)
     loadSimpleAppModules(activatemodules,backendfolder)
   });
   
@@ -76,7 +77,7 @@ const generate = (
       views: templatefolder,
       functionHeader:
         'const capitalizeFirstLetter = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);' +
-        'const initType=(str)=>{console.log(str);return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}',
+        'const initType=(str)=>{return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}',
     });
     
     const variables = {
@@ -160,10 +161,10 @@ const generate = (
 
     // prepare api router, allow add more api and wont override after regenerate
     const controllerfile = `${targetfolder}/${doctype}.controller.ts`;
-    if (!existsSync(controllerfile)) {
+    // if (!existsSync(controllerfile)) {
       const txtController = eta.render('./controller', variables);
       writeFileSync(controllerfile, txtController);
-    }
+    // }
 
     // prepare module
     const txtModule = eta.render('./module', variables);
@@ -227,7 +228,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 
 
 const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
-  console.log(modules)
+  
   const eta = new Eta({views: './templates'});
   const txtMainModule = eta.render('app.module.eta', modules);
   writeFileSync(`${targetfolder}/src/app.module.ts`, txtMainModule);

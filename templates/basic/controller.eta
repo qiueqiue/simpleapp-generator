@@ -65,7 +65,7 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   })
   @ApiResponse({ status: 400, description: 'bad request' })
   @ApiResponse({ status: 500, description: 'internal error' })
-  @ApiBody({ description: 'Data' })
+  @ApiBody({ description: 'Data',type:<%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runCreate' })
   async create(@Body() data: <%= it.fullApiSchemaName%>) {    
     return await this._create(data)
@@ -79,7 +79,7 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 500, description: 'Internal error' })
-  @ApiBody({ description: 'Data' })
+  @ApiBody({ description: 'Data',type: <%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runUpdate' })
   async update(@Param('id') id: string, @Body() data: <%= it.fullApiSchemaName%>) {    
     return await this._update(id, data) ;
