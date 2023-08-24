@@ -3,8 +3,7 @@
  * DO NOT MODIFY IT BY HAND. Instead, modify the source JSONSchema file,
  * and regenerate this file.
  */
-import { API_BASE_URL } from '../config';
-import { SimpleAppClient } from '../lib/SimpleAppClient';
+import { SimpleAppClient } from '../class/SimpleAppClient';
 // import { JSONSchema7 } from 'json-schema';
 import { Configuration,
       <%= it.doctype.toUpperCase()%>Api, 
@@ -21,7 +20,7 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
   public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
 
   constructor() {    
-    const apiconfig = new Configuration({ basePath: API_BASE_URL });
+    const apiconfig = new Configuration({ basePath: useRuntimeConfig().public.SIMPLEAPP_BACKEND_URL });
     const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
     super(apiobj)
     

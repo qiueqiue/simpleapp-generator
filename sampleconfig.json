@@ -1,5 +1,5 @@
 {
     "definationsFolder":"./definations",
-    "backendFolder":"../newnest/src", 
-    "frontendFolder":"./frontend"
+    "backendFolder":"../newnest", 
+    "frontendFolder":"../frontend"
 }

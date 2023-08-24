@@ -20,7 +20,7 @@ let jsonschemas = {};
 const docs = [];
 
 export const initialize = async (defFolder:string,backendfolder:string,frontendfolder:string) => {
-  prepareEnvironments(backendfolder)
+  prepareEnvironments(backendfolder,frontendfolder)
 let activatemodules:ModuleObject[]=[]
   await readdir(defFolder, (err, files) => {
     files.forEach((file) => {
@@ -60,12 +60,12 @@ const generate = (
   backendfolder:string,
   frontendfolder:string
 ) => {
-  const targetfolder = `${backendfolder}/docs/${doctype}`;
+  const targetfolder = `${backendfolder}/src/docs/${doctype}`;
   
   try {
     
-    mkdirSync(targetfolder,{ recursive: true });
-    mkdirSync(frontendfolder,{ recursive: true });
+    mkdirSync(targetfolder,{ recursive: true });    
+    mkdirSync(`${frontendfolder}/server/docs/`,{ recursive: true });
     
   } catch (err) {
     //do nothing if folder exists
@@ -173,7 +173,7 @@ const generate = (
     const txtReadme = eta.render('./readme', variables);
     writeFileSync(`${targetfolder}/README.md`, txtReadme);
 
-    const frontendfile = `${frontendfolder}/${variables.typename}Doc.ts`;
+    const frontendfile = `${frontendfolder}/server/docs/${variables.typename}Doc.ts`;
     let frontEndCode = '';
     if (existsSync(frontendfile)) {
       const clientcodes = readFileSync(frontendfile).toString();
@@ -205,9 +205,11 @@ const generate = (
   }
 };
 
-const prepareEnvironments = (backendfolder:string)=>{
-  const targetfolder = `${backendfolder}/class`
+const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
+  const targetfolder = `${backendfolder}/src/class`
+  const targetfrontendfolder = `${frontendfolder}/server/class`
   mkdirSync(targetfolder,{ recursive: true });
+  mkdirSync(targetfrontendfolder,{ recursive: true });
 
   //copy over backend service class
   copyFileSync('./templates/SimpleAppService.eta',`${targetfolder}/SimpleAppService.ts`)
@@ -215,9 +217,11 @@ const prepareEnvironments = (backendfolder:string)=>{
   //copy over backend controller
   copyFileSync('./templates/SimpleAppController.eta',`${targetfolder}/SimpleAppController.ts`)
 
-  //prepare backend config.ts
-
   //copy over frontend apiabstract class
+  copyFileSync('./templates/SimpleAppClient.eta',`${targetfrontendfolder}/SimpleAppClient.ts`)
+
+    //prepare backend config.ts
+
   //copy over frontend config.ts
 }
 
@@ -226,6 +230,6 @@ const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
   console.log(modules)
   const eta = new Eta({views: './templates'});
   const txtMainModule = eta.render('app.module.eta', modules);
-  writeFileSync(`${targetfolder}/app.module.ts`, txtMainModule);
+  writeFileSync(`${targetfolder}/src/app.module.ts`, txtMainModule);
 
 }
