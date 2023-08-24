@@ -1,5 +1,6 @@
 // import { readFormBuilder } from './processors/formbuilder.tsa';
 // import { readJsonSchemaBuilder } from './processors/jsonschemabuilder';
+import * as constants from './constant'
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
 // import { compile } from 'json-schema-to-typescript';
 // import { Fieldtypes, SchemaModel, ChildModels } from './type';
@@ -10,7 +11,7 @@ const clc = require("cli-color");
 
 
 const path = require('path');
-import {mkdirSync,readdir,readFileSync,writeFileSync,existsSync,copyFileSync} from 'fs'
+import {mkdirSync,readdir,readFileSync,writeFileSync,existsSync,copyFileSync, readdirSync} from 'fs'
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
 const extFb = '.xfb.json';
@@ -19,12 +20,14 @@ const extjsonschema = '.jsonschema.json';
 let jsonschemas = {};
 const docs = [];
 
-export const initialize = async (defFolder:string,backendfolder:string,frontendfolder:string) => {
+export const initialize =  (defFolder:string,backendfolder:string,frontendfolder:string) => {
   prepareEnvironments(backendfolder,frontendfolder)
 let activatemodules:ModuleObject[]=[]
-  await readdir(defFolder, (err, files) => {
-    files.forEach((file) => {
-      
+  const files = readdirSync(defFolder)
+  // readdir(defFolder, (err, files) => {
+    // files.forEach((file) => {
+    for(let j = 0; j< files.length;j++){
+      const file = files[j]
       const filearr = file.split('.');
       let rendertype = 'basic';
       const docname = filearr[0].toLowerCase();
@@ -44,13 +47,14 @@ let activatemodules:ModuleObject[]=[]
         log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
       }
       
-    });
+    }
     log.info("Activated backend modules: ")
     log.info(activatemodules)
     loadSimpleAppModules(activatemodules,backendfolder)
-  });
+    return Promise.resolve(true)
+  }
   
-};
+
 
 const generate = (
   docname: string,
@@ -70,7 +74,7 @@ const generate = (
   } catch (err) {
     //do nothing if folder exists
   } finally {
-    const templatefolder = `./templates/${rendertype}`;
+    const templatefolder = `${constants.templatedir}/${rendertype}`
     log.info(`- Generate ${docname}, ${doctype}, ${templatefolder}`)
     const eta = new Eta({
       views: templatefolder,
@@ -218,17 +222,22 @@ const generate = (
 const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   const targetfolder = `${backendfolder}/src/class`
   const targetfrontendfolder = `${frontendfolder}/server/class`
-  mkdirSync(targetfolder,{ recursive: true });
-  mkdirSync(targetfrontendfolder,{ recursive: true });
-
+  try{
+    mkdirSync(targetfolder,{recursive:true});
+    mkdirSync(targetfrontendfolder);
+  }catch(error){
+    //do nothing
+  }
+  
   //copy over backend service class
-  copyFileSync('./templates/SimpleAppService.eta',`${targetfolder}/SimpleAppService.ts`)
+  
+  copyFileSync(`${constants.templatedir}/SimpleAppService.eta`,`${targetfolder}/SimpleAppService.ts`)
   
   //copy over backend controller
-  copyFileSync('./templates/SimpleAppController.eta',`${targetfolder}/SimpleAppController.ts`)
+  copyFileSync(`${constants.templatedir}/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
 
   //copy over frontend apiabstract class
-  copyFileSync('./templates/SimpleAppClient.eta',`${targetfrontendfolder}/SimpleAppClient.ts`)
+  copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
 
     //prepare backend config.ts
 
@@ -238,7 +247,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 
 const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
   
-  const eta = new Eta({views: './templates'});
+  const eta = new Eta({views:constants.templatedir});
   const txtMainModule = eta.render('app.module.eta', modules);
   writeFileSync(`${targetfolder}/src/app.module.ts`, txtMainModule);
 

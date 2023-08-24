@@ -1,0 +1,21 @@
+<template>
+  <div>
+    <div>
+      <label>Firstname</label>
+      <input v-model="reactivedata.name.firstName">{{ reactivedata }}
+    </div>
+
+    <button @click="person.create().then((res)=>console.log(res.data))">try</button>
+  </div>
+</template>
+<script setup lang="ts">
+import {PersonDoc} from './server/docs/PersonDoc'
+const person = new PersonDoc()
+
+// person.update().then((res)=>console.log("dosomething"))
+// person.delete('record-id').then((res)=>console.log("dosomething"))
+// person.getById('record-id').then((res)=>console.log("dosomething"))
+// person.list().then((res)=>console.log(res))
+const noreactivedata = person.getData()
+const reactivedata = person.getReactiveData()
+</script>

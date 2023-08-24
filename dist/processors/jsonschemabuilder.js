@@ -11,7 +11,9 @@ const readJsonSchemaBuilder = (doctype, docname, jsondata) => {
     let schema;
     if (jsondata && jsondata.type == 'object') {
         //no _id then need add
+        // console.log(jsondata)
         schema = processObject(doctype, docname, jsondata);
+        // console.log("schema",schema)
     }
     else if (jsondata.type == 'array') {
         throw (`unsupport array type for ${docname}.${doctype}`);
@@ -38,7 +40,7 @@ requiredlist) => {
         const key = props[i];
         //below is Object.assign use for force datatype compatibility
         const obj = {};
-        Object.assign(obj, jsondata ? [key] : {});
+        Object.assign(obj, jsondata[key]);
         const objectitem = {};
         Object.assign(objectitem, obj.items);
         // Object.assign(objtmp,jsondata?[key]:{});
@@ -47,12 +49,14 @@ requiredlist) => {
         const newName = docname + (0, libs_1.capitalizeFirstLetter)(key);
         // console.log(key);
         //need create sub model
+        // console.log("----",key,obj.type,objectitem.type)
         if (obj.type == 'object') {
             genSchema(newName, obj.type, obj.properties, obj.required);
             newmodel[key] = newName;
         }
         else if (obj.type == 'array' && obj.items && (objectitem === null || objectitem === void 0 ? void 0 : objectitem.type) == 'object') {
             //array need submodel
+            // console.log("======",newName,key)
             genSchema(newName, obj.type, objectitem === null || objectitem === void 0 ? void 0 : objectitem.properties, obj.required);
             newmodel[key] = [newName];
         }

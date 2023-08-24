@@ -1,14 +1,38 @@
 # simpleapp-generator
 ## this project still in alpha stage!
 
-SimpleApp is an frontend and backend code generator, the phylosophy of this project is to allow developer build reliable and scalable application with low code philosophy. 
+SimpleApp is an frontend and backend code generator, the ideal of this project is to allow developer build reliable and scalable application with low code methods. 
 
-It suitable to project with a lot of complex data schema, complex calculation requirement:
+It suitable for complex schema +complex calculation such as:
 1. sales invoice: having parent and childs as 1 document, it need to calculate tax, discount, exchange rate
 2. delivery order: need to calculate total quantity, unit of measurement conversion
 
+Key Ideal:
+1. Every data store as json format, name as `document`
+2. Every document defined by jsonschema, and store in folder `definations`
+3. We store jsonschema as `<uniquedocumentname>.<uniquedocumentshortname>.jsonschema.json`. Example: `purchaseorder.po.jsonschema.json`, `student.std.jsonschema.json`
+4. `JsonSchema` used to generate:
+    - multiple pattern of data types for database, dto, frontend, backend. The data type match to `jsonschema`
+    - api controller (openapi)
+    - simpleapp frontend and backend objects
+5. Generated code will control data validation in both frontend and backend using `ajv`
+6. There is few important keyword need to know:
+    - `jsondata`: actual data like `{"document_no":"PO001",amount:300}`
+    - `jsonschema`: it is schema of `jsondata`, we use it to generate CRUD codes 
+    - `frontend`: user interface framework using nuxt (vue+typescript), it doesn't store any data
+    - `backend`: api server using nest(typescript), it provide openapi, and store data into mongodb
+    - `doc service`: a typescript class use for process specific document in server. example" `po.service.ts`
+    - `doc controller`: it is api router for route http traffic to document service. example: `po.controller.ts`
+    - `doc client`: frontend client, it provide reactive data and data processing mechanism for frontend
 
-## Benfit
+6. To make our app useful, we perform development at
+    - backend: modify `api controller` and `backend document service`
+    - frontend: layout user interface, bind input fields to `doc client` , and modify `doc client` required
+7. We may frequently change `jsonschema`, `doc service`, `doc controller`, `doc client`:
+    - the previous modified code remain when you regenerate code (with specific rules)
+8. After regenerate codes, some data processing codes in `doc service` will sync into `doc client`, to reduce repeat coding at both end
+
+## Benefit
 - Use `jsonschema` generate most of the frontend and backend code
 - Generated frontend and backend code in typescript+OOP.
 - it control as tight as possible the frontend and backend data consistency
@@ -27,19 +51,158 @@ This project assume you familiar with below:
 3. vue/react kind of ecosystem
 
 
-## Overview of development life cycle
-1. prepare environment of backend(nest), frontend (nuxt), mongodb, openapi-generator
-2. prepare sample data in json format, and convert it to jsonschem [here](https://redocly.com/tools/json-to-json-schema)
-3. store jsonschema somewhere and simpleapp-generator to source code into frontend and backend
-4. code your frontend using nuxt and `simpleapp-uicomponent`
+You need to install mongodb and openapi generator:
+1. https://www.mongodb.com/docs/manual/installation/
+2. https://openapi-generator.tech/docs/installation/
+
+# How To Setup simpleapp-generator environment
+1. Install `simpleapp-generator`
+```sh
+npm install -g simpleapp-generator
+```
+2. mkdir project folder for store frontend and backend codes
+```sh
+mkdir ~/myapp
+cd myapp
+mkdir definations   #we put json schema here
+
+```
+3. create configuration file `config.json` 
+```sh
+echo '{"definationsFolder":"./definations","backendFolder":"./backend", "frontendFolder":"./frontend","openapi3Yaml":""}' > config.json
+```
+4. create below content and save as `~/myapp/definations/person.pes.jsonschema.json`
+```json
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "examples": [
+            "John"
+          ]
+        },
+        "lastName": {
+          "type": "string",
+          "examples": [
+            "Fox"
+          ]
+        }
+      }
+    },
+    "age": {
+      "type": "integer",
+      "examples": [
+        20
+      ]
+    },
+    "email": {
+      "type": "string",
+      "examples": [
+        "john@example.com"
+      ],
+      "format": "email"
+    },
+    "dob": {
+      "type": "string",
+      "examples": [
+        "2000-01-01"
+      ],
+      "format": "date"
+    },
+    "hobbies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": [
+          "badminton",
+          "dota",
+          "reading"
+        ]
+      }
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "street1",
+          "street2",
+          "postcode"
+        ],
+        "properties": {
+          "street1": {
+            "type": "string",
+            "examples": [
+              "11, Fox Road"
+            ]
+          },
+          "street2": {
+            "type": "string",
+            "examples": [
+              "My Home Town"
+            ]
+          },
+          "postcode": {
+            "type": "integer",
+            "examples": [
+              12345
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+5. generate backend and frontend codes, and define backend/.env `mongodb connection` string:
+```sh
+simpleapp-generator -c ./config.json
+code backend # use vscode open backend project, edit .env
+```
+6. You can start backend server and try the generated api at `http://localhost:8000/api`
+```sh
+cd ~/myapp/backend
+pnpm start:dev   
+```
+7. Next we need more frontend work, put content of `http://localhost:8000/api-yaml` into `~/myapp/openapi.yaml`, and edit config.json as:
+```json
+{
+    "definationsFolder":"./definations",
+    "backendFolder":"./backend",
+    "frontendFolder":"./frontend",
+    "openapi3Yaml":"./openapi.yaml"
+ }
+```
+8. regenerate source code, and use vscode open both backend and frontend project:
+ ```sh
+simpleapp-generator -c ./config.json
+code ./frontend ;
+code ./backend ;
+```
 
 
-# Prepare environment:
-it involve 3 major scope of work:
-1. setup nestjs
-2. setup nuxt
-3. setup mongodb
-4. install openapi-generator
+# The complete development process:
+1. Prepare documents
+    a. Prepare sample json data
+    b. Convert `json` data to `jsonschema`
+    c. touch up jsonschema, like define require fields, format, minLength and etc
+    d. place json schema into `definations` folder
+2. Generate source codes
+    a. generate source code into backend project
+    b. start backend service, obtain yaml content and save into project folder
+    c. re-generate source code, it create required codes for frontend 
+3. Begin Frontend development:
+    a. use vscode open frontend project
+    b. create user interface with several input fields, bind to generated simpleapp object
+
+
+
+
+
 
 
 ## Backend NestJS project preparation
@@ -99,6 +262,7 @@ PORT=8800
 ## setup Mongodb
 1. you can use mongodb, either docker or install binary
 https://www.mongodb.com/docs/manual/installation/
+** remember create database, and define suitable credentials (user/password)
 
 ## Setup openapi-generator
 Refer below:
@@ -249,7 +413,11 @@ Below is the sample of jsonschema:
 ```vue
 <template>
   <div>
-    <input v-mode="reactivedata">{{ reactivedata }}
+    <div>
+      <label>Firstname</label>
+      <input v-model="reactivedata.name.firstName">  
+    </div>
+    {{ reactivedata }}
     <button @click="person.create().then((res)=>console.log(res.data))">try</button>
   </div>
 </template>
@@ -257,11 +425,99 @@ Below is the sample of jsonschema:
 import {PersonDoc} from './server/docs/PersonDoc'
 const person = new PersonDoc()
 
+// person.update().then((res)=>console.log("dosomething"))
+// person.delete('record-id').then((res)=>console.log("dosomething"))
+// person.getById('record-id').then((res)=>console.log("dosomething"))
+// person.list().then((res)=>console.log(res))
+const noreactivedata = person.getData()  //give not reactive data, it cant apply 2 way data binding
+const reactivedata = person.getReactiveData() //give vue reactive data, it can apply 2 way data binding using v-model
+</script>
+```
+
+We notice:
+1. `PersonDoc` auto generated, it come with plenty of build in crud features which you can use without knowing API:
+```typescript
+person.create().then((res)=>console.log("dosomething"))
 person.update().then((res)=>console.log("dosomething"))
 person.delete('record-id').then((res)=>console.log("dosomething"))
 person.getById('record-id').then((res)=>console.log("dosomething"))
-const noreactivedata = person.getData()
-const reactivedata = person.getReactiveData()
-</script>
-
+person.list().then((res)=>console.log(res))
 ```
+2. `person.getData()` gave reactive object, we can bind all properties directly to `vue` component using `v-model`
+3. you may try add more input bind to `reactivedata.name.lastName`,`reactivedata.email`, `reactivedata.age` and monitor result
+4. `button` can directly trigger `save` method from person.getData()
+5. You wont able to save the record because it not pass validation rules, check browser console it tell you what is happening
+6. There is UI component `simpleapp-uicomponent` which can integrate nicely with with `PersonDoc`. Refer the link [here](...)
+
+# We can do more With SimpleApp
+## no time for full documentation yet
+1. Monitor variable change at frontend
+step 1: add new methods for frontend's class `PesonDoc.ts` 
+```
+    watchChanges = ()=>{
+        watch(this.getReactiveData(),(newdata)=>{ 
+            this.getReactiveData().age=calculateAge(newdata.dob)
+            //apply others changes here
+            })
+    }
+```
+step 2: edit `app.vue` to on the watcher
+```typescript
+//others codes
+const person = new PersonDoc()
+person.watchChanges()  //<-- add this line to on watcher at frontend
+//others codes
+```
+
+2. create more api to `person`, such as `post /person/:id/sendEmail {title:"title",body:"body"}`
+step 1: edit backend `<backend>/src/docs/pes/pes.controller.ts`, add new source code between `<begin-controller-code>` and `<end-controller-code>`:
+```typescript
+//<begin-controller-code>
+//new api, wont override when regenerate code
+  @Get('/try/:id')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+    type: pesapischema.Person,
+  })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiOperation({ operationId: 'newFindOne' })  //important, frontend access it via person.newFindOne()
+  async newFindOne(@Param('id') id: string) {
+    return this._findOne(id);
+  } 
+  //<end-controller-code>
+```
+step 2: try browse to `http://localhost:8000/api` to check new api appear or not. 
+step 3: You shall regenerate the code
+```bash
+simpleapp-generator -c ./config.json
+```
+step 4: go frontend project, edit `app.vue` you may try type  `person.newFindOne()` see new method exists?
+
+step 3: Regenerate code for frontend  
+
+4. create backend only execution for `person`. It is useful cause some work only 
+step 1: Edit backend `backend/src/docs/pes/pes.service.ts`, add new source code between `<begin-backend-code>` and `<end-backend-code>`:
+```typescript
+//<begin-backend-code>
+   //new method, wont override when regenerate code
+  logSomething = () => {
+    console.log('Access try api');
+  };
+  //<end-backend-code>
+```
+step 2: modify `<backend>/src/docs/pes/pes.controller.ts`, call the new method
+```typescript
+async newFindOne(@Param('id') id: string) {
+    this.service.logSomething();  //this.service is our service class
+    return this._findOne(id);
+  }
+```
+
+
+5. create frontend only code for `person`, such as:
+    `person.addHobbies('hobby1')`,`person.addAddress({})`,`person.delAddress(index:number)` edit `newFindOne`:
+```
+```
+6. create bothend code for `person`

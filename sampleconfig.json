@@ -1,6 +1,6 @@
 {
     "definationsFolder":"./definations",
-    "backendFolder":"../newnest", 
-    "frontendFolder":"../frontend",
+    "backendFolder":"../backend1", 
+    "frontendFolder":"../frontend1",
     "openapi3Yaml":"../openapi.yaml"
 }
