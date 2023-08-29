@@ -61,7 +61,7 @@ const runGenNuxt = (callback)=>{
 }
 runGenNext(()=>{
   console.log("runGenNext (backen) done")
-  runGenNuxt(()=>{   
+  // runGenNuxt(()=>{   
     console.log("runGenNuxt (frontend) done")
     generator.initialize(definationsFolder,backendFolder,frontendFolder)    
     if(openapi3Yaml !=''){

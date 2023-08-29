@@ -35,8 +35,7 @@ export const createNuxt= (targetfolder:string,callback)=>{
     exec(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D prettier`, (error, stdout, stderr)=>{                
     //;pnpm install    
     if(!error){
-        exec(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema @simitgroup/simpleapp-doc-client@latest @simitgroup/simpleapp-vue-component@latest
-        ;npm run format`, (error, stdout, stderr)=>{                
+        exec(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
         const eta = new Eta({views: constants.templatedir});              
         const variables=[]            
         const txtEnv = eta.render('./nuxt.env.eta', variables);                
