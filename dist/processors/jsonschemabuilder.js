@@ -28,14 +28,21 @@ const processObject = (doctype, docname, jsondata) => {
     //ensure some field exists, also override it
     jsondata.properties['_id'] = { type: 'string', description: 'Control value, dont edit it', };
     jsondata.properties['doctype'] = { type: 'string', default: doctype, examples: [doctype], description: 'Control value, dont edit it', };
+    jsondata.properties['tenant_id'] = { type: 'number', description: 'Control value, dont edit it', };
+    jsondata.properties['organization_id'] = { type: 'number', description: 'Control value, dont edit it', };
+    jsondata.properties['branch_id'] = { type: 'number', description: 'Control value, dont edit it', };
+    jsondata.properties['created'] = { type: 'string', description: 'Control value, dont edit it', };
+    jsondata.properties['updated'] = { type: 'string', description: 'Control value, dont edit it', };
+    jsondata.properties['createdby'] = { type: 'string', description: 'Control value, dont edit it', };
+    jsondata.properties['updatedby'] = { type: 'string', description: 'Control value, dont edit it', };
     return genSchema((0, libs_1.capitalizeFirstLetter)(docname), 'object', jsondata.properties, jsondata['required'] ? jsondata['required'] : []);
 };
 const genSchema = (docname, schematype, jsondata, //JSONSchema7,//|JsonSchemaProperties|JSONSchema7Definition,
 requiredlist) => {
     var _a, _b;
     const newmodel = {};
-    const props = Object.getOwnPropertyNames(jsondata);
-    // console.log('==== requirelist', requiredlist);
+    const props = Object.getOwnPropertyNames(jsondata !== null && jsondata !== void 0 ? jsondata : {});
+    // console.log('==== jsondata', jsondata);
     for (let i = 0; i < props.length; i++) {
         const key = props[i];
         //below is Object.assign use for force datatype compatibility
@@ -68,14 +75,16 @@ requiredlist) => {
         }
         else {
             newmodel[key] = getField(key, obj, isrequired);
-            // console.log('--------newmodel', newmodel[key]);
+            // console.log(key,'--------newmodel',obj, newmodel[key]);
         }
     }
     allmodels[docname] = { type: schematype, model: newmodel };
     return newmodel;
 };
 const getField = (fieldname, obj, isrequired) => {
-    let datatype = type_1.Fieldtypes.string;
+    let datatype = obj.type;
+    // console.log(datatype)
+    //Fieldtypes.string;
     let format = obj.format;
     if (obj.type == 'integer') {
         datatype = type_1.Fieldtypes.number;
@@ -92,8 +101,6 @@ const getField = (fieldname, obj, isrequired) => {
         f.description = obj.description;
     if (obj.format)
         f.format = obj.format;
-    if (obj.example)
-        f.example = obj.example;
     if (obj.examples)
         f.examples = obj.examples;
     if (obj.default) {

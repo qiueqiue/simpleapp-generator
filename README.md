@@ -55,7 +55,8 @@ You need to install mongodb and openapi generator:
 1. https://www.mongodb.com/docs/manual/installation/
 2. https://openapi-generator.tech/docs/installation/
 
-# How To Setup simpleapp-generator environment
+# Quick Start
+This quick start create a example project developed by simpleapp-generator      
 1. Install `simpleapp-generator`
 ```sh
 npm install -g simpleapp-generator
@@ -64,6 +65,31 @@ npm install -g simpleapp-generator
 ```sh
 mkdir ~/myapp
 cd myapp
+```
+3. generate sample project 
+```sh
+simpleapp-generator -e person    # -e mean use example schema "person". Currently only 1 example
+```
+
+4. run backend apiserver
+```sh
+cd backend
+pnpm start:dev
+```
+5. browse to `http://localhost:8000/api` for swagger ui, `http://localhost:8000/api-yaml` for openapi documents
+6. You may use vscode to see the example code in `backend/src/docs/pes`:
+- pes.controller.ts   //document api controller
+- pes.service.ts      //document service controller
+- pes.type.ts, pes.apischema.ts, pes.model.ts         //multiple datatype or schema
+
+
+
+
+
+
+
+
+```
 mkdir definations   #we put json schema here
 
 ```
@@ -199,7 +225,126 @@ code ./backend ;
     a. use vscode open frontend project
     b. create user interface with several input fields, bind to generated simpleapp object
 
-
+## 1. Prepare documents
+1.  [click here](https://www.convertsimple.com/convert-javascript-to-json/) allow you create json data with lesser effort. Lets use this example:
+```json
+{
+  "docNo": "SI001",
+  "customer": "My Customer Pte Ltd",
+  "amount": 200,
+  "products": [
+    "apple",
+    "orange"
+  ],
+  "details": [
+    {
+      "item": "apple",
+      "qty": 100,
+      "unitprice": 1,
+      "subtotal": 100
+    },
+    {
+      "item": "orange",
+      "qty": 100,
+      "unitprice": 1,
+      "subtotal": 100
+    }
+  ],
+  "remarks": "need fast delivery"
+}
+```
+b. Copy generated json data to [here](https://redocly.com/tools/json-to-json-schema) using below setting, you may define data type/format/required parameters according [jsonschema standard](https://json-schema.org/understanding-json-schema/reference/index.html)
+```
+output format: json
+add example to schema: true
+infer require property for array items: true
+disable additionalProperty: true
+```
+Here is the result:
+```json
+{
+  "type": "object",
+  "properties": {
+    "docNo": {
+      "type": "string",
+      "examples": [
+        "SI001"
+      ]
+    },
+    "customer": {
+      "type": "string",
+      "examples": [
+        "My Customer Pte Ltd"
+      ]
+    },
+    "amount": {
+      "type": "integer",
+      "examples": [
+        200
+      ]
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": [
+          "apple",
+          "orange"
+        ]
+      }
+    },
+    "details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item",
+          "qty",
+          "unitprice",
+          "subtotal"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "examples": [
+              "apple",
+              "orange"
+            ]
+          },
+          "qty": {
+            "type": "integer",
+            "examples": [
+              100,
+              100
+            ]
+          },
+          "unitprice": {
+            "type": "integer",
+            "examples": [
+              1,
+              1
+            ]
+          },
+          "subtotal": {
+            "type": "integer",
+            "examples": [
+              100,
+              100
+            ]
+          }
+        }
+      }
+    },
+    "remarks": {
+      "type": "string",
+      "examples": [
+        "need fast delivery"
+      ]
+    }
+  }
+}
+```
+c. save the json data into `definations` folder
 
 
 

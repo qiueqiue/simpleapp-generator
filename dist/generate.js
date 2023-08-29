@@ -67,8 +67,8 @@ const initialize = (defFolder, backendfolder, frontendfolder) => {
             log.warn(`Load ` + clc.yellow(file) + ` but it is not supported`);
         }
     }
-    log.info("Activated backend modules: ");
-    log.info(activatemodules);
+    log.info("Activated backend modules: ", activatemodules);
+    // log.info(activatemodules)
     loadSimpleAppModules(activatemodules, backendfolder);
     return Promise.resolve(true);
 };
@@ -213,7 +213,7 @@ const prepareEnvironments = (backendfolder, frontendfolder) => {
     //copy over backend controller
     (0, fs_1.copyFileSync)(`${constants.templatedir}/SimpleAppController.eta`, `${targetfolder}/SimpleAppController.ts`);
     //copy over frontend apiabstract class
-    (0, fs_1.copyFileSync)(`${constants.templatedir}/SimpleAppClient.eta`, `${targetfrontendfolder}/SimpleAppClient.ts`);
+    // copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
     //prepare backend config.ts
     //copy over frontend config.ts
 };

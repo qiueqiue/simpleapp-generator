@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+      "organization_id": {
+        "type": "integer",
+        "examples": [
+          1
+        ]
+      },
+      "branch_id": {
+        "type": "integer",
+        "examples": [
+          1
+        ]
+      },
+      "category_id": {
+        "type": "integer",
+        "examples": [
+          100
+        ]
+      },
+      "category_code": {
+        "type": "string",
+        "examples": [
+          "stk"
+        ]
+      },
+      "category_name": {
+        "type": "string",
+        "examples": [
+          "stocks"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "examples": [
+          ""
+        ]
+      },
+      "isactive": {
+        "type": "boolean",
+        "examples": [
+          true
+        ]
+      },
+      "category_type": {
+        "type": "string",
+        "examples": [
+          "S"
+        ]
+      },
+      "more": {
+        "type": "object"
+      }
+    }
+  }

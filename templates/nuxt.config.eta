@@ -1,0 +1,33 @@
+export default defineNuxtConfig({
+  // colorMode: {}  ,  
+  runtimeConfig:{    
+    public:{
+      SIMPLEAPP_BACKEND_URL: process.env.SIMPLEAPP_BACKEND_URL,
+    }
+  },
+  vite: {
+    vue: {
+        script: {
+            defineModel: true,
+            propsDestructure: true
+        }
+    }
+},
+  modules: [
+    // '@nuxtjs/tailwindcss',
+    // '@nuxtjs/color-mode'
+
+  ],  
+  ssr: false,
+  css: [
+    // "assets/css/index.css",
+    "primevue/resources/themes/lara-light-blue/theme.css",
+    'primeicons/primeicons.css'
+  ],
+  devtools: { enabled: true },
+  build: {
+                transpile: ["primevue"]
+        },
+  
+
+})

@@ -45,6 +45,13 @@ const processObject = (doctype: string,
     //ensure some field exists, also override it
     jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
+    jsondata.properties['tenant_id'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['organization_id'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['branch_id'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
+    jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
+    jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
+    jsondata.properties['updatedby'] = {type: 'string',description: 'Control value, dont edit it',};
     return genSchema(
       capitalizeFirstLetter(docname),
       'object',
@@ -56,12 +63,12 @@ const processObject = (doctype: string,
 const genSchema = (
   docname: string,
   schematype: string,
-  jsondata: JsonSchemaProperties|undefined,//JSONSchema7,//|JsonSchemaProperties|JSONSchema7Definition,
+  jsondata: JsonSchemaProperties,//JSONSchema7,//|JsonSchemaProperties|JSONSchema7Definition,
   requiredlist: string[] | undefined,
 ): SchemaModel => {
   const newmodel: SchemaModel = {};
-  const props = Object.getOwnPropertyNames(jsondata);
-  // console.log('==== requirelist', requiredlist);
+  const props = Object.getOwnPropertyNames(jsondata ??{});
+  // console.log('==== jsondata', jsondata);
   
   for (let i = 0; i < props.length; i++) {    
     const key = props[i];
@@ -94,7 +101,7 @@ const genSchema = (
       newmodel[key] = [objecttype];
     } else {
       newmodel[key] = getField(key, obj, isrequired);
-      // console.log('--------newmodel', newmodel[key]);
+      // console.log(key,'--------newmodel',obj, newmodel[key]);
     }
   }
   allmodels[docname] = { type: schematype, model: newmodel };
@@ -103,10 +110,12 @@ const genSchema = (
 
 const getField = (
   fieldname: string,
-  obj: any,
+  obj: JSONSchema7,
   isrequired: boolean | undefined,
 ): FieldModel => {
-  let datatype: Fieldtypes = Fieldtypes.string;
+  let datatype: Fieldtypes = obj.type as Fieldtypes
+  // console.log(datatype)
+  //Fieldtypes.string;
   let format = obj.format;
   if (obj.type == 'integer') {
     datatype = Fieldtypes.number;
@@ -122,7 +131,6 @@ const getField = (
   if (obj.title) f.title = obj.title;
   if (obj.description) f.description = obj.description;
   if (obj.format) f.format = obj.format;
-  if (obj.example) f.example = obj.example;
   if (obj.examples) f.examples = obj.examples;
   if (obj.default) {
     f.default = obj.default;

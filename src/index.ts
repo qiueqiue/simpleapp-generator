@@ -14,9 +14,9 @@ const figlet = require("figlet");
 // const program = new Command();
 
 
-
+let version='1.0.8'
 program
-  .version("1.0.0")
+  .version(version)
   .description("An simpleapp CLI tool for generate frontend (vuejs) and backend(nestjs) codes")  
   .option("-c, --config-file <value>", 'configuration file content such as:{"definationsFolder":"./definations", "backendFolder":"./nestproject/src/docs", "frontendFolder":"./nuxt/server"}')
   .option("-s, --definations-folder <value>", "load defination files from which folder")
@@ -27,7 +27,7 @@ program
 
 
 const options = program.opts();
-console.log(figlet.textSync("SimpleApp Generator 1"));
+console.log(figlet.textSync(`SimpleApp Generator ${version}`));
 // console.log(options)
 const configs = require(options.configFile)
 console.log("configurations: ",configs)
@@ -38,22 +38,31 @@ const openapi3Yaml:string = configs.openapi3Yaml ?? options.openapi3Yaml
 
 const runGenNext = (callback)=>{
   if(!fs.existsSync(backendFolder)){
+    console.error(`${backendFolder} does not exists, please run "nest new -p pnpm ${backendFolder}"`)
+  }else if(!fs.existsSync(`${backendFolder}/.env`)){
+    console.log(`initial nest configuratoin for simpleapp generator`)
     createNest(backendFolder,callback)
   }else{
+    console.log(`.env file exists, skip nest initialization`)
     callback()
   }
 }
 const runGenNuxt = (callback)=>{  
   if(!fs.existsSync(frontendFolder)){
+    console.error(`${frontendFolder} does not exists, please run "npx nuxi@latest init ${frontendFolder}"`)
+  }else if(!fs.existsSync(`${frontendFolder}/.env`)){
+    console.log(`initial nuxt configuratoin for simpleapp generator`)
     createNuxt(frontendFolder,callback)
   }else{
+    console.log(`.env file exists, skip nuxt initialization`)
     callback()
+
   }
 }
-runGenNuxt(()=>{
-  console.log("runGenNuxt done")
-  runGenNext(()=>{   
-    console.log("runGenNext done")
+runGenNext(()=>{
+  console.log("runGenNext (backen) done")
+  runGenNuxt(()=>{   
+    console.log("runGenNuxt (frontend) done")
     generator.initialize(definationsFolder,backendFolder,frontendFolder)    
     if(openapi3Yaml !=''){
       

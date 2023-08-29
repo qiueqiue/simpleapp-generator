@@ -54,70 +54,55 @@ const checkNestCli = (callback) => {
     });
 };
 const createNuxt = (targetfolder, callback) => {
-    log.info("setting up nuxt frontend");
-    checkNodeJS(() => {
-        log.info("Nodejs ok");
-        (0, child_process_1.exec)(`npx nuxi@latest init  ${targetfolder}`, (error, stdout, stderr) => {
-            log.info(`frontend nuxt project "${targetfolder}" created, installing module`);
-            (0, child_process_1.exec)(`cd ${targetfolder};pnpm install`, (error, stdout, stderr) => {
-                //;pnpm install
-                if (!error) {
-                    (0, child_process_1.exec)(`pnpm install ajv ajv-formats axios json-schema`, (error, stdout, stderr) => {
-                        const eta = new Eta({ views: constants.templatedir });
-                        const variables = [];
-                        const txtEnv = eta.render('./nuxt.env.eta', variables);
-                        (0, fs_1.writeFileSync)(`${targetfolder}/.env`, txtEnv);
-                        log.info("nuxt project completed");
-                        callback();
-                    });
-                }
-                else {
-                    throw error;
-                }
+    log.info("setting up nuxt frontend ${targetfolder}");
+    log.info(`frontend nuxt project "${targetfolder}" created, installing module`);
+    (0, child_process_1.exec)(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D prettier`, (error, stdout, stderr) => {
+        //;pnpm install    
+        if (!error) {
+            (0, child_process_1.exec)(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema @simitgroup/simpleapp-doc-client@latest @simitgroup/simpleapp-vue-component@latest
+        ;npm run format`, (error, stdout, stderr) => {
+                const eta = new Eta({ views: constants.templatedir });
+                const variables = [];
+                const txtEnv = eta.render('./nuxt.env.eta', variables);
+                (0, fs_1.writeFileSync)(`${targetfolder}/.env`, txtEnv);
+                const txtConfig = eta.render('./nuxt.config.eta', variables);
+                (0, fs_1.writeFileSync)(`${targetfolder}/nuxt.config.ts`, txtConfig);
+                const txtPlugins = eta.render('./nuxt.plugins.eta', variables);
+                (0, fs_1.writeFileSync)(`${targetfolder}/plugins/simpleapp.ts`, txtPlugins);
+                log.info("nuxt project completed");
+                callback();
             });
-            if (error) {
-                log.error(stderr);
-                throw error;
-            }
-        });
+        }
+        else {
+            throw error;
+        }
     });
 };
 exports.createNuxt = createNuxt;
 const createNest = (targetfolder, callback) => {
-    checkNestCli(() => {
-        (0, child_process_1.exec)(`nest new -p pnpm ${targetfolder}`, (error, stdout, stderr) => {
-            if (error)
-                throw stderr;
-            log.info(`creating backend project ${targetfolder}`);
-            (0, child_process_1.exec)(`cd ${targetfolder};pnpm install --save @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats @nestjs/config`, async (error, stdout, stderr) => {
-                // log.info(`dependency installed`)
-                if (!error) {
-                    (0, child_process_1.exec)(`pnpm install ajv ajv-formats axios json-schema`, (error, stdout, stderr) => {
-                        const eta = new Eta({ views: constants.templatedir });
-                        const variables = [];
-                        const txtEnv = eta.render('./nest.env.eta', variables);
-                        const txtMain = eta.render('./nest.main.eta', variables);
-                        (0, fs_1.writeFileSync)(`${targetfolder}/.env`, txtEnv);
-                        (0, fs_1.writeFileSync)(`${targetfolder}/src/main.ts`, txtMain);
-                        log.info("nest project completed");
-                        callback();
-                    });
-                }
-                else {
-                    log.error(stderr);
-                    throw error;
-                }
+    //   checkNestCli(()=>{                    
+    log.info(`creating backend project ${targetfolder}`);
+    (0, child_process_1.exec)(`cd ${targetfolder};pnpm install --save @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats @nestjs/config`, async (error, stdout, stderr) => {
+        // log.info(`dependency installed`)
+        if (!error) {
+            (0, child_process_1.exec)(`pnpm install ajv ajv-formats axios json-schema`, (error, stdout, stderr) => {
+                const eta = new Eta({ views: constants.templatedir });
+                const variables = [];
+                const txtEnv = eta.render('./nest.env.eta', variables);
+                const txtMain = eta.render('./nest.main.eta', variables);
+                (0, fs_1.writeFileSync)(`${targetfolder}/.env`, txtEnv);
+                (0, fs_1.writeFileSync)(`${targetfolder}/src/main.ts`, txtMain);
+                log.info("nest project completed");
+                callback();
             });
-            // 
-        });
+        }
+        else {
+            log.error(stderr);
+            throw error;
+        }
     });
-    //install nestjs cli
-    //create nest project
-    //install dependency
-    //create empty .env 
-    //swap nestjs src/main.ts file
-    //try edit the configuration files
-    //console log http server how to start
+    // 
+    // })                    
 };
 exports.createNest = createNest;
 //# sourceMappingURL=createproject.js.map

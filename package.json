@@ -1,6 +1,6 @@
 {
   "name": "@simitgroup/simpleapp-generator",
-  "version": "1.0.1",
+  "version": "1.0.7",
   "description": "frontend nuxtjs and backend nests code generator using jsonschema",  
   "main": "dist/index.js",
   "scripts": {
@@ -11,9 +11,9 @@
   "keywords": [],
   "author": "Ks Tan",  
   "license": "ISC",
-  "publishConfig":{
-    "registry": "https://npm.pkg.github.com/simitgroup"
-
+  "repository": {"type": "git", "url": "git://github.com/SIMITGROUP/simpleapp-generator.git"},
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@nestjs/config": "^3.0.0",

@@ -48,8 +48,8 @@ let activatemodules:ModuleObject[]=[]
       }
       
     }
-    log.info("Activated backend modules: ")
-    log.info(activatemodules)
+    log.info("Activated backend modules: ",activatemodules)
+    // log.info(activatemodules)
     loadSimpleAppModules(activatemodules,backendfolder)
     return Promise.resolve(true)
   }
@@ -237,7 +237,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   copyFileSync(`${constants.templatedir}/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
 
   //copy over frontend apiabstract class
-  copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
+  // copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
 
     //prepare backend config.ts
 
@@ -246,7 +246,6 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 
 
 const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
-  
   const eta = new Eta({views:constants.templatedir});
   const txtMainModule = eta.render('app.module.eta', modules);
   writeFileSync(`${targetfolder}/src/app.module.ts`, txtMainModule);
