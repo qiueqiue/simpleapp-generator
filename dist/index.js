@@ -59,17 +59,16 @@ const runGenNuxt = (callback) => {
 };
 runGenNext(() => {
     console.log("runGenNext (backen) done");
-    runGenNuxt(() => {
-        console.log("runGenNuxt (frontend) done");
-        generator.initialize(definationsFolder, backendFolder, frontendFolder);
-        if (openapi3Yaml != '') {
-            exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/server/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(stderr);
-                }
-            });
-        }
-    });
+    // runGenNuxt(()=>{   
+    console.log("runGenNuxt (frontend) done");
+    generator.initialize(definationsFolder, backendFolder, frontendFolder);
+    if (openapi3Yaml != '') {
+        exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/server/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(stderr);
+            }
+        });
+    }
 });
 // pnpm exec prettier ./src/docs  --write
 // 	pnpm exec prettier ./apiclients  --write
