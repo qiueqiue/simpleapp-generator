@@ -52,6 +52,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       filter2[this.documentIdentityName] = { $regex: keyword };
       const filterobj = { $or: [filter1, filter2] };
       const projections = {
+        id: `\$_id`,
         label: `\$${this.documentIdentityCode}`,
         name: `\$${this.documentIdentityName}`,
       };
