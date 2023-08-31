@@ -1,6 +1,6 @@
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 export type ChildModels = {
-  [key: string]: { type: string; model: SchemaModel };
+  [key: string]: { type: string; model: SchemaModel,codeField:string,nameField:string };
 };
 export enum Fieldtypes {
   'string' = 'string',

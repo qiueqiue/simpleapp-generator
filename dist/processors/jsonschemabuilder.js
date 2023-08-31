@@ -2,10 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readJsonSchemaBuilder = void 0;
 const libs_1 = require("../libs");
+const tslog_1 = require("tslog");
 // import { ConflictException } from '@nestjs/common';
 const type_1 = require("../type");
+const log = new tslog_1.Logger();
+const FIELD_AUTOCOMPLETE_CODE = 'field-autocomplete-code';
+const FIELD_AUTOCOMPLETE_NAME = 'field-autocomplete-name';
 let allmodels = {};
+let fieldAutoCompleteCode = '';
+let fieldAutoCompleteName = '';
 const readJsonSchemaBuilder = (doctype, docname, jsondata) => {
+    fieldAutoCompleteCode = '';
+    fieldAutoCompleteName = '';
     allmodels = {};
     const validateddata = Object.assign({}, jsondata);
     let schema;
@@ -17,6 +25,14 @@ const readJsonSchemaBuilder = (doctype, docname, jsondata) => {
     }
     else if (jsondata.type == 'array') {
         throw (`unsupport array type for ${docname}.${doctype}`);
+    }
+    if (fieldAutoCompleteCode == '') {
+        log.error(`you shall define 1 field with format:'${FIELD_AUTOCOMPLETE_CODE}'`);
+        throw "missing field format";
+    }
+    if (fieldAutoCompleteName == '') {
+        log.error(`you shall define 1 field with format: '${FIELD_AUTOCOMPLETE_NAME}'}`);
+        throw "missing field format";
     }
     return allmodels;
 };
@@ -50,14 +66,19 @@ requiredlist) => {
         Object.assign(obj, jsondata[key]);
         const objectitem = {};
         Object.assign(objectitem, obj.items);
-        // Object.assign(objtmp,jsondata?[key]:{});
         const isrequired = requiredlist && requiredlist.includes(key);
-        // console.log('----', key, isrequired, obj);
         const newName = docname + (0, libs_1.capitalizeFirstLetter)(key);
-        // console.log(key);
-        //need create sub model
-        // console.log("----",key,obj.type,objectitem.type)
-        if (obj.type == 'object') {
+        if (obj.format && obj.format == FIELD_AUTOCOMPLETE_CODE) {
+            fieldAutoCompleteCode = key;
+        }
+        if (obj.format && obj.format == FIELD_AUTOCOMPLETE_NAME) {
+            fieldAutoCompleteName = key;
+        }
+        if (obj.type == 'object' && !obj.properties) {
+            console.log("Skip empty object", docname, ': ', key);
+            newmodel[key] = 'Object';
+        }
+        else if (obj.type == 'object' && obj.properties) {
             genSchema(newName, obj.type, obj.properties, obj.required);
             newmodel[key] = newName;
         }
@@ -78,7 +99,7 @@ requiredlist) => {
             // console.log(key,'--------newmodel',obj, newmodel[key]);
         }
     }
-    allmodels[docname] = { type: schematype, model: newmodel };
+    allmodels[docname] = { type: schematype, model: newmodel, codeField: fieldAutoCompleteCode, nameField: fieldAutoCompleteName };
     return newmodel;
 };
 const getField = (fieldname, obj, isrequired) => {

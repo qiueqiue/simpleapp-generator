@@ -1,6 +1,7 @@
-
 import { defineNuxtPlugin } from "#app";
 import PrimeVue from "primevue/config";
+import ToastService from 'primevue/toastservice';
+
 import SimpleAppAutocomplete from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppAutocomplete.vue'
 import SimpleAppAutocompletemulti from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppAutocompletemulti.vue'
 import SimpleAppCalendar from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppCalendar.vue'
@@ -23,6 +24,7 @@ import SimpleAppText from '@simitgroup/simpleapp-vue-component/src/components/Si
 import SimpleAppTextarea from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppTextarea.vue'
 import SimpleAppValue from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppValue.vue'
 import SimpleFieldContainer from '@simitgroup/simpleapp-vue-component/src/components/SimpleFieldContainer.vue'
+import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue'
 
 
 
@@ -53,6 +55,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     .component("SimpleAppTextarea",SimpleAppTextarea)
     .component("SimpleAppValue",SimpleAppValue)
     .component("SimpleFieldContainer",SimpleFieldContainer)
+    .use(ToastService)
     ;
     //other components that you need
 });

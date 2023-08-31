@@ -50,6 +50,10 @@ This project assume you familiar with below:
 2. mongodb
 3. vue/react kind of ecosystem
 
+# Special Format:
+There is special format value:
+1. `field-autcomplete-code`:field for document code, like `student_code,document_no`
+2. `field-autocomplete-label`: field for document name, like `student_name, product_name`
 
 You need to install mongodb and openapi generator:
 1. https://www.mongodb.com/docs/manual/installation/

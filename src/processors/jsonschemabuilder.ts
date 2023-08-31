@@ -3,6 +3,7 @@ import { JSONSchema7, JSONSchema7Definition,JSONSchema7Array,JSONSchema7TypeName
 import * as js7 from 'json-schema';
 import { capitalizeFirstLetter } from '../libs';
 import {JsonSchemaProperties} from "../type"
+import { Logger, ILogObj } from "tslog";
 // import { ConflictException } from '@nestjs/common';
 import {
   FieldModel,
@@ -11,13 +12,19 @@ import {
   SchemaModel,
 } from '../type';
 import { json } from 'stream/consumers';
-
+const log: Logger<ILogObj> = new Logger();
+const FIELD_AUTOCOMPLETE_CODE='field-autocomplete-code'
+const FIELD_AUTOCOMPLETE_NAME='field-autocomplete-name'
 let allmodels: ChildModels = {};
+let fieldAutoCompleteCode=''
+let fieldAutoCompleteName=''
 export const readJsonSchemaBuilder = (
   doctype: string,
   docname: string,
   jsondata:JSONSchema7,
 ): ChildModels => {
+  fieldAutoCompleteCode=''
+  fieldAutoCompleteName=''
   allmodels = {};
   const validateddata: JSONSchema7 = { ...jsondata };
   let schema: SchemaModel | SchemaModel[];
@@ -29,6 +36,14 @@ export const readJsonSchemaBuilder = (
     // console.log("schema",schema)
   } else if (jsondata.type == 'array') {
     throw(`unsupport array type for ${docname}.${doctype}`)
+  }
+  if(fieldAutoCompleteCode=='') {
+    log.error(`you shall define 1 field with format:'${FIELD_AUTOCOMPLETE_CODE}'`)
+    throw "missing field format"
+  }
+  if(fieldAutoCompleteName=='') {
+    log.error(`you shall define 1 field with format: '${FIELD_AUTOCOMPLETE_NAME}'}`)
+    throw "missing field format"
   }
 
   return allmodels;
@@ -79,14 +94,20 @@ const genSchema = (
     const objectitem:JSONSchema7= {} as JSONSchema7    
     Object.assign(objectitem,obj.items);
 
-    // Object.assign(objtmp,jsondata?[key]:{});
     const isrequired = requiredlist && requiredlist.includes(key);
-    // console.log('----', key, isrequired, obj);
     const newName: string = docname + capitalizeFirstLetter(key);
-    // console.log(key);
-    //need create sub model
-    // console.log("----",key,obj.type,objectitem.type)
-    if (obj.type == 'object') {
+   if(obj.format && obj.format==FIELD_AUTOCOMPLETE_CODE){
+    fieldAutoCompleteCode=key
+   }
+   if(obj.format && obj.format==FIELD_AUTOCOMPLETE_NAME){
+    fieldAutoCompleteName=key
+   }
+
+    if (obj.type == 'object' && !obj.properties){
+      console.log("Skip empty object",docname,': ',key)
+      newmodel[key] = 'Object';
+    }
+    else if (obj.type == 'object' && obj.properties) {
       genSchema(newName, obj.type, obj.properties, obj.required);
       newmodel[key] = newName;
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
@@ -104,7 +125,7 @@ const genSchema = (
       // console.log(key,'--------newmodel',obj, newmodel[key]);
     }
   }
-  allmodels[docname] = { type: schematype, model: newmodel };
+  allmodels[docname] = { type: schematype, model: newmodel,codeField: fieldAutoCompleteCode ,nameField: fieldAutoCompleteName };
   return newmodel;
 };
 

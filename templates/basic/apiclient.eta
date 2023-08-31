@@ -18,7 +18,8 @@ import { Configuration,
 
 export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= it.doctype.toUpperCase()%>Api>{
   public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
-
+  protected documentIdentityCode='<%~ it.autocompletecode %>'
+  protected documentIdentityName='<%~ it.autocompletename %>'
   constructor() {    
     const apiconfig = new Configuration({ basePath:  useRuntimeConfig().public.SIMPLEAPP_BACKEND_URL });
     const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
@@ -30,9 +31,13 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
     const newdata =  {
         
         <%Object.keys(it.schema).forEach(function(key){%>      
-          <%let field=it.schema[key]%>      
-          <% if(field.type=='boolean' ){%> 
-              <%=key%> : <%=field.default%>,
+          <%let field=it.schema[key]%>                
+          <% if(typeof field.default !='undefined' && field.type=='string'){%> 
+            <%=key%> : '<%= field.default  %>',
+          <%} else if(typeof field.default !='undefined'){%> 
+            <%=key%> : <%= field.default  %>,
+          <%} else if(field.type=='boolean' ){%> 
+              <%=key%> :false ,
           <%} else if(typeof field=='string'){%>
             <%=key%> : <<%= field  %>>{},          
           <%} else if(field.type=='string'){%>

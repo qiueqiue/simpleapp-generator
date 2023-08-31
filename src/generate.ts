@@ -87,6 +87,8 @@ const generate = (
       name: docname,
       doctype: doctype,
       models: allmodels,
+      autocompletecode:allmodels[capitalizeFirstLetter(docname)].codeField,
+      autocompletename:allmodels[capitalizeFirstLetter(docname)].nameField,
       schema: allmodels[capitalizeFirstLetter(docname)].model,
       apiSchemaName: capitalizeFirstLetter(docname), //capitalizeFirstLetter(doctype) + 'ApiSchema',
       typename: capitalizeFirstLetter(docname),
@@ -221,7 +223,7 @@ const generate = (
 
 const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   const targetfolder = `${backendfolder}/src/class`
-  const targetfrontendfolder = `${frontendfolder}/server/class`
+  const targetfrontendfolder = `${frontendfolder}/server`
   try{
     mkdirSync(targetfolder,{recursive:true});
     mkdirSync(targetfrontendfolder);

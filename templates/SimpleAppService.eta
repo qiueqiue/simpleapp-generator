@@ -11,6 +11,9 @@ import {
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
   protected jsonschema = { type: 'object', properties: {}, required: [] };
+  protected documentIdentityCode='code'
+  protected documentIdentityName='label'
+  protected LIMITPERPAGE=20
   protected data: T = { _id: '' } as T;
   protected doc: Model<T>;
   protected errorlist = [];
@@ -36,6 +39,28 @@ export class SimpleAppService<T extends { _id?: string }> {
         return p;
       });
       //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+   async getAutoComplete(keyword: string) {
+    try {
+      const filter1 = {};
+      const filter2 = {};
+      filter1[this.documentIdentityCode] = { $regex: keyword };
+      filter2[this.documentIdentityName] = { $regex: keyword };
+      const filterobj = { $or: [filter1, filter2] };
+      const projections = {
+        label: `\$${this.documentIdentityCode}`,
+        name: `\$${this.documentIdentityName}`,
+      };
+      const products = await this.doc.find(filterobj, projections, {
+        limit: this.LIMITPERPAGE,
+      });
+      const productlist = products.map((p: T) => {
+        return p;
+      });
       return productlist;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
@@ -87,7 +112,9 @@ export class SimpleAppService<T extends { _id?: string }> {
   validateData(data: T) {
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
-
+    ajv.addFormat('field-autocomplete-code', /.*$/)
+    ajv.addFormat('field-autocomplete-name', /.*$/)
+    ajv.addFormat('autocomplete', /.*$/)
     if (!this.hook('pre-validation', data)) {
       const erromsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {

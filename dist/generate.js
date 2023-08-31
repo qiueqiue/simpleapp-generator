@@ -94,6 +94,8 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
             name: docname,
             doctype: doctype,
             models: allmodels,
+            autocompletecode: allmodels[capitalizeFirstLetter(docname)].codeField,
+            autocompletename: allmodels[capitalizeFirstLetter(docname)].nameField,
             schema: allmodels[capitalizeFirstLetter(docname)].model,
             apiSchemaName: capitalizeFirstLetter(docname),
             typename: capitalizeFirstLetter(docname),
@@ -200,7 +202,7 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
 };
 const prepareEnvironments = (backendfolder, frontendfolder) => {
     const targetfolder = `${backendfolder}/src/class`;
-    const targetfrontendfolder = `${frontendfolder}/server/class`;
+    const targetfrontendfolder = `${frontendfolder}/server`;
     try {
         (0, fs_1.mkdirSync)(targetfolder, { recursive: true });
         (0, fs_1.mkdirSync)(targetfrontendfolder);

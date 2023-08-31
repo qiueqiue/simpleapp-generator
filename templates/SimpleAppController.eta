@@ -20,6 +20,7 @@ type ServiceType = {
   findIdThenDelete: Function;
   findIdThenUpdate: Function;
   setData: Function;
+  getAutoComplete: Function;
 };
 
 // @ApiTags(doctype)
@@ -37,7 +38,9 @@ export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
   async _list() {
     return this.service.list();
   }
-  
+  async _autocomplete(keyword: string) {
+    return this.service.getAutoComplete(keyword);
+  }
   async _findOne(id: string) {
     const result = (await this.service.findById(id)) as TApiSchema;
 

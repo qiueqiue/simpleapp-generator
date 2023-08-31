@@ -10,6 +10,7 @@ import {
   Post,
   Delete,
   Body,
+  Query,
   Param,
   Type,
 } from '@nestjs/common';
@@ -42,7 +43,20 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   async list() {
     return this._list();
   }
-  
+  //autocomplete shall above :id
+  @Get('/autocomplete')
+  @ApiResponse({
+    status: 200,
+    description: 'Found',
+    type: ()=>[{id:'100',label:'label1'}],
+  })
+  @ApiResponse({ status: 500, description: 'Internal error' })
+  @ApiOperation({ operationId: 'autoComplete' })
+  async autoComplete(@Query('keyword') keyword: string) {
+    return this._autocomplete(keyword);
+  }
+
+
   @Get(':id')
   @ApiResponse({
     status: 200,
@@ -55,6 +69,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   async findOne(@Param('id') id: string) {    
     return await this._findOne(id);
   }
+  
+
 
   @Post()
   @ApiResponse({
