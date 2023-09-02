@@ -14,6 +14,7 @@ type crudType = {
 export class SimpleAppClient<
   TData extends { _id?: string },
   TApi extends crudType,
+  defaultTimeout:number = 5000;
 > {
   protected docapi;
   protected data = <Ref<TData>>ref({} as TData);
@@ -36,7 +37,7 @@ export class SimpleAppClient<
   };
 
   async getById(id: string) {
-    return await this.docapi.runFindOne(id).then((res: AxiosResponse) => {
+    return await this.docapi.runFindOne(id,{timeout:this.defaultTimeout}).then((res: AxiosResponse) => {
       // this.data.value = { ...res.data };
       Object.assign(this.data.value, res.data);
       return res;
@@ -48,7 +49,7 @@ export class SimpleAppClient<
       return await Promise.reject(errors);
     } else {
       return await this.docapi
-        .runCreate(this.data.value)
+        .runCreate(this.data.value,{timeout:this.defaultTimeout})
         .then((res: AxiosResponse) => {
           this.data.value = { ...res.data };
           return res;
@@ -62,17 +63,17 @@ export class SimpleAppClient<
       return await Promise.reject(errors);
     } else {
       return await this.docapi
-        .runUpdate(recordid, this.data.value)
+        .runUpdate(recordid, this.data.value,{timeout:this.defaultTimeout})
         .then((res: AxiosResponse) => {
           return res;
         });
     }
   }
   async delete(id: string) {
-    return await this.docapi.runDelete(id);
+    return await this.docapi.runDelete(id,{timeout:this.defaultTimeout});
   }
   async list() {
-    return await this.docapi.runList();
+    return await this.docapi.runList({timeout:this.defaultTimeout});
   }
   find() {}
   hook(type: string, data: TData) {
@@ -81,6 +82,10 @@ export class SimpleAppClient<
   }
   validateFailed() {
     const ajv = new Ajv({ allErrors: true });
+    ajv.addKeyword({
+      keyword:'autocompletesrc',
+      type:'string'
+    });
     addFormats(ajv);
     this.errorlist.value = {};
     this.hook('pre-validation', this.data.value);

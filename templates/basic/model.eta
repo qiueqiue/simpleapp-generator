@@ -30,6 +30,6 @@ const schemasetting = {
   <%}) %>
 };
 
-export const <%= it.doctype %>MongoSchema = new Schema(schemasetting)
+export const <%= it.doctype %>MongoSchema = new Schema(schemasetting,{collection: '<%= it.name %>'})
   .post('validate', (doc: <%= it.typename %>) => beforeSave(doc))
   .pre('save', () => {});

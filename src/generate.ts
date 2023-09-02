@@ -2,9 +2,10 @@
 // import { readJsonSchemaBuilder } from './processors/jsonschemabuilder';
 import * as constants from './constant'
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
+import {foreignkeys} from './storage'
 // import { compile } from 'json-schema-to-typescript';
 // import { Fieldtypes, SchemaModel, ChildModels } from './type';
-import { Fieldtypes, SchemaModel, ChildModels,ModuleObject } from './type'
+import { TypeForeignKeyCatalogue,  ChildModels,ModuleObject } from './type'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
 const clc = require("cli-color");
@@ -20,9 +21,10 @@ const extjsonschema = '.jsonschema.json';
 let jsonschemas = {};
 const docs = [];
 
-export const initialize =  (defFolder:string,backendfolder:string,frontendfolder:string) => {
+export const initialize =  async (defFolder:string,backendfolder:string,frontendfolder:string) => {
   prepareEnvironments(backendfolder,frontendfolder)
-let activatemodules:ModuleObject[]=[]
+  let activatemodules:ModuleObject[]=[]
+  // 
   const files = readdirSync(defFolder)
   // readdir(defFolder, (err, files) => {
     // files.forEach((file) => {
@@ -40,17 +42,22 @@ let activatemodules:ModuleObject[]=[]
         log.info(`Load `+clc.green(file))
         rendertype = 'basic';
         jsonschemas[docname] = jsondata;
-        allmodels = readJsonSchemaBuilder(doctype, docname, jsondata);
+        // foreignkeys:
+        // tmpforeignkeys:TypeForeignKey
+        allmodels = await readJsonSchemaBuilder(doctype, docname, jsondata,foreignkeys);
+         
+        //foreignkeycatalogues
+        // foreignkeys
         generate(docname, doctype, rendertype, allmodels,backendfolder,frontendfolder);        
         activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname)})
       } else {
         log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
-      }
-      
+      }      
     }
+    // log.warn("foreignkeys---",foreignkeys)
     log.info("Activated backend modules: ",activatemodules)
     // log.info(activatemodules)
-    loadSimpleAppModules(activatemodules,backendfolder)
+    finalize(activatemodules,backendfolder)
     return Promise.resolve(true)
   }
   
@@ -223,10 +230,10 @@ const generate = (
 
 const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   const targetfolder = `${backendfolder}/src/class`
-  const targetfrontendfolder = `${frontendfolder}/server`
+  const targetfrontendfolder = `${frontendfolder}/server/api`
   try{
     mkdirSync(targetfolder,{recursive:true});
-    mkdirSync(targetfrontendfolder);
+    mkdirSync(targetfrontendfolder,{recursive:true});
   }catch(error){
     //do nothing
   }
@@ -239,7 +246,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   copyFileSync(`${constants.templatedir}/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
 
   //copy over frontend apiabstract class
-  // copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
+  copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
 
     //prepare backend config.ts
 
@@ -247,9 +254,16 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 }
 
 
-const loadSimpleAppModules=(modules:ModuleObject[],targetfolder:string)=>{
+const finalize=(modules:ModuleObject[],backendfolder:string)=>{
+  log.info("Finalizing foreignkey:",foreignkeys)
+  mkdirSync(`${backendfolder}/src/dicts/`,{ recursive: true });
   const eta = new Eta({views:constants.templatedir});
   const txtMainModule = eta.render('app.module.eta', modules);
-  writeFileSync(`${targetfolder}/src/app.module.ts`, txtMainModule);
+  writeFileSync(`${backendfolder}/src/app.module.ts`, txtMainModule);
+
+  const foreignkeyfile =`${backendfolder}/src/dicts/foreignkeys.json`
+  writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));
+  console.log("write to foreignkey file ",foreignkeyfile)
+  
 
 }

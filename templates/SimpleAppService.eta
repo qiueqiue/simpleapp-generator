@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-
+import foreignkeys from '../dicts/foreignkeys.json';
 import {
   NotFoundException,
   InternalServerErrorException,
@@ -11,9 +11,11 @@ import {
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
   protected jsonschema = { type: 'object', properties: {}, required: [] };
-  protected documentIdentityCode='code'
-  protected documentIdentityName='label'
-  protected LIMITPERPAGE=20
+  protected documentIdentityCode = 'code';
+  protected documentIdentityName = 'label';
+  protected documentName = 'category';
+  protected documentType = 'CAT';
+  protected LIMITPERPAGE = 20;
   protected data: T = { _id: '' } as T;
   protected doc: Model<T>;
   protected errorlist = [];
@@ -44,7 +46,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       throw new InternalServerErrorException(err.message);
     }
   }
-   async getAutoComplete(keyword: string) {
+  async getAutoComplete(keyword: string) {
     try {
       const filter1 = {};
       const filter2 = {};
@@ -104,8 +106,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.findIdThenUpdate(id, this.data);
   }
   async delete() {
+    
     const id: string = this.getRecordId();
-    this.findIdThenDelete(id);
+    const dependency = await this.getRelatedRecords(id);
+    if (!dependency) {
+     return await this.findIdThenDelete(id);
+    } else {
+      return dependency;
+    }
   }
   hook(type: string, data: T) {
     return true;
@@ -113,9 +121,12 @@ export class SimpleAppService<T extends { _id?: string }> {
   validateData(data: T) {
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
-    ajv.addFormat('field-autocomplete-code', /.*$/)
-    ajv.addFormat('field-autocomplete-name', /.*$/)
-    ajv.addFormat('autocomplete', /.*$/)
+    ajv.addFormat('field-autocomplete-code', /.*$/);
+    ajv.addFormat('field-autocomplete-name', /.*$/);
+    ajv.addKeyword({
+      keyword: 'x-foreignkey',
+      type: 'string',
+    });
     if (!this.hook('pre-validation', data)) {
       const erromsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {
@@ -139,8 +150,14 @@ export class SimpleAppService<T extends { _id?: string }> {
   async findIdThenDelete(id: string) {
     // const data = await this.findById(id);
     try {
-      const deleteresult = await this.doc.findByIdAndDelete(id);
-      return deleteresult;
+      console.log('deletedeletedeletedelete');
+      const dependency = await this.getRelatedRecords(id);
+      if (!dependency) {
+        const deleteresult = await this.doc.findByIdAndDelete(id);
+        return deleteresult;
+      } else {
+        return Promise.reject(dependency);
+      }
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
@@ -154,9 +171,40 @@ export class SimpleAppService<T extends { _id?: string }> {
       this.validateData(data);
       // const result = await existingdata.doc.updateOne(data);
       const result = await this.doc.findByIdAndUpdate(id, data);
+
       return result;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  //find what foreign key constraint
+  async getRelatedRecords(id: string) {
+    const foreignkeysettings = foreignkeys[this.documentName];
+    console.log('foreignkeysettings', foreignkeysettings);
+    const propkeys = Object.getOwnPropertyNames(foreignkeysettings);
+
+    if (propkeys.length > 0) {
+      console.log('Have properties');
+      for (let i = 0; i < propkeys.length; i++) {
+        const collectionname = propkeys[i];
+        console.log('run ', i, collectionname);
+        const fobjs = foreignkeysettings[propkeys[i]];
+        const collection = this.doc.db.collection(collectionname);
+        //single schema may have multiple foreign key link here, loop all
+        for (let j = 0; j < fobjs.length; j++) {
+          const fkey = fobjs[j];
+          const filter = {};
+          filter[fkey] = id;
+          console.log('getRelatedRecords get filter', collectionname, filter);
+          const result = await collection.findOne(filter);
+          console.log('getRelatedRecords', result);
+          if (result) {
+            return Promise.reject(result);
+          }
+        }
+      }
+    }
+    return Promise.resolve(null);
   }
 }

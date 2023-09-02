@@ -35,7 +35,12 @@ export type JsonSchemaProperties= {
   // JSONSchema7Definition ,JSONSchema7
 }
 
-
+export type TypeForeignKeyCatalogue = {
+  [cataloguename:string]:TypeForeignKey
+}
+export type TypeForeignKey={
+  [collection:string]:string[]
+}
 export type ModuleObject = {
   doctype:string
   docname:string

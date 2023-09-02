@@ -1,22 +1,34 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readJsonSchemaBuilder = void 0;
 const libs_1 = require("../libs");
 const tslog_1 = require("tslog");
+const json_schema_ref_parser_1 = __importDefault(require("@apidevtools/json-schema-ref-parser"));
+const storage_1 = require("../storage");
 // import { ConflictException } from '@nestjs/common';
 const type_1 = require("../type");
 const log = new tslog_1.Logger();
 const FIELD_AUTOCOMPLETE_CODE = 'field-autocomplete-code';
 const FIELD_AUTOCOMPLETE_NAME = 'field-autocomplete-name';
+const FOREIGNKEY_PROPERTY = 'x-foreignkey';
 let allmodels = {};
+let fullschema = {};
 let fieldAutoCompleteCode = '';
 let fieldAutoCompleteName = '';
-const readJsonSchemaBuilder = (doctype, docname, jsondata) => {
+const readJsonSchemaBuilder = async (doctype, docname, orijsondata, allforeignkeys) => {
     fieldAutoCompleteCode = '';
     fieldAutoCompleteName = '';
     allmodels = {};
-    const validateddata = Object.assign({}, jsondata);
+    const validateddata = Object.assign({}, orijsondata);
     let schema;
+    const tmpjsondata = await json_schema_ref_parser_1.default.dereference(orijsondata).then((schema) => {
+        // console.log("schema",doctype, schema['properties']['category']? schema['properties']['category']:'')
+        return schema;
+    });
+    const jsondata = Object.assign({}, tmpjsondata);
     if (jsondata && jsondata.type == 'object') {
         //no _id then need add
         // console.log(jsondata)
@@ -34,7 +46,7 @@ const readJsonSchemaBuilder = (doctype, docname, jsondata) => {
         log.error(`you shall define 1 field with format: '${FIELD_AUTOCOMPLETE_NAME}'}`);
         throw "missing field format";
     }
-    return allmodels;
+    return Promise.resolve(allmodels);
 };
 exports.readJsonSchemaBuilder = readJsonSchemaBuilder;
 const processObject = (doctype, docname, jsondata) => {
@@ -74,11 +86,29 @@ requiredlist) => {
         if (obj.format && obj.format == FIELD_AUTOCOMPLETE_NAME) {
             fieldAutoCompleteName = key;
         }
-        if (obj.type == 'object' && !obj.properties) {
-            console.log("Skip empty object", docname, ': ', key);
-            newmodel[key] = 'Object';
-        }
-        else if (obj.type == 'object' && obj.properties) {
+        //  if (obj.type == 'object' && obj.items  ){
+        //   console.log("Refer to another object",docname,': ',key,obj,obj.items)
+        // obj,obj.items
+        //foreignkeys
+        //FOREIGNKEY_PROPERTY
+        // newmodel[key] = 'Object';
+        // }
+        // else 
+        if (obj.type == 'object') {
+            if (obj[FOREIGNKEY_PROPERTY]) {
+                console.warn("FOREIGNKEY_PROPERTY exists", FOREIGNKEY_PROPERTY, obj[FOREIGNKEY_PROPERTY]);
+                const masterdatacollection = obj[FOREIGNKEY_PROPERTY];
+                const clientdatacollection = docname.toLowerCase();
+                const foreignkeyidentity = key + '._id';
+                if (!storage_1.foreignkeys[masterdatacollection]) {
+                    let tmp = {};
+                    tmp[clientdatacollection] = [foreignkeyidentity];
+                    storage_1.foreignkeys[masterdatacollection] = tmp;
+                }
+                else {
+                    storage_1.foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity);
+                }
+            }
             genSchema(newName, obj.type, obj.properties, obj.required);
             newmodel[key] = newName;
         }

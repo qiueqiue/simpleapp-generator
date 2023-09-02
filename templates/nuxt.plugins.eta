@@ -25,8 +25,9 @@ import SimpleAppTextarea from '@simitgroup/simpleapp-vue-component/src/component
 import SimpleAppValue from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppValue.vue'
 import SimpleFieldContainer from '@simitgroup/simpleapp-vue-component/src/components/SimpleFieldContainer.vue'
 import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue'
-
-
+import mitt from 'mitt'
+import ToastService from 'primevue/toastservice';
+const emitter = mitt()
 
 
 

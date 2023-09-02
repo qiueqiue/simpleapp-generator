@@ -1,3 +1,24 @@
+# Todo
+1. define foreign key relationship in json schema2
+2. auto index and block deletion
+3. when delete identify foreign connected documents
+4. how to unique key
+5. how to multi-tenancy
+6. login/logout in nuxt
+7. jwt in nestjs
+8. format errors at server side link back client side
+9. how to auto toast
+10.server side custom validation link back client side
+11.permission controls
+12.find records
+13.audit trail
+14.data isolation by org, branch and tenant
+15.statistics, aggregations
+16.auto generate frontend page
+17.
+
+
+
 # simpleapp-generator
 ## this project still in alpha stage!
 
@@ -54,6 +75,10 @@ This project assume you familiar with below:
 There is special format value:
 1. `field-autcomplete-code`:field for document code, like `student_code,document_no`
 2. `field-autocomplete-label`: field for document name, like `student_name, product_name`
+
+# Special properties:
+## object:
+* autocomplete-src=category  => autocomplete list from server-url/category/autocomplete
 
 You need to install mongodb and openapi generator:
 1. https://www.mongodb.com/docs/manual/installation/

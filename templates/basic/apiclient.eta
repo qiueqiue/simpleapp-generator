@@ -20,10 +20,12 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
   public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityName='<%~ it.autocompletename %>'
-  constructor() {    
-    const apiconfig = new Configuration({ basePath:  useRuntimeConfig().public.SIMPLEAPP_BACKEND_URL });
+  constructor(event:any,listen?:any) {    
+    const apiconfig = new Configuration({ basePath:  useRuntimeConfig().public.APP_URL+'/api' });
     const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
     super(apiobj)
+    this.event=event
+    this.listen=listen
     
     this.setNew();    
   }

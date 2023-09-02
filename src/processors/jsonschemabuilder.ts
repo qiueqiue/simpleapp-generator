@@ -4,30 +4,45 @@ import * as js7 from 'json-schema';
 import { capitalizeFirstLetter } from '../libs';
 import {JsonSchemaProperties} from "../type"
 import { Logger, ILogObj } from "tslog";
+import $RefParser from "@apidevtools/json-schema-ref-parser";
+import {foreignkeys} from '../storage'
 // import { ConflictException } from '@nestjs/common';
 import {
   FieldModel,
   Fieldtypes,
   ChildModels,
   SchemaModel,
+  TypeForeignKey,
+  TypeForeignKeyCatalogue
 } from '../type';
 import { json } from 'stream/consumers';
 const log: Logger<ILogObj> = new Logger();
 const FIELD_AUTOCOMPLETE_CODE='field-autocomplete-code'
 const FIELD_AUTOCOMPLETE_NAME='field-autocomplete-name'
+const FOREIGNKEY_PROPERTY='x-foreignkey'
 let allmodels: ChildModels = {};
+let fullschema={}
 let fieldAutoCompleteCode=''
 let fieldAutoCompleteName=''
-export const readJsonSchemaBuilder = (
+
+export const readJsonSchemaBuilder = async (
   doctype: string,
   docname: string,
-  jsondata:JSONSchema7,
-): ChildModels => {
+  orijsondata:JSONSchema7,
+  allforeignkeys:TypeForeignKeyCatalogue
+) => {
+  
   fieldAutoCompleteCode=''
   fieldAutoCompleteName=''
   allmodels = {};
-  const validateddata: JSONSchema7 = { ...jsondata };
+  const validateddata: JSONSchema7 = { ...orijsondata };
   let schema: SchemaModel | SchemaModel[];
+  const  tmpjsondata = await $RefParser.dereference(orijsondata).then((schema)=>{
+    // console.log("schema",doctype, schema['properties']['category']? schema['properties']['category']:'')
+    return schema
+  })
+  const  jsondata:JSONSchema7 = {...tmpjsondata} as JSONSchema7
+
   
   if (jsondata && jsondata.type == 'object') {
     //no _id then need add
@@ -45,14 +60,14 @@ export const readJsonSchemaBuilder = (
     log.error(`you shall define 1 field with format: '${FIELD_AUTOCOMPLETE_NAME}'}`)
     throw "missing field format"
   }
-
-  return allmodels;
+  
+  return Promise.resolve(allmodels);
 };
 
 
-const processObject = (doctype: string,
+const processObject =  (doctype: string,
   docname: string,
-  jsondata:JSONSchema7,) : SchemaModel =>{
+  jsondata:JSONSchema7,)  =>{
     if(!jsondata['properties']){      
       throw ("Invalid json schema {doctype}.{docname}, no 'properties' defined")
     }
@@ -102,12 +117,31 @@ const genSchema = (
    if(obj.format && obj.format==FIELD_AUTOCOMPLETE_NAME){
     fieldAutoCompleteName=key
    }
-
-    if (obj.type == 'object' && !obj.properties){
-      console.log("Skip empty object",docname,': ',key)
-      newmodel[key] = 'Object';
-    }
-    else if (obj.type == 'object' && obj.properties) {
+  //  if (obj.type == 'object' && obj.items  ){
+  //   console.log("Refer to another object",docname,': ',key,obj,obj.items)
+    
+    // obj,obj.items
+    //foreignkeys
+    //FOREIGNKEY_PROPERTY
+    // newmodel[key] = 'Object';
+    // }
+    // else 
+    if (obj.type == 'object') {
+      
+      if(obj[FOREIGNKEY_PROPERTY]){
+        console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
+        const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
+        const clientdatacollection = docname.toLowerCase()
+        const foreignkeyidentity= key+'._id'
+        if(!foreignkeys[masterdatacollection]){
+          let tmp:TypeForeignKey = {} as TypeForeignKey
+          tmp[clientdatacollection]=[foreignkeyidentity]
+          foreignkeys[masterdatacollection] = tmp
+        }else{
+          foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
+        }
+                
+      }
       genSchema(newName, obj.type, obj.properties, obj.required);
       newmodel[key] = newName;
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {

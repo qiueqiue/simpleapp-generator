@@ -28,6 +28,7 @@ exports.initialize = void 0;
 // import { readJsonSchemaBuilder } from './processors/jsonschemabuilder';
 const constants = __importStar(require("./constant"));
 const jsonschemabuilder_1 = require("./processors/jsonschemabuilder");
+const storage_1 = require("./storage");
 const tslog_1 = require("tslog");
 const log = new tslog_1.Logger();
 const clc = require("cli-color");
@@ -40,9 +41,10 @@ const extHfb = '.xhfb.json';
 const extjsonschema = '.jsonschema.json';
 let jsonschemas = {};
 const docs = [];
-const initialize = (defFolder, backendfolder, frontendfolder) => {
+const initialize = async (defFolder, backendfolder, frontendfolder) => {
     prepareEnvironments(backendfolder, frontendfolder);
     let activatemodules = [];
+    // 
     const files = (0, fs_1.readdirSync)(defFolder);
     // readdir(defFolder, (err, files) => {
     // files.forEach((file) => {
@@ -59,7 +61,11 @@ const initialize = (defFolder, backendfolder, frontendfolder) => {
             log.info(`Load ` + clc.green(file));
             rendertype = 'basic';
             jsonschemas[docname] = jsondata;
-            allmodels = (0, jsonschemabuilder_1.readJsonSchemaBuilder)(doctype, docname, jsondata);
+            // foreignkeys:
+            // tmpforeignkeys:TypeForeignKey
+            allmodels = await (0, jsonschemabuilder_1.readJsonSchemaBuilder)(doctype, docname, jsondata, storage_1.foreignkeys);
+            //foreignkeycatalogues
+            // foreignkeys
             generate(docname, doctype, rendertype, allmodels, backendfolder, frontendfolder);
             activatemodules.push({ doctype: doctype, docname: capitalizeFirstLetter(docname) });
         }
@@ -67,9 +73,10 @@ const initialize = (defFolder, backendfolder, frontendfolder) => {
             log.warn(`Load ` + clc.yellow(file) + ` but it is not supported`);
         }
     }
+    // log.warn("foreignkeys---",foreignkeys)
     log.info("Activated backend modules: ", activatemodules);
     // log.info(activatemodules)
-    loadSimpleAppModules(activatemodules, backendfolder);
+    finalize(activatemodules, backendfolder);
     return Promise.resolve(true);
 };
 exports.initialize = initialize;
@@ -202,10 +209,10 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
 };
 const prepareEnvironments = (backendfolder, frontendfolder) => {
     const targetfolder = `${backendfolder}/src/class`;
-    const targetfrontendfolder = `${frontendfolder}/server`;
+    const targetfrontendfolder = `${frontendfolder}/server/api`;
     try {
         (0, fs_1.mkdirSync)(targetfolder, { recursive: true });
-        (0, fs_1.mkdirSync)(targetfrontendfolder);
+        (0, fs_1.mkdirSync)(targetfrontendfolder, { recursive: true });
     }
     catch (error) {
         //do nothing
@@ -215,13 +222,18 @@ const prepareEnvironments = (backendfolder, frontendfolder) => {
     //copy over backend controller
     (0, fs_1.copyFileSync)(`${constants.templatedir}/SimpleAppController.eta`, `${targetfolder}/SimpleAppController.ts`);
     //copy over frontend apiabstract class
-    // copyFileSync(`${constants.templatedir}/SimpleAppClient.eta`,`${targetfrontendfolder}/SimpleAppClient.ts`)
+    (0, fs_1.copyFileSync)(`${constants.templatedir}/nuxt.apigateway.eta`, `${targetfrontendfolder}/[...].ts`);
     //prepare backend config.ts
     //copy over frontend config.ts
 };
-const loadSimpleAppModules = (modules, targetfolder) => {
+const finalize = (modules, backendfolder) => {
+    log.info("Finalizing foreignkey:", storage_1.foreignkeys);
+    (0, fs_1.mkdirSync)(`${backendfolder}/src/dicts/`, { recursive: true });
     const eta = new Eta({ views: constants.templatedir });
     const txtMainModule = eta.render('app.module.eta', modules);
-    (0, fs_1.writeFileSync)(`${targetfolder}/src/app.module.ts`, txtMainModule);
+    (0, fs_1.writeFileSync)(`${backendfolder}/src/app.module.ts`, txtMainModule);
+    const foreignkeyfile = `${backendfolder}/src/dicts/foreignkeys.json`;
+    (0, fs_1.writeFileSync)(foreignkeyfile, JSON.stringify(storage_1.foreignkeys));
+    console.log("write to foreignkey file ", foreignkeyfile);
 };
 //# sourceMappingURL=generate.js.map

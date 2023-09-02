@@ -1,21 +1,25 @@
 {
   "name": "@simitgroup/simpleapp-generator",
-  "version": "1.0.8",
-  "description": "frontend nuxtjs and backend nests code generator using jsonschema",  
+  "version": "1.0.9",
+  "description": "frontend nuxtjs and backend nests code generator using jsonschema",
   "main": "dist/index.js",
   "scripts": {
     "generate": "ts-node src/index.ts -c ../sampleconfig.json; pnpm exec prettier ./backend  --write;pnpm exec prettier ./frontend  --write",
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },  
+  },
   "keywords": [],
-  "author": "Ks Tan",  
+  "author": "Ks Tan",
   "license": "ISC",
-  "repository": {"type": "git", "url": "git://github.com/SIMITGROUP/simpleapp-generator.git"},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/SIMITGROUP/simpleapp-generator.git"
+  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^10.1.0",
     "@nestjs/config": "^3.0.0",
     "@nestjs/mongoose": "^10.0.1",
     "@nestjs/swagger": "^7.1.8",
@@ -29,6 +33,7 @@
     "figlet": "^1.6.0",
     "fs": "0.0.1-security",
     "json-schema": "^0.4.0",
+    "json-schema-ref-parser": "^9.0.9",
     "mongoose": "^7.4.4",
     "path": "^0.12.7",
     "tslog": "^4.9.1"
