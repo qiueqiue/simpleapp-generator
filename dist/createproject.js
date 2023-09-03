@@ -60,6 +60,7 @@ const createNuxt = (targetfolder, callback) => {
         //;pnpm install    
         console.log(error, stdout, stderr);
         (0, child_process_1.exec)(`cd ${targetfolder};pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr) => {
+            console.log(error, stdout, stderr);
             (0, fs_1.mkdirSync)(`${targetfolder}/assets/css/`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/layouts`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/components`, { recursive: true });

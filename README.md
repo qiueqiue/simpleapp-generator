@@ -12,28 +12,31 @@ MONGODB_URL='mongodb://mongoadmin:secret@localhost:27017/admin?authMechanism=DEF
 4. regenerate code (for frontend can function completely)
 5. 
 
+9. beautify default tailwind ui
+10.plugin for ajv
+  long string format for description
+  errors formating
+7. load backend tsconfig and add more property: **
+8. simpleapp generate currentfolder error **
+
+
 # Todo
 x1. override app.vue * 
-2. create layout  
+x2. create layout  
   simpleapp (first time only) 
       /default *
-3. components/  (first time only)
-    /MonitorEvent.vue *
-    /CrudBasic.vue **
-    /Menubar *
+x3. components/  (first time only)
+x    /MonitorEvent.vue *
+x    /CrudBasic.vue **
+x    /Menubar *
 4. create page/docs (everytime)
   /index.ts
   //create page if docs/documentname not exists  ***
   //override if docs/documentname/delete-me-for-avoid-override exists  *
 5. login/logout sessions
-6. auto create *
-    server/api to backend *
-7. load backend tsconfig and add more property: **
-8. simpleapp generate currentfolder error **
-9. beautify default tailwind ui
-10.plugin for ajv
-  long string format for description
-  errors formating
+x6. auto create *
+x    server/api to backend *
+
 
 
 
