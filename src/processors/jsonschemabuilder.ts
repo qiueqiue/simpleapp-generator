@@ -129,7 +129,7 @@ const genSchema = (
     if (obj.type == 'object') {
       
       if(obj[FOREIGNKEY_PROPERTY]){
-        console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
+        // console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
         const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
         const clientdatacollection = docname.toLowerCase()
         const foreignkeyidentity= key+'._id'

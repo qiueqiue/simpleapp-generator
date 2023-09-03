@@ -55,7 +55,7 @@ export const initialize =  async (defFolder:string,backendfolder:string,frontend
       }      
     }
     // log.warn("foreignkeys---",foreignkeys)
-    log.info("Activated backend modules: ",activatemodules)
+    log.info("Activated backend modules: ",JSON.stringify(activatemodules))
     // log.info(activatemodules)
     finalize(activatemodules,backendfolder,frontendfolder)
     return Promise.resolve(true)
@@ -266,7 +266,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 
 
 const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:string)=>{
-  log.info("Finalizing foreignkey:",foreignkeys)
+  log.info("Finalizing foreignkey:",JSON.stringify(foreignkeys))
   mkdirSync(`${backendfolder}/src/dicts/`,{ recursive: true });
   mkdirSync(`${frontendfolder}/composables/`,{ recursive: true });
 
@@ -276,7 +276,7 @@ const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:strin
 
   const foreignkeyfile =`${backendfolder}/src/dicts/foreignkeys.json`
   writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));
-  console.log("write to foreignkey file ",foreignkeyfile)
+  log.info("write to foreignkey file ",foreignkeyfile)
   
   const txtCatalogue = eta.render('./nuxt/composables.getautocomplete.ts.eta', modules);
   writeFileSync(`${frontendfolder}/composables/getAutocomplete.ts`, txtCatalogue);

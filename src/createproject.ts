@@ -4,6 +4,7 @@ import * as constants from './constant'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
 
+
 const { Eta } = require('eta');
 
 const  checkNodeJS= (callback)=>{
@@ -91,9 +92,16 @@ export const createNest= (targetfolder:string,callback)=>{
             const eta = new Eta({views: constants.templatedir});              
             const variables=[]            
             const txtEnv = eta.render('./nest.env.eta', variables);                
-            const txtMain = eta.render('./nest.main.eta', variables);                
+            const txtMain = eta.render('./nest.main.eta', variables);   
+
             writeFileSync(`${targetfolder}/.env`, txtEnv);
-            writeFileSync(`${targetfolder}/src/main.ts`, txtMain);
+            writeFileSync(`${targetfolder}/src/main.ts`, txtMain);            
+            const tsconfigpath = process.cwd()+'/'+`${targetfolder}/tsconfig.json`
+            const tsconfig = require(tsconfigpath)
+            tsconfig.compilerOptions.esModuleInterop=true
+            tsconfig.compilerOptions.resolveJsonModule=true
+            writeFileSync(tsconfigpath, JSON.stringify(tsconfig));
+
             log.info("nest project completed")                
             callback()
         })

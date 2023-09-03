@@ -1,0 +1,40 @@
+{
+    "type": "object",
+    "$defs":{
+      "foreignkey":{
+        "type":"object",
+        "default":"null",
+        "properties": 
+          {
+            "_id": {"type": "string","examples": ["100"]},
+            "label": {"type": "string","examples": ["level1"]}
+          }
+      }
+    },
+    "properties": {
+      "organization_id": {"type": "integer","examples": [1]},
+      "branch_id": {"type": "integer","examples": [1]},      
+      "product_code": {"type": "string","format":"field-autocomplete-code","minLength":1,"examples": ["prd1"]},
+      "product_name": {"type": "string","format":"field-autocomplete-name","minLength":5,"examples": ["Product 1"]},
+      "description": {"type": "string","examples": [""]},
+      "uom": {"type": "string","examples": ["unit"]},
+      "sku": {"type": "string","examples": ["SIKEU001"]},
+      "isactive": {"type": "boolean","examples": [true],"default":true},
+      "tags": {"type": "array","items": {"type": "string","examples": ["book","longman"]}},
+      "defaultprice": {"type": "number","examples": [120]},
+      "category":{"type":"object","x-foreignkey":"category","items":{"$ref":"#/$defs/foreignkey"}},
+      "pricelist": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["group","unitprice","effectivedate","minimalOrder"],
+          "properties": {         
+            "unitprice": {"type": "number","examples": [100.00]},
+            "effectivedate": {"type": "string","format": "date","examples": ["2000-01-01"]},
+            "minimalOrder": {"type": "number","examples": [5]}
+          }
+        }
+      }
+    }
+    
+  }
