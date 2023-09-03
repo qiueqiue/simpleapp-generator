@@ -281,5 +281,7 @@ const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:strin
   const txtCatalogue = eta.render('./nuxt/composables.getautocomplete.ts.eta', modules);
   writeFileSync(`${frontendfolder}/composables/getAutocomplete.ts`, txtCatalogue);
 
+  const txtMenus = eta.render('./nuxt/composables.getmenus.ts.eta', modules);
+  writeFileSync(`${frontendfolder}/composables/getMenus.ts`, txtMenus);
   
 }

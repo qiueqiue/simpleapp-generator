@@ -248,5 +248,7 @@ const finalize = (modules, backendfolder, frontendfolder) => {
     console.log("write to foreignkey file ", foreignkeyfile);
     const txtCatalogue = eta.render('./nuxt/composables.getautocomplete.ts.eta', modules);
     (0, fs_1.writeFileSync)(`${frontendfolder}/composables/getAutocomplete.ts`, txtCatalogue);
+    const txtMenus = eta.render('./nuxt/composables.getmenus.ts.eta', modules);
+    (0, fs_1.writeFileSync)(`${frontendfolder}/composables/getMenus.ts`, txtMenus);
 };
 //# sourceMappingURL=generate.js.map

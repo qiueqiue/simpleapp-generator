@@ -1,0 +1,8 @@
+export const getMenus =()=>
+[
+  {label: 'Home',icon: 'pi pi-fw pi-home',to: '/'},
+  <% for(let i=0;i<it.length; i++){ %>
+    <% let obj = it[i]%>
+    {label: '<%=obj.docname.toLowerCase()%>', to:'/<%=obj.docname.toLowerCase()%>'},
+  <%}%>
+]
