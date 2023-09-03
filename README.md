@@ -29,8 +29,11 @@ x1. override app.vue *
 6. auto create *
     server/api to backend *
 7. load backend tsconfig and add more property: **
-8. simpleapp generat currentfolder error **
+8. simpleapp generate currentfolder error **
 9. beautify default tailwind ui
+10.plugin for ajv
+  long string format for description
+  errors formating
 
 
 

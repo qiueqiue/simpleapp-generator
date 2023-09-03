@@ -57,7 +57,7 @@ export const initialize =  async (defFolder:string,backendfolder:string,frontend
     // log.warn("foreignkeys---",foreignkeys)
     log.info("Activated backend modules: ",activatemodules)
     // log.info(activatemodules)
-    finalize(activatemodules,backendfolder)
+    finalize(activatemodules,backendfolder,frontendfolder)
     return Promise.resolve(true)
   }
   
@@ -76,7 +76,7 @@ const generate = (
   try {
     
     mkdirSync(targetfolder,{ recursive: true });    
-    mkdirSync(`${frontendfolder}/server/docs/`,{ recursive: true });
+    mkdirSync(`${frontendfolder}/simpleapp/simpleappdocs/`,{ recursive: true });
     mkdirSync(frontendpagefolder,{recursive:true})
   } catch (err) {
     //do nothing if folder exists
@@ -196,7 +196,7 @@ const generate = (
     const txtReadme = eta.render('./readme', variables);
     writeFileSync(`${targetfolder}/README.md`, txtReadme);
 
-    const frontendfile = `${frontendfolder}/server/docs/${variables.typename}Doc.ts`;
+    const frontendfile = `${frontendfolder}/simpleapp/simpleappdocs/${variables.typename}Doc.ts`;
     let frontEndCode = '';
     if (existsSync(frontendfile)) {
       const clientcodes = readFileSync(frontendfile).toString();
@@ -265,9 +265,11 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
 }
 
 
-const finalize=(modules:ModuleObject[],backendfolder:string)=>{
+const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:string)=>{
   log.info("Finalizing foreignkey:",foreignkeys)
   mkdirSync(`${backendfolder}/src/dicts/`,{ recursive: true });
+  mkdirSync(`${frontendfolder}/composables/`,{ recursive: true });
+
   const eta = new Eta({views:constants.templatedir});
   const txtMainModule = eta.render('app.module.eta', modules);
   writeFileSync(`${backendfolder}/src/app.module.ts`, txtMainModule);
@@ -276,5 +278,8 @@ const finalize=(modules:ModuleObject[],backendfolder:string)=>{
   writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));
   console.log("write to foreignkey file ",foreignkeyfile)
   
+  const txtCatalogue = eta.render('./nuxt/composables.getautocomplete.ts.eta', modules);
+  writeFileSync(`${frontendfolder}/composables/getAutocomplete.ts`, txtCatalogue);
 
+  
 }

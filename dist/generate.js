@@ -76,7 +76,7 @@ const initialize = async (defFolder, backendfolder, frontendfolder) => {
     // log.warn("foreignkeys---",foreignkeys)
     log.info("Activated backend modules: ", activatemodules);
     // log.info(activatemodules)
-    finalize(activatemodules, backendfolder);
+    finalize(activatemodules, backendfolder, frontendfolder);
     return Promise.resolve(true);
 };
 exports.initialize = initialize;
@@ -85,7 +85,7 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
     const frontendpagefolder = `${frontendfolder}/pages`;
     try {
         (0, fs_1.mkdirSync)(targetfolder, { recursive: true });
-        (0, fs_1.mkdirSync)(`${frontendfolder}/server/docs/`, { recursive: true });
+        (0, fs_1.mkdirSync)(`${frontendfolder}/simpleapp/simpleappdocs/`, { recursive: true });
         (0, fs_1.mkdirSync)(frontendpagefolder, { recursive: true });
     }
     catch (err) {
@@ -184,7 +184,7 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
         // prepare readme
         const txtReadme = eta.render('./readme', variables);
         (0, fs_1.writeFileSync)(`${targetfolder}/README.md`, txtReadme);
-        const frontendfile = `${frontendfolder}/server/docs/${variables.typename}Doc.ts`;
+        const frontendfile = `${frontendfolder}/simpleapp/simpleappdocs/${variables.typename}Doc.ts`;
         let frontEndCode = '';
         if ((0, fs_1.existsSync)(frontendfile)) {
             const clientcodes = (0, fs_1.readFileSync)(frontendfile).toString();
@@ -236,14 +236,17 @@ const prepareEnvironments = (backendfolder, frontendfolder) => {
     //prepare backend config.ts
     //copy over frontend config.ts
 };
-const finalize = (modules, backendfolder) => {
+const finalize = (modules, backendfolder, frontendfolder) => {
     log.info("Finalizing foreignkey:", storage_1.foreignkeys);
     (0, fs_1.mkdirSync)(`${backendfolder}/src/dicts/`, { recursive: true });
+    (0, fs_1.mkdirSync)(`${frontendfolder}/composables/`, { recursive: true });
     const eta = new Eta({ views: constants.templatedir });
     const txtMainModule = eta.render('app.module.eta', modules);
     (0, fs_1.writeFileSync)(`${backendfolder}/src/app.module.ts`, txtMainModule);
     const foreignkeyfile = `${backendfolder}/src/dicts/foreignkeys.json`;
     (0, fs_1.writeFileSync)(foreignkeyfile, JSON.stringify(storage_1.foreignkeys));
     console.log("write to foreignkey file ", foreignkeyfile);
+    const txtCatalogue = eta.render('./nuxt/composables.getautocomplete.ts.eta', modules);
+    (0, fs_1.writeFileSync)(`${frontendfolder}/composables/getAutocomplete.ts`, txtCatalogue);
 };
 //# sourceMappingURL=generate.js.map

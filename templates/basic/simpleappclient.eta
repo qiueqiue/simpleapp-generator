@@ -4,6 +4,7 @@
  * and regenerate this file.
  */
 import { SimpleAppClient } from "@simitgroup/simpleapp-vue-component/src/SimpleAppClient";
+
 // import { JSONSchema7 } from 'json-schema';
 import { Configuration,
       <%= it.doctype.toUpperCase()%>Api, 

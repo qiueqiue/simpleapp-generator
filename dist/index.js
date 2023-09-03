@@ -63,8 +63,10 @@ runGenNext(() => {
     runGenNuxt(() => {
         log.info("runGenNuxt (frontend) done");
         generator.initialize(definationsFolder, backendFolder, frontendFolder);
+        exec(`cd ${frontendFolder};npx prettier --write "./pages/**/*.vue" "./simpleapp/**/*" `);
+        exec(`cd ${backendFolder};npx run format `);
         if (openapi3Yaml != '') {
-            exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/server/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
+            exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/simpleapp/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
                 if (error) {
                     log.error(stderr);
                 }

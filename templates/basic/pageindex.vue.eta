@@ -15,14 +15,14 @@
             <SimpleAppChip :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
         <% } else if(obj.type=='object'  && typeof obj['x-foreignkey']!='undefined'){ %>              
             <SimpleAppAutocomplete :setting="o.getField('#/properties/<%= key %>')"
-                    v-model="data.<%= key %>" optionLabel="label" :remote-src="doc.getApi()"/>
+                    v-model="data.<%= key %>" optionLabel="label" :remote-src="getAutocomplete('<%=obj['x-foreignkey']%>')"/>
         <% } else if(obj.type=='string'){ %>            
                 <% if(obj.format=='date'){ %>
                     <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.format=='email'){ %>
                     <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.enum){ %>
-                    <SimpleAppSelect :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+                    <SimpleAppRadio :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
                 <% } else {%>
                         <SimpleAppText :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% }%>  
@@ -35,9 +35,7 @@
   </div>
   </template>
   <script setup lang="ts">
-  import SimpleAppText from "@simitgroup/simpleapp-vue-component/src/components/SimpleAppText.vue";
-  import { <%= it.typename %>Doc } from "../../server/docs/<%= it.typename %>Doc";
-  import SimpleAppSelect from "@simitgroup/simpleapp-vue-component/src/components/SimpleAppSelect.vue";
+  import { <%= it.typename %>Doc } from "../../simpleapp/simpleappdocs/<%= it.typename %>Doc";
   const { $event, $listen } = useNuxtApp();
   const doc = new <%= it.typename %>Doc($event, $listen);
   const data = doc.getReactiveData();

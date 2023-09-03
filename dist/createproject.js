@@ -56,7 +56,7 @@ const checkNestCli = (callback) => {
 const createNuxt = (targetfolder, callback) => {
     log.info("setting up nuxt frontend ${targetfolder}");
     log.info(`frontend nuxt project "${targetfolder}" created, installing module`);
-    (0, child_process_1.exec)(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D prettier @nuxtjs/tailwindcss;`, (error, stdout, stderr) => {
+    (0, child_process_1.exec)(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss;`, (error, stdout, stderr) => {
         //;pnpm install    
         if (!error) {
             (0, fs_1.mkdirSync)(`${targetfolder}/assets/css/`, { recursive: true });
@@ -65,7 +65,7 @@ const createNuxt = (targetfolder, callback) => {
             (0, fs_1.mkdirSync)(`${targetfolder}/server/api`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/pages`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/plugins`, { recursive: true });
-            (0, child_process_1.exec)(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr) => {
+            (0, child_process_1.exec)(`pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr) => {
                 const eta = new Eta({ views: `${constants.templatedir}/nuxt` });
                 const variables = [];
                 const writes = {

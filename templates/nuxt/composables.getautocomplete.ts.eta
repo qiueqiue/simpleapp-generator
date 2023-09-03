@@ -1,0 +1,24 @@
+
+import * as o from "../simpleapp/openapi";
+
+const getAutoComplete = (apiname: string): any => {
+  const config: o.Configuration = {
+    basePath: useRuntimeConfig().public.APP_URL + "/api",
+    isJsonMime: () => true,
+  };
+  const docsOpenapi: any = {
+    <% for(let i=0;i<it.length; i++){ %>
+        <% let obj = it[i]%>
+        '<%=obj.docname.toLowerCase()%>' : new o.<%=obj.doctype.toUpperCase()%>Api(config),
+        <%}%>
+  };
+  if (!docsOpenapi[apiname]) {
+    console.error(
+      `api for '${apiname}' does not exists, most probably define wrong x-foreignkey`,
+    );
+    return undefined;
+  } else {
+    return docsOpenapi[apiname];
+  }
+};
+export default getAutoComplete;

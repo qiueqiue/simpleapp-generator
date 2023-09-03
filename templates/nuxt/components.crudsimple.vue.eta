@@ -13,21 +13,27 @@
       <DebugDocumentData v-model="data"/>
     </div>
 
-    <Dialog v-model:visible="visible" modal header="Header" :style="{ width: '80vw' }">
-        <button class="simpleapp-btn-addnew" @click="newData">New</button>
-        <button class="simpleapp-btn-save" @click="saveData">Save</button>
-        <button class="simpleapp-btn-delete" @click="deleteData">Delete</button>
+    <Dialog v-model:visible="visible" modal header="Header" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
         <SimpleAppForm :document="obj" :title="title" #default="o">        
+            <button class="simpleapp-btn-addnew" @click="newData">New</button>
+            <button class="simpleapp-btn-save" @click="saveData">Save</button>
+            <button class="simpleapp-btn-delete" @click="deleteData($event)">Delete</button>
+            <ConfirmPopup></ConfirmPopup>
+
         <slot :data="o.data" :getField="o.getField" name="default"></slot>
       </SimpleAppForm>
     </Dialog>
 </template>
 <script setup lang="ts">
-import { SimpleAppClient } from '@simitgroup/simpleapp-doc-client';
+
+import { SimpleAppClient } from '@simitgroup//simpleapp-vue-component/src/SimpleAppClient';
 import SimpleAppForm from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppForm.vue';
 import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue';
 import Dialog from 'primevue/dialog';
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useConfirm } from "primevue/useconfirm";
 
+const confirm = useConfirm();
 const props = defineProps<{
     document:SimpleAppClient<any,any>
     listColumns:string[]
@@ -56,16 +62,33 @@ const editRecord = (event: any) => {
 
 const saveData = () => {
   if (data.value._id == "") {
-    obj.create().finally(() => refresh());
+    obj.create().then(()=>visible.value=false).finally(() => refresh());
   } else {
-    obj.update().finally(() => refresh());
+    obj.update().then(()=>visible.value=false).finally(() => refresh());
   }
 };
-const deleteData = () => {
-  obj.delete(data.value._id ?? "").finally(() => {
-    refresh();
-    newData();
-  });
+const deleteData = (event:Event) => {
+    console.log("deleteData")
+    confirm.require({
+        target: event.currentTarget as HTMLElement,
+        message:'Delete?',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: ()=>{
+            obj.delete(data.value._id ?? "").then(()=>visible.value=false).finally(() => {
+                refresh();    
+            });
+        },
+        reject: () => {
+            console.log("Cancel delete")
+        }
+    })
+  
 };
 refresh();
 </script>
+<style scoped>
+.crudsimple-dialog{
+    z-index: 100;
+}
+</style>
