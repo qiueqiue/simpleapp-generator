@@ -1,6 +1,6 @@
 <template>
     <div class="simpleapp-crudsimple">    
-        <button class="simpleapp-btn-addnew" @click="newData">New</button>
+        <button class="bg-primary" type="reset" @click="newData">New</button>
         
       
       <SimpleAppDatatable
@@ -14,12 +14,13 @@
     </div>
 
     <Dialog v-model:visible="visible" modal header="Header" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
-        <SimpleAppForm :document="obj" :title="title" #default="o">        
-            <button class="simpleapp-btn-addnew" @click="newData">New</button>
-            <button class="simpleapp-btn-save" @click="saveData">Save</button>
-            <button class="simpleapp-btn-delete" @click="deleteData($event)">Delete</button>
+        <SimpleAppForm :document="obj" :title="title" #default="o">     
+          <div class="simpleapp-tool-bar"   >
+            <button class="bg-default" @click="newData" type="reset">New</button>
+            <button class="bg-primary" @click="saveData" type="submit">Save</button>
+            <button class="bg-danger" @click="deleteData($event)">Delete</button>
             <ConfirmPopup></ConfirmPopup>
-
+          </div>
         <slot :data="o.data" :getField="o.getField" name="default"></slot>
       </SimpleAppForm>
     </Dialog>

@@ -26,7 +26,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   setSchema = (newschema) => (this.jsonschema = newschema);
   getSchema = () => this.doc.schema.obj;
   getData = () => {
-    console.log('thisdata', this.data);
+    //console.log('thisdata', this.data);
     return this.data;
   };
   setData = (newdata: T) => {
@@ -71,9 +71,9 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async findById(id: string) {
     try {
-      console.log('findById', id);
+      //console.log('findById', id);
       this.data = await this.doc.findById(id);
-      console.log('findById done', this.data);
+      //console.log('findById done', this.data);
     } catch (err) {
       //error
       throw new InternalServerErrorException(err.message);
@@ -83,7 +83,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       //data not found
       throw new NotFoundException('Document Not found:');
     }
-    console.log('this.data', this.data);
+    //console.log('this.data', this.data);
     return this.data;
     // return this;
   }
@@ -137,7 +137,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     const validate = ajv.compile(this.jsonschema);
     const valid = validate(data);
     if (!valid) {
-      console.log(validate.errors);
+      //console.log(validate.errors);
       const erromsg: string[] = [];
       for (let i = 0; i < validate.errors.length; i++) {
         erromsg.push(validate.errors[i].message);
@@ -150,7 +150,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   async findIdThenDelete(id: string) {
     // const data = await this.findById(id);
     try {
-      console.log('deletedeletedeletedelete');
+      //console.log('deletedeletedeletedelete');
       const dependency = await this.getRelatedRecords(id);
       if (!dependency) {
         const deleteresult = await this.doc.findByIdAndDelete(id);
@@ -167,7 +167,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     // const existingdata = await this.findById(id);
 
     try {
-      console.log('findIdThenUpdate', id);
+      //console.log('findIdThenUpdate', id);
       this.validateData(data);
       // const result = await existingdata.doc.updateOne(data);
       const result = await this.doc.findByIdAndUpdate(id, data);
@@ -181,14 +181,14 @@ export class SimpleAppService<T extends { _id?: string }> {
   //find what foreign key constraint
   async getRelatedRecords(id: string) {
     const foreignkeysettings = foreignkeys[this.documentName];
-    console.log('foreignkeysettings', foreignkeysettings);
+    //console.log('foreignkeysettings', foreignkeysettings);
     const propkeys = Object.getOwnPropertyNames(foreignkeysettings);
 
     if (propkeys.length > 0) {
-      console.log('Have properties');
+      //console.log('Have properties');
       for (let i = 0; i < propkeys.length; i++) {
         const collectionname = propkeys[i];
-        console.log('run ', i, collectionname);
+        //console.log('run ', i, collectionname);
         const fobjs = foreignkeysettings[propkeys[i]];
         const collection = this.doc.db.collection(collectionname);
         //single schema may have multiple foreign key link here, loop all
@@ -196,9 +196,9 @@ export class SimpleAppService<T extends { _id?: string }> {
           const fkey = fobjs[j];
           const filter = {};
           filter[fkey] = id;
-          console.log('getRelatedRecords get filter', collectionname, filter);
+          //console.log('getRelatedRecords get filter', collectionname, filter);
           const result = await collection.findOne(filter);
-          console.log('getRelatedRecords', result);
+          //console.log('getRelatedRecords', result);
           if (result) {
             return Promise.reject(result);
           }

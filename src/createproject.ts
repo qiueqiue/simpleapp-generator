@@ -32,16 +32,18 @@ export const createNuxt= (targetfolder:string,callback)=>{
     log.info("setting up nuxt frontend ${targetfolder}")
 
     log.info(`frontend nuxt project "${targetfolder}" created, installing module`)
-    exec(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss;`, (error, stdout, stderr)=>{                
+    exec(`cd ${targetfolder};pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss`, (error, stdout, stderr)=>{                
     //;pnpm install    
-    if(!error){
+    console.log(error, stdout, stderr)
+        exec(`cd ${targetfolder};pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+        console.log(error, stdout, stderr)
+        
         mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})
         mkdirSync(`${targetfolder}/layouts`,{recursive:true})
         mkdirSync(`${targetfolder}/components`,{recursive:true})
         mkdirSync(`${targetfolder}/server/api`,{recursive:true})
         mkdirSync(`${targetfolder}/pages`,{recursive:true})
         mkdirSync(`${targetfolder}/plugins`,{recursive:true})
-        exec(`pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
         const eta = new Eta({views: `${constants.templatedir}/nuxt`});              
         const variables=[]            
         const writes = {
@@ -73,9 +75,7 @@ export const createNuxt= (targetfolder:string,callback)=>{
         log.info("nuxt project completed")                
         callback()
         })
-    }else{
-        throw error
-    }
+    
     })         
 
 }

@@ -56,49 +56,45 @@ const checkNestCli = (callback) => {
 const createNuxt = (targetfolder, callback) => {
     log.info("setting up nuxt frontend ${targetfolder}");
     log.info(`frontend nuxt project "${targetfolder}" created, installing module`);
-    (0, child_process_1.exec)(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss;`, (error, stdout, stderr) => {
+    (0, child_process_1.exec)(`cd ${targetfolder};pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss`, (error, stdout, stderr) => {
         //;pnpm install    
-        if (!error) {
+        console.log(error, stdout, stderr);
+        (0, child_process_1.exec)(`cd ${targetfolder};pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr) => {
             (0, fs_1.mkdirSync)(`${targetfolder}/assets/css/`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/layouts`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/components`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/server/api`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/pages`, { recursive: true });
             (0, fs_1.mkdirSync)(`${targetfolder}/plugins`, { recursive: true });
-            (0, child_process_1.exec)(`pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr) => {
-                const eta = new Eta({ views: `${constants.templatedir}/nuxt` });
-                const variables = [];
-                const writes = {
-                    './app.vue.eta': 'app.vue',
-                    './components.eventmonitor.vue.eta': 'components/EventMonitor.vue',
-                    './components.menus.vue.eta': 'components/Menus.vue',
-                    './components.crudsimple.vue.eta': 'components/CrudSimple.vue',
-                    './components.debugdocdata.vue.eta': 'components/DebugDocumentData.vue',
-                    './layouts.default.vue.eta': 'layouts/default.vue',
-                    './server.api.ts.eta': 'server/api/[...].ts',
-                    './nuxt.config.ts.eta': 'nuxt.config.ts',
-                    './pages.index.vue.eta': 'pages/index.vue',
-                    './plugins.simpleapp.ts.eta': 'plugins/simpleapp.ts',
-                    './tailwind.config.ts.eta': 'tailwind.config.ts',
-                    './tailwind.css.eta': 'assets/css/tailwind.css',
-                    './env.eta': '.env',
-                };
-                const templates = Object.getOwnPropertyNames(writes);
-                for (let i = 0; i < templates.length; i++) {
-                    const template = templates[i];
-                    const filename = writes[template];
-                    const txt = eta.render(template, variables);
-                    const file = `${targetfolder}/${filename}`;
-                    log.info("writing ", file);
-                    (0, fs_1.writeFileSync)(file, txt);
-                }
-                log.info("nuxt project completed");
-                callback();
-            });
-        }
-        else {
-            throw error;
-        }
+            const eta = new Eta({ views: `${constants.templatedir}/nuxt` });
+            const variables = [];
+            const writes = {
+                './app.vue.eta': 'app.vue',
+                './components.eventmonitor.vue.eta': 'components/EventMonitor.vue',
+                './components.menus.vue.eta': 'components/Menus.vue',
+                './components.crudsimple.vue.eta': 'components/CrudSimple.vue',
+                './components.debugdocdata.vue.eta': 'components/DebugDocumentData.vue',
+                './layouts.default.vue.eta': 'layouts/default.vue',
+                './server.api.ts.eta': 'server/api/[...].ts',
+                './nuxt.config.ts.eta': 'nuxt.config.ts',
+                './pages.index.vue.eta': 'pages/index.vue',
+                './plugins.simpleapp.ts.eta': 'plugins/simpleapp.ts',
+                './tailwind.config.ts.eta': 'tailwind.config.ts',
+                './tailwind.css.eta': 'assets/css/tailwind.css',
+                './env.eta': '.env',
+            };
+            const templates = Object.getOwnPropertyNames(writes);
+            for (let i = 0; i < templates.length; i++) {
+                const template = templates[i];
+                const filename = writes[template];
+                const txt = eta.render(template, variables);
+                const file = `${targetfolder}/${filename}`;
+                log.info("writing ", file);
+                (0, fs_1.writeFileSync)(file, txt);
+            }
+            log.info("nuxt project completed");
+            callback();
+        });
     });
 };
 exports.createNuxt = createNuxt;
