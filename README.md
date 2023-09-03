@@ -13,14 +13,38 @@ MONGODB_URL='mongodb://mongoadmin:secret@localhost:27017/admin?authMechanism=DEF
 5. 
 
 9. beautify default tailwind ui
+  1. front page
+  2. top bar
+  3. menu bars
+  4. default with of each component is it nicely fit
+  5. table layout
+  6. error messages
+  7. error formating
+7. load backend tsconfig and add more property: **
+8. add prettier formating option for frontend
+9. write proper user guide
+10.add find options
+11.retain modifications of controller, service, apiclients
+12.add find records
+13.add workflow functions
+14.add permission control
+16.access right
+17.setting of tenants
+18.keep audit trail into db
+19.function of remain menulist
+20.security of string input, block xss
+21.control csrf
+
+
 10.plugin for ajv
   long string format for description
   errors formating
-7. load backend tsconfig and add more property: **
-8. simpleapp generate currentfolder error **
+
+
 
 
 # Todo
+x8. simpleapp generate currentfolder error **
 x1. override app.vue * 
 x2. create layout  
   simpleapp (first time only) 

@@ -1,8 +1,9 @@
-export const getMenus =()=>
-[
-  {label: 'Home',icon: 'pi pi-fw pi-home',to: '/'},
+export const getMenus =()=>[
+  {label: 'Cruds',icon: 'pi pi-fw pi-pencil',items:[
   <% for(let i=0;i<it.length; i++){ %>
     <% let obj = it[i]%>
     {label: '<%=obj.docname.toLowerCase()%>', to:'/<%=obj.docname.toLowerCase()%>'},
   <%}%>
+]},
+  {label: 'Profile',icon: 'pi pi-fw pi-user'},
 ]
