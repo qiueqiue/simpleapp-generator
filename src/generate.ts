@@ -5,14 +5,14 @@ import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
 import {foreignkeys} from './storage'
 // import { compile } from 'json-schema-to-typescript';
 // import { Fieldtypes, SchemaModel, ChildModels } from './type';
-import { TypeForeignKeyCatalogue,  ChildModels,ModuleObject } from './type'
+import { TypeForeignKeyCatalogue,  TypeGenerateDocumentVariable,ChildModels,ModuleObject } from './type'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
 const clc = require("cli-color");
 
 
 const path = require('path');
-import {mkdirSync,readdir,readFileSync,writeFileSync,existsSync,copyFileSync, readdirSync} from 'fs'
+import {mkdirSync, readdir,readFileSync,writeFileSync,existsSync,copyFileSync, readdirSync} from 'fs'
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
 const extFb = '.xfb.json';
@@ -72,12 +72,12 @@ const generate = (
   frontendfolder:string
 ) => {
   const targetfolder = `${backendfolder}/src/docs/${doctype}`;
-  
+  const frontendpagefolder=`${frontendfolder}/pages`
   try {
     
     mkdirSync(targetfolder,{ recursive: true });    
     mkdirSync(`${frontendfolder}/server/docs/`,{ recursive: true });
-    
+    mkdirSync(frontendpagefolder,{recursive:true})
   } catch (err) {
     //do nothing if folder exists
   } finally {
@@ -90,7 +90,7 @@ const generate = (
         'const initType=(str)=>{return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}',
     });
     
-    const variables = {
+    const variables:TypeGenerateDocumentVariable = {
       name: docname,
       doctype: doctype,
       models: allmodels,
@@ -212,22 +212,33 @@ const generate = (
       }
     }
     variables.frontEndCode = frontEndCode ?? '';
-    const txtDocClient = eta.render('./apiclient', variables);
+    const txtDocClient = eta.render('./simpleappclient.eta', variables);
     writeFileSync(frontendfile, txtDocClient);
 
-    // // fs.writeFileSync(`${targetfolder}/${doctype}.uischema.ts`, txtUISchema);
-    log.info(`- write completed: `+clc.green(doctype))
+    generateClientPage(variables,eta,frontendpagefolder)
+
     
-    //create type
-    //create service
-    //create controller
-    //create module
-    //create apischema
-    //create beforesave if not exists
-    // console.log(schema, res);
+    log.info(`- write completed: ${doctype}`)
+    
+    
   }
 };
 
+const generateClientPage=(variables:TypeGenerateDocumentVariable,eta,frontendpagefolder:string)=>{
+  const docname = variables.name
+  const targetfolder = `${frontendpagefolder}/${docname}`
+  const overridefilename = `${targetfolder}/delete-me-for-avoid-override`
+  if(!existsSync(targetfolder)){
+    mkdirSync(targetfolder)
+    writeFileSync(overridefilename,'delete this file to prevent override by generator')
+  }
+  if(existsSync(overridefilename)){
+    const txtIndex=  eta.render('./pageindex.vue.eta', variables);
+    const txtIndexwithid=  eta.render('./pageindexwithid.vue.eta', variables);
+    writeFileSync(`${targetfolder}/index.vue`,txtIndex)
+    writeFileSync(`${targetfolder}/[id].vue`,txtIndexwithid)
+  }
+}
 const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   const targetfolder = `${backendfolder}/src/class`
   const targetfrontendfolder = `${frontendfolder}/server/api`
@@ -246,7 +257,7 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   copyFileSync(`${constants.templatedir}/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
 
   //copy over frontend apiabstract class
-  copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
+  // copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
 
     //prepare backend config.ts
 

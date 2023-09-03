@@ -82,9 +82,11 @@ const initialize = async (defFolder, backendfolder, frontendfolder) => {
 exports.initialize = initialize;
 const generate = (docname, doctype, rendertype, allmodels, backendfolder, frontendfolder) => {
     const targetfolder = `${backendfolder}/src/docs/${doctype}`;
+    const frontendpagefolder = `${frontendfolder}/pages`;
     try {
         (0, fs_1.mkdirSync)(targetfolder, { recursive: true });
         (0, fs_1.mkdirSync)(`${frontendfolder}/server/docs/`, { recursive: true });
+        (0, fs_1.mkdirSync)(frontendpagefolder, { recursive: true });
     }
     catch (err) {
         //do nothing if folder exists
@@ -194,17 +196,25 @@ const generate = (docname, doctype, rendertype, allmodels, backendfolder, fronte
             }
         }
         variables.frontEndCode = frontEndCode !== null && frontEndCode !== void 0 ? frontEndCode : '';
-        const txtDocClient = eta.render('./apiclient', variables);
+        const txtDocClient = eta.render('./simpleappclient.eta', variables);
         (0, fs_1.writeFileSync)(frontendfile, txtDocClient);
-        // // fs.writeFileSync(`${targetfolder}/${doctype}.uischema.ts`, txtUISchema);
-        log.info(`- write completed: ` + clc.green(doctype));
-        //create type
-        //create service
-        //create controller
-        //create module
-        //create apischema
-        //create beforesave if not exists
-        // console.log(schema, res);
+        generateClientPage(variables, eta, frontendpagefolder);
+        log.info(`- write completed: ${doctype}`);
+    }
+};
+const generateClientPage = (variables, eta, frontendpagefolder) => {
+    const docname = variables.name;
+    const targetfolder = `${frontendpagefolder}/${docname}`;
+    const overridefilename = `${targetfolder}/delete-me-for-avoid-override`;
+    if (!(0, fs_1.existsSync)(targetfolder)) {
+        (0, fs_1.mkdirSync)(targetfolder);
+        (0, fs_1.writeFileSync)(overridefilename, 'delete this file to prevent override by generator');
+    }
+    if ((0, fs_1.existsSync)(overridefilename)) {
+        const txtIndex = eta.render('./pageindex.vue.eta', variables);
+        const txtIndexwithid = eta.render('./pageindexwithid.vue.eta', variables);
+        (0, fs_1.writeFileSync)(`${targetfolder}/index.vue`, txtIndex);
+        (0, fs_1.writeFileSync)(`${targetfolder}/[id].vue`, txtIndexwithid);
     }
 };
 const prepareEnvironments = (backendfolder, frontendfolder) => {
@@ -222,7 +232,7 @@ const prepareEnvironments = (backendfolder, frontendfolder) => {
     //copy over backend controller
     (0, fs_1.copyFileSync)(`${constants.templatedir}/SimpleAppController.eta`, `${targetfolder}/SimpleAppController.ts`);
     //copy over frontend apiabstract class
-    (0, fs_1.copyFileSync)(`${constants.templatedir}/nuxt.apigateway.eta`, `${targetfrontendfolder}/[...].ts`);
+    // copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
     //prepare backend config.ts
     //copy over frontend config.ts
 };

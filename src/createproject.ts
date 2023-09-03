@@ -1,5 +1,5 @@
 import { exec ,spawn}  from "child_process";
-import {writeFileSync} from 'fs'
+import {mkdirSync, writeFileSync} from 'fs'
 import * as constants from './constant'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
@@ -32,18 +32,44 @@ export const createNuxt= (targetfolder:string,callback)=>{
     log.info("setting up nuxt frontend ${targetfolder}")
 
     log.info(`frontend nuxt project "${targetfolder}" created, installing module`)
-    exec(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D prettier`, (error, stdout, stderr)=>{                
+    exec(`cd ${targetfolder};mkdir plugins;pnpm install;pnpm install -D prettier @nuxtjs/tailwindcss;`, (error, stdout, stderr)=>{                
     //;pnpm install    
     if(!error){
-        exec(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
-        const eta = new Eta({views: constants.templatedir});              
+        mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})
+        mkdirSync(`${targetfolder}/layouts`,{recursive:true})
+        mkdirSync(`${targetfolder}/components`,{recursive:true})
+        mkdirSync(`${targetfolder}/server/api`,{recursive:true})
+        mkdirSync(`${targetfolder}/pages`,{recursive:true})
+        mkdirSync(`${targetfolder}/plugins`,{recursive:true})
+        exec(`pnpm install --save ajv ajv-formats primeflex primeicons primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+        const eta = new Eta({views: `${constants.templatedir}/nuxt`});              
         const variables=[]            
-        const txtEnv = eta.render('./nuxt.env.eta', variables);                
-        writeFileSync(`${targetfolder}/.env`, txtEnv);
-        const txtConfig = eta.render('./nuxt.config.eta', variables);                
-        writeFileSync(`${targetfolder}/nuxt.config.ts`, txtConfig);
-        const txtPlugins = eta.render('./nuxt.plugins.eta', variables);                
-        writeFileSync(`${targetfolder}/plugins/simpleapp.ts`, txtPlugins);
+        const writes = {
+            './app.vue.eta':'app.vue',            
+            './components.eventmonitor.vue.eta':'components/EventMonitor.vue',
+            './components.menus.vue.eta':'components/Menus.vue',
+            './components.crudsimple.vue.eta':'components/CrudSimple.vue',            
+            './components.debugdocdata.vue.eta':'components/DebugDocumentData.vue',            
+            './layouts.default.vue.eta':'layouts/default.vue',
+            './server.api.ts.eta':'server/api/[...].ts',
+            './nuxt.config.ts.eta':'nuxt.config.ts',
+            './pages.index.vue.eta':'pages/index.vue',
+            './plugins.simpleapp.ts.eta':'plugins/simpleapp.ts',
+            './tailwind.config.ts.eta':'tailwind.config.ts',
+            './tailwind.css.eta':'assets/css/tailwind.css',
+            './env.eta':'.env',
+        }
+
+        const templates = Object.getOwnPropertyNames(writes)
+        for(let i=0; i<templates.length;i++){
+            const template = templates[i]
+            const filename = writes[template]
+            const txt = eta.render(template, variables);                
+            const file =`${targetfolder}/${filename}`
+            log.info("writing ",file)
+            writeFileSync(file, txt);    
+        }
+       
         log.info("nuxt project completed")                
         callback()
         })

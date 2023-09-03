@@ -1,0 +1,37 @@
+<template>
+    <header>      
+        <MegaMenu :model="items" orientation="horizontal" />              
+    </header>
+  </template>
+  <script setup lang="ts">
+import MegaMenu from 'primevue/megamenu';
+  
+const items = ref([
+  {
+        label: 'Home',
+        icon: 'pi pi-fw pi-video',
+        to: '/'
+    },
+    {
+        label: 'Category',
+        icon: 'pi pi-fw pi-video',
+        to: '/category'
+    },
+    {
+        label: 'Products',
+        icon: 'pi pi-fw pi-users',
+        to: '/product'
+    },
+    {
+        label: 'Groups',
+        icon: 'pi pi-fw pi-calendar',
+        to: '/studentgroup'
+    },
+    {
+        label: 'Cat3',
+        icon: 'pi pi-fw pi-calendar',
+        to: '/category3'
+    },
+   
+]);
+  </script>

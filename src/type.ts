@@ -45,3 +45,20 @@ export type ModuleObject = {
   doctype:string
   docname:string
 }
+export type TypeGenerateDocumentVariable ={
+name: string
+doctype: string
+models: ChildModels
+autocompletecode:string
+autocompletename:string
+schema: SchemaModel
+apiSchemaName: string
+typename: string
+fullApiSchemaName: string
+fullTypeName:string
+jsonschema: JSONSchema7
+bothEndCode: string
+frontEndCode: string
+backEndCode: string
+controllerCode:string
+}

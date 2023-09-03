@@ -58,5 +58,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     .component("SimpleFieldContainer",SimpleFieldContainer)
     .use(ToastService)
     ;
+    return {
+        provide: {
+          event: emitter.emit, // Will emit an event
+          listen: emitter.on // Will register a listener for an event
+        }
+    }
     //other components that you need
 });

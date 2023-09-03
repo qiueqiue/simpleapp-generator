@@ -8,11 +8,12 @@ const fs = require('fs');
 const { createNuxt, createNest } = require('./createproject');
 const { exec } = require("child_process");
 const capitalizeFirstLetter = require('./libs');
-// const {Logger, ILogObj} = require( "tslog");
-// const log:  Logger = new Logger();
+const { Logger, ILogObj } = require("tslog");
+const log = new Logger();
 const figlet = require("figlet");
 // const program = new Command();
-let version = '1.0.8';
+const pj = require('../package.json');
+let version = pj.version;
 program
     .version(version)
     .description("An simpleapp CLI tool for generate frontend (vuejs) and backend(nestjs) codes")
@@ -33,42 +34,43 @@ const frontendFolder = (_c = configs.frontendFolder) !== null && _c !== void 0 ?
 const openapi3Yaml = (_d = configs.openapi3Yaml) !== null && _d !== void 0 ? _d : options.openapi3Yaml;
 const runGenNext = (callback) => {
     if (!fs.existsSync(backendFolder)) {
-        console.error(`${backendFolder} does not exists, please run "nest new -p pnpm ${backendFolder}"`);
+        log.error(`${backendFolder} does not exists, please run "nest new -p pnpm ${backendFolder}"`);
     }
     else if (!fs.existsSync(`${backendFolder}/.env`)) {
-        console.log(`initial nest configuratoin for simpleapp generator`);
+        log.info(`initial nest configuratoin for simpleapp generator`);
         createNest(backendFolder, callback);
     }
     else {
-        console.log(`.env file exists, skip nest initialization`);
+        log.warn(`.env file exists, skip nest initialization`);
         callback();
     }
 };
 const runGenNuxt = (callback) => {
     if (!fs.existsSync(frontendFolder)) {
-        console.error(`${frontendFolder} does not exists, please run "npx nuxi@latest init ${frontendFolder}"`);
+        log.error(`${frontendFolder} does not exists, please run "npx nuxi@latest init ${frontendFolder}"`);
     }
     else if (!fs.existsSync(`${frontendFolder}/.env`)) {
-        console.log(`initial nuxt configuratoin for simpleapp generator`);
+        log.info(`initial nuxt configuratoin for simpleapp generator`);
         createNuxt(frontendFolder, callback);
     }
     else {
-        console.log(`.env file exists, skip nuxt initialization`);
+        log.warn(`.env file exists, skip nuxt initialization`);
         callback();
     }
 };
 runGenNext(() => {
-    console.log("runGenNext (backen) done");
-    // runGenNuxt(()=>{   
-    console.log("runGenNuxt (frontend) done");
-    generator.initialize(definationsFolder, backendFolder, frontendFolder);
-    if (openapi3Yaml != '') {
-        exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/server/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(stderr);
-            }
-        });
-    }
+    log.info("runGenNext (backen) done");
+    runGenNuxt(() => {
+        log.info("runGenNuxt (frontend) done");
+        generator.initialize(definationsFolder, backendFolder, frontendFolder);
+        if (openapi3Yaml != '') {
+            exec(`openapi-generator generate -i ${openapi3Yaml} -o ${frontendFolder}/server/openapi -g typescript-axios --skip-validate-spec`, (error, stdout, stderr) => {
+                if (error) {
+                    log.error(stderr);
+                }
+            });
+        }
+    });
 });
 // pnpm exec prettier ./src/docs  --write
 // 	pnpm exec prettier ./apiclients  --write

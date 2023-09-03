@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   runtimeConfig:{    
     public:{
       SIMPLEAPP_BACKEND_URL: process.env.SIMPLEAPP_BACKEND_URL,
+      APP_URL: process.env.APP_URL,
     }
   },
   vite: {
@@ -13,14 +14,16 @@ export default defineNuxtConfig({
         }
     }
 },
+tailwindcss: {
+    // Options
+  },
   modules: [
-    // '@nuxtjs/tailwindcss',
+    '@nuxtjs/tailwindcss',
     // '@nuxtjs/color-mode'
 
   ],  
-  ssr: false,
+  ssr: true,
   css: [
-    // "assets/css/index.css",
     "primevue/resources/themes/lara-light-blue/theme.css",
     'primeicons/primeicons.css'
   ],

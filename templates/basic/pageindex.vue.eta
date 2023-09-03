@@ -1,0 +1,52 @@
+<template>
+<% let skipcolumns = ['_id','createdby','created','updatedby','updated','organization_id','branch_id','tenant_id','doctype'] %>
+    <div>    
+    <CrudSimple :document="doc"  title="<%= it.typename %>" #default="o" 
+    :listColumns="columns"> 
+    
+      <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
+        <% let obj=it.jsonschema.properties[key] %>        
+        <% if(skipcolumns.indexOf(key)>=0){ %>
+        <% } else if(obj.type=='boolean'){ %>
+            <SimpleAppCheckbox :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+        <% } else if(obj.type=='number' || obj.type=='integer'){ %>
+            <SimpleAppNumber :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+        <% } else if(obj.type=='array'  && obj.items && obj.items.type =='string' ){ %>              
+            <SimpleAppChip :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+        <% } else if(obj.type=='object'  && typeof obj['x-foreignkey']!='undefined'){ %>              
+            <SimpleAppAutocomplete :setting="o.getField('#/properties/<%= key %>')"
+                    v-model="data.<%= key %>" optionLabel="label" :remote-src="doc.getApi()"/>
+        <% } else if(obj.type=='string'){ %>            
+                <% if(obj.format=='date'){ %>
+                    <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                <% } else if(obj.format=='email'){ %>
+                    <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                <% } else if(obj.enum){ %>
+                    <SimpleAppSelect :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+                <% } else {%>
+                        <SimpleAppText :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                <% }%>  
+        <% } else { %>           
+            <SimpleAppText  :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+        <% }%>
+      <%})%>   
+      
+    </CrudSimple>
+  </div>
+  </template>
+  <script setup lang="ts">
+  import SimpleAppText from "@simitgroup/simpleapp-vue-component/src/components/SimpleAppText.vue";
+  import { <%= it.typename %>Doc } from "../../server/docs/<%= it.typename %>Doc";
+  import SimpleAppSelect from "@simitgroup/simpleapp-vue-component/src/components/SimpleAppSelect.vue";
+  const { $event, $listen } = useNuxtApp();
+  const doc = new <%= it.typename %>Doc($event, $listen);
+  const data = doc.getReactiveData();
+  const columns = [
+    <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
+        <%let obj=it.jsonschema.properties[key] %>
+        <%if(skipcolumns.indexOf(key)>=0){%>/* skip system columns <%=key%>*/
+        <%} else if(['string','number','integer'].indexOf(obj.type)>=0){%>'<%=key%>',<%}%>
+    <%})%>
+    ]
+  </script>
+  

@@ -23,7 +23,7 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
   constructor(event:any,listen?:any) {    
     const apiconfig = new Configuration({ basePath:  useRuntimeConfig().public.APP_URL+'/api' });
     const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
-    super(apiobj)
+    super(apiobj,'<%= it.doctype %>','<%=it.name %>')
     this.event=event
     this.listen=listen
     

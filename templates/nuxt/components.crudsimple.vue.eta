@@ -1,0 +1,71 @@
+<template>
+    <div class="simpleapp-crudsimple">    
+        <button class="simpleapp-btn-addnew" @click="newData">New</button>
+        
+      
+      <SimpleAppDatatable
+            @row-dblclick="editRecord"
+            v-model="recordlist"
+            :setting="{}"
+            :columns="listColumns"
+          ></SimpleAppDatatable>
+
+      <DebugDocumentData v-model="data"/>
+    </div>
+
+    <Dialog v-model:visible="visible" modal header="Header" :style="{ width: '80vw' }">
+        <button class="simpleapp-btn-addnew" @click="newData">New</button>
+        <button class="simpleapp-btn-save" @click="saveData">Save</button>
+        <button class="simpleapp-btn-delete" @click="deleteData">Delete</button>
+        <SimpleAppForm :document="obj" :title="title" #default="o">        
+        <slot :data="o.data" :getField="o.getField" name="default"></slot>
+      </SimpleAppForm>
+    </Dialog>
+</template>
+<script setup lang="ts">
+import { SimpleAppClient } from '@simitgroup/simpleapp-doc-client';
+import SimpleAppForm from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppForm.vue';
+import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue';
+import Dialog from 'primevue/dialog';
+
+const props = defineProps<{
+    document:SimpleAppClient<any,any>
+    listColumns:string[]
+    title:string
+}>()
+const visible = ref(false)
+const obj = props.document
+const data = obj.getReactiveData()
+const recordlist = ref();
+
+
+const refresh = () => {
+  obj.list().then((res:any) => {    
+    recordlist.value = res;
+  });
+};
+const newData = () => {
+    obj.setNew()
+    visible.value=true;
+};
+
+const editRecord = (event: any) => {
+  obj.getById(event.data._id);
+  visible.value=true
+};
+
+const saveData = () => {
+  if (data.value._id == "") {
+    obj.create().finally(() => refresh());
+  } else {
+    obj.update().finally(() => refresh());
+  }
+};
+const deleteData = () => {
+  obj.delete(data.value._id ?? "").finally(() => {
+    refresh();
+    newData();
+  });
+};
+refresh();
+</script>

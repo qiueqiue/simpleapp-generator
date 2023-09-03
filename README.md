@@ -1,4 +1,40 @@
+after generate
+1. `./backend/tsconfig.ts` add bolow into compile options
+```typescript
+"resolveJsonModule": true,
+"esModuleInterop": true,
+```
+2.`./backend/.env` change mongodb setting as below example:
+```bash
+MONGODB_URL='mongodb://mongoadmin:secret@localhost:27017/admin?authMechanism=DEFAULT'
+```
+3. download http://localhost:8080/api into `./openapi.yaml`
+4. regenerate code (for frontend can function completely)
+5. 
+
 # Todo
+x1. override app.vue * 
+2. create layout  
+  simpleapp (first time only) 
+      /default *
+3. components/  (first time only)
+    /MonitorEvent.vue *
+    /CrudBasic.vue **
+    /Menubar *
+4. create page/docs (everytime)
+  /index.ts
+  //create page if docs/documentname not exists  ***
+  //override if docs/documentname/delete-me-for-avoid-override exists  *
+5. login/logout sessions
+6. auto create *
+    server/api to backend *
+7. load backend tsconfig and add more property: **
+8. simpleapp generat currentfolder error **
+9. beautify default tailwind ui
+
+
+
+
 1. define foreign key relationship in json schema2
 2. auto index and block deletion
 3. when delete identify foreign connected documents
@@ -16,6 +52,8 @@
 15.statistics, aggregations
 16.auto generate frontend page
 17.
+
+
 
 
 
@@ -63,6 +101,13 @@ Key Ideal:
 - flexible frontend, you can code react or vue, no problem. `simpleapp generator` only focus data, not ui
 - allow developer enforce specific data processing in frontend and backend
 - you can regenerate source code multiple time without worry your customization gone (there is a way!)
+
+
+Init Nuxt script
+1. npm i -D @sidebase/nuxt-auth
+2. pnpm i --save next-auth@4.21.1
+npm i -D @sidebase/nuxt-session
+
 
 
 ## You shall know
@@ -695,3 +740,50 @@ async newFindOne(@Param('id') id: string) {
 ```
 ```
 6. create bothend code for `person`
+
+
+
+foreign key
+cat
+  category_id
+  category_code
+  category_name
+
+product
+  product_id
+  product_code
+  product_name
+  category => category_id: category_code
+
+
+
+invoice
+  invoice_id
+  invoice_no
+  invoice_date
+  total
+  details => 
+    product => product_id: product_code
+    qty 
+    price 
+    subtotal
+
+order
+  order_id
+  order_no
+  order_date
+  total
+  details => 
+    product => product_id: product_code
+    qty 
+    price 
+    subtotal
+
+    
+cat => foreignkey: []
+prd => foreignkey: category => category
+invoice => foreignkey: detail.product=>product
+order => foreignkey: detail.product=>product
+
+cat =[product.category]
+product=[invoice.detail.product, order.detail.product]
