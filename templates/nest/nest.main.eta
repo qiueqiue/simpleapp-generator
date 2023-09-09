@@ -15,6 +15,6 @@ async function bootstrap() {
     swaggerOptions: { showExtensions: true },
   });
 
-  await app.listen(process.env.HTTP_PORT ?? 8000); //listen which port
+  await app.listen(process.env.HTTP_PORT ?? <%=it.backendPort%>); //listen which port
 }
 bootstrap();

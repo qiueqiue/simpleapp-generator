@@ -251,10 +251,10 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   
   //copy over backend service class
   
-  copyFileSync(`${constants.templatedir}/SimpleAppService.eta`,`${targetfolder}/SimpleAppService.ts`)
+  copyFileSync(`${constants.templatedir}/nest/SimpleAppService.eta`,`${targetfolder}/SimpleAppService.ts`)
   
   //copy over backend controller
-  copyFileSync(`${constants.templatedir}/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
+  copyFileSync(`${constants.templatedir}/nest/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
 
   //copy over frontend apiabstract class
   // copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
@@ -271,7 +271,7 @@ const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:strin
   mkdirSync(`${frontendfolder}/composables/`,{ recursive: true });
 
   const eta = new Eta({views:constants.templatedir});
-  const txtMainModule = eta.render('app.module.eta', modules);
+  const txtMainModule = eta.render('./nest/app.module.eta', modules);
   writeFileSync(`${backendfolder}/src/app.module.ts`, txtMainModule);
 
   const foreignkeyfile =`${backendfolder}/src/dicts/foreignkeys.json`

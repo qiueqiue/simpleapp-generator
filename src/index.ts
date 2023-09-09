@@ -49,14 +49,15 @@ if(!options.configFile){
   const openapi3Yaml = configs.openapi3Yaml
 
 const run = async()=>{
-    fw.runCreateNest(backendFolder,()=>{
-        fw.runCreateNuxt(frontendFolder,()=>{
-            fw.prepareNest(backendFolder,()=>{
-                fw.prepareNuxt(frontendFolder,()=>{
+    fw.setConfiguration(configs)
+    fw.runCreateNuxt(()=>{
+        fw.runCreateNest(()=>{
+            fw.prepareNest(()=>{
+                fw.prepareNuxt(()=>{
                     generate.initialize(definationsFolder,backendFolder,frontendFolder,()=>{
-                        fw.prepareOpenApiClient(openapi3Yaml,frontendFolder)
-                        fw.prettyNuxt(frontendFolder)    
-                        fw.prettyNest(backendFolder)                                                
+                        fw.prepareOpenApiClient()
+                        fw.prettyNuxt()    
+                        fw.prettyNest()                                                
                     })                    
                 })                
             })            

@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "required": ["category_code","category_name"],
+    "required": ["level_code","level_name"],
     "properties": {
       "organization_id": {
         "type": "integer",
@@ -14,7 +14,7 @@
           1
         ]
       },    
-      "category_code": {
+      "level_code": {
         "type": "string",
         "format":"field-autocomplete-code",
         "minLength":1,
@@ -22,7 +22,7 @@
           "stk"
         ]
       },
-      "category_name": {
+      "level_name": {
         "type": "string",
         "format":"field-autocomplete-name",
         "minLength":1,
@@ -43,13 +43,6 @@
           true
         ],
         "default":true
-      },
-      "category_type": {
-        "type": "string",
-        "enum":["Stock","Charge","Discount","Class"],
-        "examples": [
-          "SStock"
-        ]
-      }      
+      }
     }
   }
