@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+button {
+    @apply p-2  border-2
+}
+
+.input-error{
+   @apply text-red-500   
+}
+.simpleapp-tool-bar button{
+    margin-right: 1rem;
+}
+
+.bg-primary{
+    @apply bg-green-600 text-white
+
+}
+.bg-default{
+    @apply bg-white
+}
+.bg-danger{
+    @apply bg-red-500  text-white
+}
+.bg-warning{
+    @apply bg-orange-600  text-white
+}

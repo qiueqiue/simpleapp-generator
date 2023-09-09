@@ -8,26 +8,30 @@
         <% let obj=it.jsonschema.properties[key] %>        
         <% if(skipcolumns.indexOf(key)>=0){ %>
         <% } else if(obj.type=='boolean'){ %>
-            <SimpleAppCheckbox :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+            <SimpleAppCheckbox  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
         <% } else if(obj.type=='number' || obj.type=='integer'){ %>
-            <SimpleAppNumber :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+            <SimpleAppNumber  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
         <% } else if(obj.type=='array'  && obj.items && obj.items.type =='string' ){ %>              
-            <SimpleAppChip :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+            <SimpleAppChip   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
         <% } else if(obj.type=='object'  && typeof obj['x-foreignkey']!='undefined'){ %>              
-            <SimpleAppAutocomplete :setting="o.getField('#/properties/<%= key %>')"
+            <SimpleAppAutocomplete  autofocus :setting="o.getField('#/properties/<%= key %>')"
                     v-model="data.<%= key %>" optionLabel="label" :remote-src="getAutocomplete('<%=obj['x-foreignkey']%>')"/>
         <% } else if(obj.type=='string'){ %>            
                 <% if(obj.format=='date'){ %>
-                    <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                    <SimpleAppText type="<%=obj.format%>"  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                <% } else if(obj.format=='x-text'){ %>
+                    <SimpleAppTextarea :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                <% } else if(obj.format=='x-html'){ %>
+                    <SimpleAppEditor editorStyle="height: 320px" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.format=='email'){ %>
-                    <SimpleAppText type="<%=formattype%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                    <SimpleAppText  autofocus type="<%=obj.type%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.enum){ %>
-                    <SimpleAppRadio :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+                    <SimpleAppRadio  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
                 <% } else {%>
-                        <SimpleAppText :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                        <SimpleAppText   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% }%>  
         <% } else { %>           
-            <SimpleAppText  :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+            <SimpleAppText   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
         <% }%>
       <%})%>   
       

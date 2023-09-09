@@ -33,6 +33,7 @@
       },
       "description": {
         "type": "string",
+        "format":"x-text",
         "examples": [
           ""
         ]

@@ -29,14 +29,19 @@ const checkNestCli = (callback)=>{
         }
     })
 }
+
+export const installDependency = async () =>{
+    log.info("installDependency 'npm install -g pnpm @nestjs/cli @openapitools/openapi-generator-cli nuxi'")
+    return await exec("npm install -g pnpm @nestjs/cli @openapitools/openapi-generator-cli nuxi")
+}
 export const createNuxt= (targetfolder:string,callback)=>{
     log.info("setting up nuxt frontend ${targetfolder}")
 
     log.info(`frontend nuxt project "${targetfolder}" created, installing module`)
-    exec(`cd ${targetfolder};pnpm install;pnpm install -D @types/node prettier @nuxtjs/tailwindcss`, (error, stdout, stderr)=>{                
+    exec(`cd ${targetfolder};pnpm install;pnpm install -D @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier @nuxtjs/tailwindcss`, (error, stdout, stderr)=>{                
     //;pnpm install    
     console.log(error, stdout, stderr)
-        exec(`cd ${targetfolder};pnpm install --save ajv ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+        exec(`cd ${targetfolder};pnpm install --save ajv dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
         console.log(error, stdout, stderr)
         
         mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})

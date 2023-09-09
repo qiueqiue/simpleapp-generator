@@ -21,7 +21,7 @@ const extjsonschema = '.jsonschema.json';
 let jsonschemas = {};
 const docs = [];
 
-export const initialize =  async (defFolder:string,backendfolder:string,frontendfolder:string) => {
+export const initialize =  async (defFolder:string,backendfolder:string,frontendfolder:string,callback:Function) => {
   prepareEnvironments(backendfolder,frontendfolder)
   let activatemodules:ModuleObject[]=[]
   // 
@@ -58,7 +58,7 @@ export const initialize =  async (defFolder:string,backendfolder:string,frontend
     log.info("Activated backend modules: ",JSON.stringify(activatemodules))
     // log.info(activatemodules)
     finalize(activatemodules,backendfolder,frontendfolder)
-    return Promise.resolve(true)
+    callback()
   }
   
 

@@ -16,7 +16,7 @@
       "branch_id": {"type": "integer","examples": [1]},      
       "product_code": {"type": "string","format":"field-autocomplete-code","minLength":1,"examples": ["prd1"]},
       "product_name": {"type": "string","format":"field-autocomplete-name","minLength":5,"examples": ["Product 1"]},
-      "description": {"type": "string","examples": [""]},
+      "description": {"type": "string","format":"x-html","examples": [""]},
       "uom": {"type": "string","examples": ["unit"]},
       "sku": {"type": "string","examples": ["SIKEU001"]},
       "isactive": {"type": "boolean","examples": [true],"default":true},

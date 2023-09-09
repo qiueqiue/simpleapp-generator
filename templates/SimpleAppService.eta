@@ -123,10 +123,13 @@ export class SimpleAppService<T extends { _id?: string }> {
     addFormats(ajv);
     ajv.addFormat('field-autocomplete-code', /.*$/);
     ajv.addFormat('field-autocomplete-name', /.*$/);
+    ajv.addFormat('x-text',/.*$/)
+    ajv.addFormat('x-html',/.*$/)
     ajv.addKeyword({
       keyword: 'x-foreignkey',
       type: 'string',
     });
+
     if (!this.hook('pre-validation', data)) {
       const erromsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {

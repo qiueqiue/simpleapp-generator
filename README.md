@@ -12,38 +12,48 @@ MONGODB_URL='mongodb://mongoadmin:secret@localhost:27017/admin?authMechanism=DEF
 4. regenerate code (for frontend can function completely)
 5. 
 
+
+1. install openapi-generator, pnpm, nest, rename openapi for new setup
+2. load backend tsconfig and add more property: **
+3. add prettier formating option for frontend
+4. error messages
+5. fix single and multi select bugs
+6. function of remain menulist
+7. security of string input, block xss
+
+
+errors formating
+18.keep audit trail into db
+10.add backend find options
+10.add frontend find options
+11.retain modifications of controller, service, apiclients
+14.add permission control
+16.access right
+17.setting of tenants
+
+authentication in nuxt
+jwt in backend
+
+
 9. beautify default tailwind ui
   1. front page
   2. top bar
   3. menu bars
   4. default with of each component is it nicely fit
-  5. table layout
-  6. error messages
+  5. table layout  
   7. error formating
-7. load backend tsconfig and add more property: **
-8. add prettier formating option for frontend
 9. write proper user guide
-10.add find options
-11.retain modifications of controller, service, apiclients
-12.add find records
 13.add workflow functions
-14.add permission control
-16.access right
-17.setting of tenants
-18.keep audit trail into db
-19.function of remain menulist
-20.security of string input, block xss
-21.control csrf
 
+
+
+hold
 
 10.plugin for ajv
   long string format for description
-  errors formating
-
-
-
 
 # Todo
+x21.control csrf
 x8. simpleapp generate currentfolder error **
 x1. override app.vue * 
 x2. create layout  
