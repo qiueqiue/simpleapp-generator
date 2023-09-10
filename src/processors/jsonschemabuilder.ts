@@ -17,8 +17,8 @@ import {
 } from '../type';
 import { json } from 'stream/consumers';
 const log: Logger<ILogObj> = new Logger();
-const FIELD_AUTOCOMPLETE_CODE='field-autocomplete-code'
-const FIELD_AUTOCOMPLETE_NAME='field-autocomplete-name'
+const X_DOCUMENT_NO='x-document-no'
+const X_DOCUMENT_NAME='x-document-name'
 const FOREIGNKEY_PROPERTY='x-foreignkey'
 let allmodels: ChildModels = {};
 let fullschema={}
@@ -53,11 +53,11 @@ export const readJsonSchemaBuilder = async (
     throw(`unsupport array type for ${docname}.${doctype}`)
   }
   if(fieldAutoCompleteCode=='') {
-    log.error(`you shall define 1 field with format:'${FIELD_AUTOCOMPLETE_CODE}'`)
+    log.error(`you shall define 1 field with format:'${X_DOCUMENT_NO}'`)
     throw "missing field format"
   }
   if(fieldAutoCompleteName=='') {
-    log.error(`you shall define 1 field with format: '${FIELD_AUTOCOMPLETE_NAME}'}`)
+    log.error(`you shall define 1 field with format: '${X_DOCUMENT_NAME}'}`)
     throw "missing field format"
   }
   
@@ -75,9 +75,9 @@ const processObject =  (doctype: string,
     //ensure some field exists, also override it
     jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
-    jsondata.properties['tenant_id'] = {type: 'number',description: 'Control value, dont edit it',};
-    jsondata.properties['organization_id'] = {type: 'number',description: 'Control value, dont edit it',};
-    jsondata.properties['branch_id'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
+    jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
@@ -111,10 +111,10 @@ const genSchema = (
 
     const isrequired = requiredlist && requiredlist.includes(key);
     const newName: string = docname + capitalizeFirstLetter(key);
-   if(obj.format && obj.format==FIELD_AUTOCOMPLETE_CODE){
+   if(obj.format && obj.format==X_DOCUMENT_NO){
     fieldAutoCompleteCode=key
    }
-   if(obj.format && obj.format==FIELD_AUTOCOMPLETE_NAME){
+   if(obj.format && obj.format==X_DOCUMENT_NAME){
     fieldAutoCompleteName=key
    }
   //  if (obj.type == 'object' && obj.items  ){

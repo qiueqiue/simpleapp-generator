@@ -1,0 +1,80 @@
+import { Injectable, Scope } from '@nestjs/common';
+import Base64URL from '@darkwolf/base64url'
+
+@Injectable({
+    scope: Scope.REQUEST
+})
+export class User {
+    private static instance: User;
+    protected uid:string=''
+    protected uname:string=''
+    protected email:string=''
+    protected xOrg:string=''
+    protected tenantId:number=0
+    protected orgId:number=0
+    protected branchId:number=0
+    constructor() {}
+    public static getInstance(): User {
+        if (!User.instance) {
+            User.instance = new User();
+        }
+        return User.instance;
+    }
+    setUser = (uid:string)=>{
+        User.getInstance().uid=uid
+    }
+    getInfo=()=>{
+        return User.getInstance()
+    }
+    getBranchFilter=()=>{
+        return {
+            tenantId:User.getInstance().tenantId,
+            orgId: User.getInstance().orgId, 
+            branchId:User.getInstance().branchId
+        }
+    }
+    getTenantFilter=()=>{
+        return {tenantId:User.getInstance().tenantId}
+    }
+    getOrgFilter=()=>{
+        return {tenantId:User.getInstance().tenantId,orgId: User.getInstance().orgId}
+    }
+
+    getCreateFilter=()=>{
+        const u = User.getInstance()
+        return {
+            tenantId:u.tenantId,
+            orgId: u.orgId, 
+            branchId:u.branchId,
+            createdby: u.uid,
+            updatedby: u.uid,
+            created: new Date().getTime().toString(),
+            updated: new Date().getTime().toString()
+        }
+    }
+    getUpdateFilter=()=>{
+        const u = User.getInstance()
+        return {
+            updatedby: u.uid,
+            updated: new Date().getTime().toString()
+        }
+    }
+    setXorg = (xorg)=>{
+        try{
+            const decodedText:string = Base64URL.decodeText(xorg)
+            const arrXorg = decodedText.split('-')
+            
+            if(arrXorg.length==3){
+                const u = User.getInstance()
+                u.tenantId = Number(arrXorg[0])      
+                u.orgId = Number(arrXorg[1])      
+                u.branchId = Number(arrXorg[2])      
+            }else{
+                throw "invalid x-org"
+            }
+        }catch(err){
+            throw err
+        }
+        
+    }
+}

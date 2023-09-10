@@ -27,7 +27,8 @@ program
 
 let path=''
 const options = program.opts();
-console.log(figlet.textSync(`SimpleApp Generator ${version}`));
+console.log(figlet.textSync(`SimpleApp Generator`));
+console.log(figlet.textSync(`${version}`));
 if(!options.configFile){
     log.error("Config file parameter is required. Example: simpleapp-generator -c ./config.json")
     throw "Undefine configuration file"

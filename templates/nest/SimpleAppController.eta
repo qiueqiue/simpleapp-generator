@@ -13,6 +13,7 @@ import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
 const doctype = 'person'.toUpperCase();
 type ServiceType = {
   list: Function;
+  search: Function;
   create: Function;
   update: Function;
   delete: Function;
@@ -34,9 +35,11 @@ export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
     this.service = service;
   }
 
-  
   async _list() {
     return this.service.list();
+  }
+  async _search(searchObject:Object) {
+    return this.service.search(searchObject);
   }
   async _autocomplete(keyword: string) {
     return this.service.getAutoComplete(keyword);
@@ -47,7 +50,6 @@ export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
     return result as Type<TApiSchema>;
   }
 
-  
   async _create(data: TApiSchema) {
     //const newdata: persontype.Person = { ...data };
     const newdata: T = {} as T; //= { ...data };
@@ -55,14 +57,12 @@ export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
     return this.service.setData(newdata).create() as TApiSchema;
   }
 
-  
-  async _update( id: string,data: TApiSchema) {
+  async _update(id: string, data: TApiSchema) {
     const newdata: T = {} as T; //= { ...data };
     Object.assign(newdata, data); //
     return this.service.findIdThenUpdate(id, newdata) as TApiSchema;
   }
 
- 
   async _delete(id: string) {
     return this.service.findIdThenDelete(id);
   }

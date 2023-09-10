@@ -72,7 +72,7 @@ const generate = (
   frontendfolder:string
 ) => {
   const targetfolder = `${backendfolder}/src/docs/${doctype}`;
-  const frontendpagefolder=`${frontendfolder}/pages`
+  const frontendpagefolder=`${frontendfolder}/pages/[xorg]`
   try {
     
     mkdirSync(targetfolder,{ recursive: true });    
@@ -106,7 +106,8 @@ const generate = (
       bothEndCode: '',
       frontEndCode: '',
       backEndCode: '',
-      controllerCode:''
+      controllerCode:'',
+      apiSchemaCode:'',
     };
 
     // console.log('generate 2', JSON.stringify(variables));
@@ -126,21 +127,33 @@ const generate = (
     writeFileSync(`${targetfolder}/${doctype}.jsonschema.ts`, txtJsonSchema);
 
     // generate before save source code, wont override after regenerate
-    const customizefilename = `${targetfolder}/${doctype}.beforesave.ts`;
-    if (!existsSync(customizefilename)) {
-      const txtBeforeSave = eta.render('./beforesave', variables);
-      writeFileSync(
-        `${targetfolder}/${doctype}.beforesave.ts`,
-        txtBeforeSave,
-      );
-    }
+    // const customizefilename = `${targetfolder}/${doctype}.beforesave.ts`;
+    // if (!existsSync(customizefilename)) {
+    //   const txtBeforeSave = eta.render('./beforesave', variables);
+    //   writeFileSync(
+    //     `${targetfolder}/${doctype}.beforesave.ts`,
+    //     txtBeforeSave,
+    //   );
+    // }
     // write mongoose model file
     const txtModel = eta.render('./model', variables);
     writeFileSync(`${targetfolder}/${doctype}.model.ts`, txtModel);
 
     // prepare openapi schema
+    const apischemafile=`${targetfolder}/${doctype}.apischema.ts`
+    if (existsSync(apischemafile)) {
+      const apischemaCode = readFileSync(apischemafile).toString();
+      const regexapischema =
+      /\/\/<begin-apischema-code>([\s\S]*?)\/\/<end-apischema-code>/g;
+      const apischemaresult = apischemaCode.match(regexapischema);
+      if (apischemaresult) {
+        variables.apiSchemaCode = apischemaresult[0];
+      }else{
+        variables.apiSchemaCode="//<begin-apischema-code>\n//<end-apischema-code>";
+      }
+    }
     const txtApiSchema = eta.render('./apischema', variables);
-    writeFileSync(`${targetfolder}/${doctype}.apischema.ts`, txtApiSchema);
+    writeFileSync(apischemafile, txtApiSchema);
 
     // prepare backend classes
     // prepare frontend api client
@@ -158,17 +171,22 @@ const generate = (
         /\/\/<begin-backend-code>([\s\S]*?)\/\/<end-backend-code>/g;
       const bothendresult = servicecodes.match(regex1);
       const backendresult = servicecodes.match(regex2);
+      console.log("bothendresult",bothendresult)
+      console.log("backendresult",backendresult)
       if (bothendresult) {
-        bothEndCode = bothendresult[0];
+        variables.bothEndCode = bothendresult[0];
+      }else{
+        variables.bothEndCode="//<begin-bothend-code>\n//<end-bothend-code>";
       }
 
       if (backendresult) {
-        backEndCode = backendresult[0];
+        variables.backEndCode = backendresult[0];
+      }else{
+        variables.backEndCode="//<begin-backend-code>\n//<end-backend-code>";
       }
     }
 
-    variables.bothEndCode = bothEndCode ?? "//<begin-bothend-code>\n//<end-bothend-code>";
-    variables.backEndCode = backEndCode ?? "//<begin-backend-code>\n//<end-backend-code>";
+ 
     const txtService = eta.render('./service', variables);
     writeFileSync(`${targetfolder}/${doctype}.service.ts`, txtService);
 
@@ -193,8 +211,8 @@ const generate = (
     writeFileSync(`${targetfolder}/${doctype}.module.ts`, txtModule);
 
     // prepare readme
-    const txtReadme = eta.render('./readme', variables);
-    writeFileSync(`${targetfolder}/README.md`, txtReadme);
+    // const txtReadme = eta.render('./readme', variables);
+    // writeFileSync(`${targetfolder}/README.md`, txtReadme);
 
     const frontendfile = `${frontendfolder}/simpleapp/simpleappdocs/${variables.typename}Doc.ts`;
     let frontEndCode = '';
@@ -249,12 +267,10 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
     //do nothing
   }
   
-  //copy over backend service class
-  
   copyFileSync(`${constants.templatedir}/nest/SimpleAppService.eta`,`${targetfolder}/SimpleAppService.ts`)
-  
-  //copy over backend controller
   copyFileSync(`${constants.templatedir}/nest/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
+  copyFileSync(`${constants.templatedir}/nest/TenantMiddleware.eta`,`${targetfolder}/TenantMiddleware.ts`)
+  copyFileSync(`${constants.templatedir}/nest/User.eta`,`${targetfolder}/User.ts`)
 
   //copy over frontend apiabstract class
   // copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)

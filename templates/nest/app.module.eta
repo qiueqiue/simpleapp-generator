@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module,MiddlewareConsumer,NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-
+import {TenantMiddleware} from './class/TenantMiddleware'
 <% for(let i=0;i<it.length; i++){ %>
 import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
 <%}%>
@@ -12,4 +12,15 @@ import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      // .exclude('/api-yaml')
+      // .exclude('/api-json')
+      // .exclude('/api')
+      .forRoutes('*')
+      
+      
+  }
+}

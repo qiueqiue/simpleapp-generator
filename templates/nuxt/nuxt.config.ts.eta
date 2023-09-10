@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     public:{
       SIMPLEAPP_BACKEND_URL: process.env.SIMPLEAPP_BACKEND_URL,
       APP_URL: process.env.APP_URL,
+      DEBUGDATA: process.env.DEBUGDATA,      
     }
   },
   vite: {
@@ -20,8 +21,10 @@ tailwindcss: {
   modules: [
 //    '@sidebase/nuxt-auth',
     "nuxt-security",
-    '@nuxtjs/tailwindcss',
+    
     '@vueuse/nuxt',
+    '@nuxt/ui'
+    //'@nuxtjs/tailwindcss',  //use @nuxt/ui own tailwind
     // '@nuxtjs/color-mode'
 
   ],  

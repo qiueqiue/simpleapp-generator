@@ -9,6 +9,8 @@ async function bootstrap() {
     .setTitle(process.env.PROJECT_NAME)
     .setDescription(process.env.PROJECT_DESCRIPTION)
     .setVersion(process.env.PROJECT_VERSION)
+    .addApiKey({in:'header',name:'x-org',type:'apiKey',description:'base 64 url encode. example: MS0xLTE'},'x-org')
+    .addSecurityRequirements('x-org')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {

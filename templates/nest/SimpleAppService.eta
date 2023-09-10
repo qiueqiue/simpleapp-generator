@@ -4,10 +4,18 @@ import { Model } from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import foreignkeys from '../dicts/foreignkeys.json';
+
 import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common/exceptions';
+import { User } from './User';
+
+export enum IsolationType {
+  'org' = 'org',
+  'tenant' = 'tenant',
+  'branch' = 'branch',
+}
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
   protected jsonschema = { type: 'object', properties: {}, required: [] };
@@ -16,11 +24,19 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected documentName = 'category';
   protected documentType = 'CAT';
   protected LIMITPERPAGE = 20;
+  protected isolationtype: IsolationType = IsolationType.org;
+  protected isolationFilter: any = {};
   protected data: T = { _id: '' } as T;
-  protected doc: Model<T>;
+  private doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
-  constructor(newdoc: Model<T>) {
+  constructor(
+    newdoc: Model<T>,
+    isolationtype: IsolationType = IsolationType.org,
+  ) {
     this.doc = newdoc;
+    this.isolationtype = isolationtype;
+
+    // this.tenantdoc = tenantdoc
   }
   getRecordId = (): string => this.data._id;
   setSchema = (newschema) => (this.jsonschema = newschema);
@@ -34,9 +50,27 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.data = { ...newdata };
     return this;
   };
+  getIsolationFilter = () => {
+    let isolationFilter = {};
+    switch (this.isolationtype) {
+      case 'branch':
+        isolationFilter = User.getInstance().getBranchFilter();
+        break;
+      case 'tenant':
+        isolationFilter = User.getInstance().getTenantFilter();
+        break;
+      case 'org':
+      default:
+        isolationFilter = User.getInstance().getOrgFilter();
+        break;
+    }
+    return isolationFilter;
+  };
   async list() {
     try {
-      const products = await this.doc.find();
+      //console.log("this.isolationFilter",this.getIsolationFilter())
+      const products = await this.doc.find(this.getIsolationFilter());
+      // console.log(products)
       const productlist = products.map((p: T) => {
         return p;
       });
@@ -53,6 +87,8 @@ export class SimpleAppService<T extends { _id?: string }> {
       filter1[this.documentIdentityCode] = { $regex: keyword };
       filter2[this.documentIdentityName] = { $regex: keyword };
       const filterobj = { $or: [filter1, filter2] };
+
+      Object.assign(filterobj, this.getIsolationFilter());
       const projections = {
         id: `\$_id`,
         label: `\$${this.documentIdentityCode}`,
@@ -69,31 +105,37 @@ export class SimpleAppService<T extends { _id?: string }> {
       throw new InternalServerErrorException(err.message);
     }
   }
-  async findById(id: string) {
+  async search(filters: Object) {
     try {
-      //console.log('findById', id);
-      this.data = await this.doc.findById(id);
-      //console.log('findById done', this.data);
+      Object.assign(filters, this.getIsolationFilter());
+      const products = await this.doc.find(filters);
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      //   console.log(products);
+      return productlist;
     } catch (err) {
-      //error
       throw new InternalServerErrorException(err.message);
     }
-
-    if (!this.data) {
-      //data not found
-      throw new NotFoundException('Document Not found:');
-    }
-    //console.log('this.data', this.data);
-    return this.data;
     // return this;
+  }
+  async findById(id: string) {
+    const data = await this.search({ _id: id });
+    if (data.length == 1) {
+      // console.log('data0', data[0]);
+      return data[0];
+    } else {
+      return null;
+    }
   }
 
   async create() {
     let result;
 
     try {
+      Object.assign(this.data, User.getInstance().getCreateFilter());
       delete this.data._id;
-      this.validateData(this.data);
+      this.validateData(this.data);      
       const newdoc = new this.doc(this.data);
       result = await newdoc.save();
     } catch (err) {
@@ -103,14 +145,14 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async update() {
     const id: string = this.getRecordId();
+    Object.assign(this.data, User.getInstance().getUpdateFilter());
     this.findIdThenUpdate(id, this.data);
   }
   async delete() {
-    
     const id: string = this.getRecordId();
     const dependency = await this.getRelatedRecords(id);
     if (!dependency) {
-     return await this.findIdThenDelete(id);
+      return await this.findIdThenDelete(id);
     } else {
       return dependency;
     }
@@ -121,10 +163,10 @@ export class SimpleAppService<T extends { _id?: string }> {
   validateData(data: T) {
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
-    ajv.addFormat('field-autocomplete-code', /.*$/);
-    ajv.addFormat('field-autocomplete-name', /.*$/);
-    ajv.addFormat('x-text',/.*$/)
-    ajv.addFormat('x-html',/.*$/)
+    ajv.addFormat('x-document-no', /.*$/);
+    ajv.addFormat('x-document-name', /.*$/);
+    ajv.addFormat('x-text', /.*$/);
+    ajv.addFormat('x-html', /.*$/);
     ajv.addKeyword({
       keyword: 'x-foreignkey',
       type: 'string',
@@ -135,28 +177,36 @@ export class SimpleAppService<T extends { _id?: string }> {
       for (let i = 0; i < this.errorlist.length; i++) {
         erromsg.push(this.errorlist[i].message);
       }
+      console.log("pre-validation:",erromsg)
       throw new InternalServerErrorException(erromsg.join('\n'));
     }
     const validate = ajv.compile(this.jsonschema);
     const valid = validate(data);
+    //console.log(validate.errors);
     if (!valid) {
-      //console.log(validate.errors);
+      // console.log(validate.errors);
       const erromsg: string[] = [];
       for (let i = 0; i < validate.errors.length; i++) {
         erromsg.push(validate.errors[i].message);
       }
+      console.log("ajv erromsg: ",erromsg)
       throw new InternalServerErrorException(erromsg.join('\n'));
     }
     this.hook('post-validation', data);
   }
 
-  async findIdThenDelete(id: string) {
+  async findIdThenDelete(id: string): Promise<any> {
     // const data = await this.findById(id);
     try {
       //console.log('deletedeletedeletedelete');
       const dependency = await this.getRelatedRecords(id);
       if (!dependency) {
-        const deleteresult = await this.doc.findByIdAndDelete(id);
+        let filter = this.getIsolationFilter();
+        filter['_id'] = id;
+        const deleteresult = await this.doc.deleteOne(filter);
+        // this.doc.findByIdAndDelete(id)
+
+        //this.doc.findByIdAndDelete(id);
         return deleteresult;
       } else {
         return Promise.reject(dependency);
@@ -166,20 +216,26 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
   }
 
-  async findIdThenUpdate(id: string, data: T) {
-    // const existingdata = await this.findById(id);
+  updateOne = async (data: T) => {
+    this.doc.updateOne(data);
+  };
+
+  findIdThenUpdate = async (id: string, data: T) => {
+    const existingdata = await this.findById(id);
 
     try {
-      //console.log('findIdThenUpdate', id);
+      Object.assign(data, User.getInstance().getUpdateFilter());
+      Object.assign(existingdata, data);
       this.validateData(data);
-      // const result = await existingdata.doc.updateOne(data);
-      const result = await this.doc.findByIdAndUpdate(id, data);
+      let filter = this.getIsolationFilter();
+      filter['_id'] = id;
+      const result = await this.doc.findOneAndUpdate(filter, data);
 
       return result;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
-  }
+  };
 
   //find what foreign key constraint
   async getRelatedRecords(id: string) {

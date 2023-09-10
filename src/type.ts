@@ -61,4 +61,5 @@ bothEndCode: string
 frontEndCode: string
 backEndCode: string
 controllerCode:string
+apiSchemaCode:string
 }
