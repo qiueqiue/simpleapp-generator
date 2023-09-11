@@ -1,30 +1,39 @@
-
-import { Injectable, NestMiddleware,Scope } from '@nestjs/common';
+import { Injectable, NestMiddleware, Scope } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import {User} from './User'
+// import * as jwt from 'nestjs-jwt'
 
+
+import { User } from './User';
+// import {KeycloakConfigService} from "../keycloak/keycloak.service"
 @Injectable({
-    scope: Scope.REQUEST
+  scope: Scope.REQUEST,
 })
+
 export class TenantMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    req.headers['x-org']
-    if(req.headers['x-org']){        
-        const u =  User.getInstance()
-        try{
-            u.setXorg(req.headers['x-org'].toString())
-            u.setUser('user1')
-            //console.log(u.getInfo())
-            // u.uid='user1'
-            next();
-        }catch{
-            return res.status(401).send("Invalid x-org or user info")
-        }
-        
-    }else{
-        return res.status(401).send("undefine header string x-org")
-
+    if (req.baseUrl == '/oauth2-redirect.html') {
+      next();
+      return ;
     }
+    if(!req.headers['authorization']){
+      return res.status(401).send('Undefine bearer token');
+    }
+    if (!req.headers['x-org']){
+      return res.status(401).send('undefine header string x-org');
+    }
+    const u = User.getInstance();      
+
+    try {
+      u.setXorg(req.headers['x-org'].toString());
+      let tokenstr:string = req.headers['authorization']
+      tokenstr = tokenstr.replace("Bearer ",'')
+      u.setUserToken(tokenstr);      
+      next();
+    } catch {
+      return res.status(401).send('Invalid x-org or user info');
+    }
+
+
     
   }
 }

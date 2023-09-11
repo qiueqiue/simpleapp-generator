@@ -23,9 +23,10 @@ const schemasetting = {
     <% }else if( schema[key].type == 'array'){%>
       <%= key %>: [{type: <%= schema[key].item.type %>, required:false}]  //basic array
     <% }else{%>
-      <%= key %>: {type: <%= capitalizeFirstLetter(schema[key].type) %>, required:false},  //field 
+      <%= key %>: {type: <%= capitalizeFirstLetter(schema[key].type) %>, required: <% if(key==it.autocompletecode || key==it.autocompletename){%>true<%}else{%>false<%}%>},  //field 
     <% } %>
   <%}) %>
 };
 
 export const <%= it.doctype %>MongoSchema = new Schema(schemasetting,{collection: '<%= it.name %>'})
+.index({<%=it.autocompletecode%>:1,orgId:1},{unique:true});

@@ -47,7 +47,6 @@ const newData = () => {
 
 const triggerEdit = (event: any) => {
   let id = event.data._id.toString()
-  editRecord(event.data._id);  
   router.push({ path: `${props.path}/${id}` })  
 };
 const editRecord = (id:string) => {
@@ -95,7 +94,7 @@ refresh();
       <button class="bg-primary" @click="newData" v-tooltip="'Add new(ctrl+i)'" >New</button>
       <SimpleAppDatatable
             @row-dblclick="triggerEdit"
-            v-model="recordlist"         
+            v-model="recordlist"                                 
             :setting="{}"
             :columns="listColumns"
           >         

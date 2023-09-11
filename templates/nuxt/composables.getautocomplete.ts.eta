@@ -6,18 +6,23 @@
  */
  
 import * as o from "../simpleapp/openapi";
-
+import axios from 'axios'
 const getAutoComplete = (apiname: string): any => {
+  const { csrf } = useCsrf()    
+  axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
+  const route = useRoute();
+
   const config: o.Configuration = {
-    basePath: useRuntimeConfig().public.APP_URL + "/api",
+    basePath: `${useRuntimeConfig().public.APP_URL}/api/${route.params.xorg}`,
     isJsonMime: () => true,
   };
   const docsOpenapi: any = {
-    <% for(let i=0;i<it.length; i++){ %>
-        <% let obj = it[i]%>
-        '<%=obj.docname.toLowerCase()%>' : new o.<%=obj.doctype.toUpperCase()%>Api(config),
-        <%}%>
-  };
+                    'category' : new o.CATApi(config),
+                        'leadtype' : new o.LEADTApi(config),
+                        'level' : new o.LVLApi(config),
+                        'product' : new o.PRDApi(config),
+                        'studentgroup' : new o.STGApi(config),
+          };
   if (!docsOpenapi[apiname]) {
     console.error(
       `api for '${apiname}' does not exists, most probably define wrong x-foreignkey`,

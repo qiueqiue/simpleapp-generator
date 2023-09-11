@@ -1,6 +1,8 @@
 import { Module,MiddlewareConsumer,NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import {TenantMiddleware} from './class/TenantMiddleware'
 <% for(let i=0;i<it.length; i++){ %>
 import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
@@ -8,7 +10,14 @@ import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].
 
 @Module({
     //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
-  imports: [ConfigModule.forRoot(),MongooseModule.forRoot(process.env.MONGODB_URL),<% for(let i=0;i<it.length; i++){ %><%= it[i].docname %>Module,<%}%>],
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGODB_URL),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public_html'),
+      exclude: ['/api/(.*)'],      
+    }),
+    <% for(let i=0;i<it.length; i++){ %><%= it[i].docname %>Module,<%}%>],
   controllers: [],
   providers: [],
 })

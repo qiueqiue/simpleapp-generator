@@ -19,19 +19,19 @@ tailwindcss: {
     // Options
   },
   modules: [
-//    '@sidebase/nuxt-auth',
-    "nuxt-security",
-    
+    '@sidebase/nuxt-auth',
+    "nuxt-security",    
     '@vueuse/nuxt',
     '@nuxt/ui'
-    //'@nuxtjs/tailwindcss',  //use @nuxt/ui own tailwind
-    // '@nuxtjs/color-mode'
-
   ],  
-  ssr: true,
+  auth: {
+    globalAppMiddleware: true
+  },
   security: {
     csrf: true,
   },
+  ssr: true,
+  
   css: [
     "primevue/resources/themes/lara-light-blue/theme.css",
     'primeicons/primeicons.css'
@@ -40,6 +40,7 @@ tailwindcss: {
   build: {
                 transpile: ["primevue"]
         },
+  
   
 
 })
