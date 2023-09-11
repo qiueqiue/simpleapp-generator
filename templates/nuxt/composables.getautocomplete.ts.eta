@@ -8,8 +8,8 @@
 import * as o from "../simpleapp/openapi";
 import axios from 'axios'
 const getAutoComplete = (apiname: string): any => {
-  const { csrf } = useCsrf()    
-  axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
+  //const { csrf } = useCsrf()    
+  //axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
   const route = useRoute();
 
   const config: o.Configuration = {

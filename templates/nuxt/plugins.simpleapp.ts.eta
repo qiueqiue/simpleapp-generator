@@ -40,8 +40,8 @@ const emitter = mitt()
 
 
 export default defineNuxtPlugin((nuxtApp) => {
-    const { csrf } = useCsrf()    
-    axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
+    //const { csrf } = useCsrf()    
+    //axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
     nuxtApp.vueApp.use(PrimeVue, { ripple: true });
     nuxtApp.vueApp
     .component("SimpleAppAutocomplete",SimpleAppAutocomplete)

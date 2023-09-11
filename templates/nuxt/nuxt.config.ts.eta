@@ -28,7 +28,7 @@ tailwindcss: {
     globalAppMiddleware: true
   },
   security: {
-    csrf: true,
+    //csrf: true,   // been force to off csrf cash it crash with nuxt-auth
   },
   ssr: true,
   

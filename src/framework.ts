@@ -14,6 +14,8 @@ let config = {
     "frontendPort":"8080",
     "openapi3Yaml":"../openapi.yaml",
     "keycloaksetting":{
+        "OAUTH2_BASEURL":"https://keycloak-server-url/",
+        "OAUTH2_REALM":"realm-name",
         "OAUTH2_CONFIGURL":"https://keycloak-server-url/realms/realm-name",
         "OAUTH2_CLIENTID":"client-id",
         "OAUTH2_CLIENTSECRET":"client-secret-value",
@@ -59,7 +61,7 @@ export const prepareNest = (callback:Function)=>{
     if(!fs.existsSync(`${targetfolder}/.env`)){
 
     
-        exec(`cd ${targetfolder};pnpm install --save @nestjs/serve-static axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats @nestjs/config`,async (error, stdout, stderr)=>{
+        exec(`cd ${targetfolder};pnpm install --save nest-keycloak-connect keycloak-connect @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats @nestjs/config`,async (error, stdout, stderr)=>{
             // log.info(`dependency installed`)
             if(!error){
                 fs.mkdirSync(`${targetfolder}/public_html`,{recursive:true})
