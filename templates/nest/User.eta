@@ -50,7 +50,7 @@ export class User {
     
     const u = User.getInstance()
     u.token = tokenstr
-    u.uid = tokeninfo.sid;
+    u.uid = tokeninfo.sub;
     u.email = tokeninfo.email
     u.uname = tokeninfo.preferred_username
     u.fullname = tokeninfo.name

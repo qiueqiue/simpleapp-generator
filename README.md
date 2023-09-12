@@ -78,18 +78,20 @@ x    - service
 x    - schema
 x    - controller
 5. tenant setting
-2. error at frontend/backend messages
+6. user management
+2. tidy up error at frontend/backend messages
+3. settle instancePath in form
 5. security of string input, block xss
-6. fill in data for tenant/org/branch created,updated,createdby,updatedby
+x6. fill in data for tenant/org/branch created,updated,createdby,updatedby
 7. update record need replace  updated,updatedby, line item also need headache
-8. block uniquekey
+x8. block uniquekey
 
 ## Lower Priority
 3. multi-lingual
 6. audit trails
 7. permissions
-8. jwt
-9. frontend authentication
+x8. jwt
+x9. frontend authentication
 11.frontend add parent/child ui for invoices
 
 ## Bug fix
