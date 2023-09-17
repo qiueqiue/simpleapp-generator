@@ -13,10 +13,10 @@ async function bootstrap() {
         in: 'header',name: 'x-org',type: 'apiKey',description: 'base 64 url encode. example: MS0xLTE',
       },'x-org',)
     .addOAuth2({
-        name:'oauth2',in:'header',type:'oauth2',flows:{          
+        type:'oauth2',flows:{          
           implicit:{          
             authorizationUrl: `${process.env.OAUTH2_CONFIGURL}/protocol/openid-connect/auth`,
-            scopes:[],                      
+            scopes:{},                      
           }}},'oauth2')
     .addSecurityRequirements('x-org')
     .addSecurityRequirements('oauth2')

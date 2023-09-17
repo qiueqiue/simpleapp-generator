@@ -1,6 +1,6 @@
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 export type ChildModels = {
-  [key: string]: { type: string; model: SchemaModel,codeField:string,nameField:string };
+  [key: string]: { type: string; model: SchemaModel,codeField:string,nameField:string,moreAutoComplete:string[] };
 };
 export enum Fieldtypes {
   'string' = 'string',
@@ -51,6 +51,7 @@ doctype: string
 models: ChildModels
 autocompletecode:string
 autocompletename:string
+moreAutoComplete:string[]
 schema: SchemaModel
 apiSchemaName: string
 typename: string

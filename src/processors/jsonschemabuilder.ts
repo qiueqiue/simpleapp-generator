@@ -19,12 +19,15 @@ import { json } from 'stream/consumers';
 const log: Logger<ILogObj> = new Logger();
 const X_DOCUMENT_NO='x-document-no'
 const X_DOCUMENT_NAME='x-document-name'
+const X_AUTOCOMPLETE_FIELD='x-autocomplete-field'
 const FOREIGNKEY_PROPERTY='x-foreignkey'
+
+const X_TEL_NO='x-tel'
 let allmodels: ChildModels = {};
 let fullschema={}
 let fieldAutoCompleteCode=''
 let fieldAutoCompleteName=''
-
+let moreAutoComplete:string[]=[]
 export const readJsonSchemaBuilder = async (
   doctype: string,
   docname: string,
@@ -34,6 +37,7 @@ export const readJsonSchemaBuilder = async (
   
   fieldAutoCompleteCode=''
   fieldAutoCompleteName=''
+  moreAutoComplete=[]
   allmodels = {};
   const validateddata: JSONSchema7 = { ...orijsondata };
   let schema: SchemaModel | SchemaModel[];
@@ -113,10 +117,21 @@ const genSchema = (
     const newName: string = docname + capitalizeFirstLetter(key);
    if(obj.format && obj.format==X_DOCUMENT_NO){
     fieldAutoCompleteCode=key
+    obj.minLength=obj.minLength??1
+    jsondata[key]['minLength']=obj.minLength
    }
    if(obj.format && obj.format==X_DOCUMENT_NAME){
     fieldAutoCompleteName=key
+    obj.minLength=obj.minLength??1
+    jsondata[key]['minLength']=obj.minLength
    }
+   if(obj[X_AUTOCOMPLETE_FIELD]){
+    moreAutoComplete.push(key)
+   }
+
+  //  if(obj.format && obj.format==X_TEL_NO){
+  //   obj.pattern=obj.pattern ?? '/^\d{7,15}$/gm'
+  //  }
   //  if (obj.type == 'object' && obj.items  ){
   //   console.log("Refer to another object",docname,': ',key,obj,obj.items)
     
@@ -132,11 +147,14 @@ const genSchema = (
         // console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
         const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
         const clientdatacollection = docname.toLowerCase()
-        const foreignkeyidentity= key+'._id'
+        const foreignkeyidentity= key
         if(!foreignkeys[masterdatacollection]){
           let tmp:TypeForeignKey = {} as TypeForeignKey
           tmp[clientdatacollection]=[foreignkeyidentity]
           foreignkeys[masterdatacollection] = tmp
+        }
+        else if(!foreignkeys[masterdatacollection][clientdatacollection]){
+          foreignkeys[masterdatacollection][clientdatacollection]=[foreignkeyidentity]
         }else{
           foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
         }
@@ -159,7 +177,7 @@ const genSchema = (
       // console.log(key,'--------newmodel',obj, newmodel[key]);
     }
   }
-  allmodels[docname] = { type: schematype, model: newmodel,codeField: fieldAutoCompleteCode ,nameField: fieldAutoCompleteName };
+  allmodels[docname] = { type: schematype, model: newmodel,codeField: fieldAutoCompleteCode ,nameField: fieldAutoCompleteName,moreAutoComplete:moreAutoComplete };
   return newmodel;
 };
 

@@ -17,11 +17,9 @@ const getAutoComplete = (apiname: string): any => {
     isJsonMime: () => true,
   };
   const docsOpenapi: any = {
-                    'category' : new o.CATApi(config),
-                        'leadtype' : new o.LEADTApi(config),
-                        'level' : new o.LVLApi(config),
-                        'product' : new o.PRDApi(config),
-                        'studentgroup' : new o.STGApi(config),
+            <% for(let i=0;i<it.length; i++){ %>
+                '<%=it[i].docname.toLowerCase()%>': new o.<%=it[i].doctype.toUpperCase()%>Api(config),                
+              <%}%>
           };
   if (!docsOpenapi[apiname]) {
     console.error(

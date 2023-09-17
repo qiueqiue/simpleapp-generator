@@ -26,20 +26,21 @@ export const initialize =  async (defFolder:string,backendfolder:string,frontend
   let activatemodules:ModuleObject[]=[]
   // 
   const files = readdirSync(defFolder)
+  // log.warn("all schemas:",files)
   // readdir(defFolder, (err, files) => {
     // files.forEach((file) => {
     for(let j = 0; j< files.length;j++){
       const file = files[j]
+      log.info(`Load `+clc.green(file))
       const filearr = file.split('.');
       let rendertype = 'basic';
       const docname = filearr[0].toLowerCase();
       const doctype = filearr[1].toLowerCase();
-      const jsonstring = readFileSync(defFolder +path.sep+ file, 'utf-8');
-      const jsondata = JSON.parse(jsonstring);
+      const jsonstring = readFileSync(defFolder +path.sep+ file, 'utf-8');      
       let allmodels: ChildModels = {} as ChildModels;
       
-      if (file.endsWith(extjsonschema)) {
-        log.info(`Load `+clc.green(file))
+      if (file.endsWith(extjsonschema)) {  
+        const jsondata = JSON.parse(jsonstring);      
         rendertype = 'basic';
         jsonschemas[docname] = jsondata;
         // foreignkeys:
@@ -96,6 +97,7 @@ const generate = (
       models: allmodels,
       autocompletecode:allmodels[capitalizeFirstLetter(docname)].codeField,
       autocompletename:allmodels[capitalizeFirstLetter(docname)].nameField,
+      moreAutoComplete:allmodels[capitalizeFirstLetter(docname)].moreAutoComplete,
       schema: allmodels[capitalizeFirstLetter(docname)].model,
       apiSchemaName: capitalizeFirstLetter(docname), //capitalizeFirstLetter(doctype) + 'ApiSchema',
       typename: capitalizeFirstLetter(docname),

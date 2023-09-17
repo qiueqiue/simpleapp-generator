@@ -5,10 +5,18 @@
 button {
     @apply p-2  border-2
 }
-
+.simpleapp-input-container{
+    @apply flex flex-col
+}
+.simpleapp-input-container .p-chips ul{
+    width: 100%
+}
 .input-error{
    @apply text-red-500   
 }
+.input-error input{
+    @apply border-red-600
+ }
 .simpleapp-tool-bar button{
     margin-right: 1rem;
 }

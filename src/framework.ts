@@ -61,7 +61,7 @@ export const prepareNest = (callback:Function)=>{
     if(!fs.existsSync(`${targetfolder}/.env`)){
 
     
-        exec(`cd ${targetfolder};pnpm install --save nest-keycloak-connect keycloak-connect @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats @nestjs/config`,async (error, stdout, stderr)=>{
+        exec(`cd ${targetfolder};pnpm install --save nest-keycloak-connect keycloak-connect @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
             // log.info(`dependency installed`)
             if(!error){
                 fs.mkdirSync(`${targetfolder}/public_html`,{recursive:true})
@@ -101,7 +101,7 @@ export const prepareNuxt = (callback:Function)=>{
         exec(`cd ${targetfolder};pnpm install;pnpm install -D @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
-                exec(`cd ${targetfolder};pnpm install --save next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid ajv-formats primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+                exec(`cd ${targetfolder};pnpm install --save next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
                 console.log(error, stdout, stderr)
                 
                 fs.mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})
@@ -159,7 +159,7 @@ export const prettyNuxt = ()=>{
                         
 }
 export const prettyNest = ()=>{
-    exec(`cd ${config.backendFolder};npm run format`)
+    exec(`cd ${config.backendFolder};npm run format;npx prettier --write src/dicts/foreignkeys.json`)
 }
 
 export const prepareOpenApiClient = () => {

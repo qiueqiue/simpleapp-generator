@@ -58,6 +58,13 @@ Development using simpleapp-generator involve below steps:
 5. repeat same typscript formula at frontend and backend
 
 
+# JSON Schema supported String Format
+1. all format recognize by ajv
+2. x-document-no : string, apply minLength:1, will auto apply uniquekey in mongodb
+3. x-document-name: string, apply minLength:1
+4. tel: only digit, auto generate input tel
+5. x-text: do nothing, will auto generate textarea
+6. x-autocomplete-field: this field will add into autocomplete
 # Todo
 ## Update documentation and reference
 1. create github simpleapp-generator-template and documentation
@@ -66,33 +73,58 @@ Development using simpleapp-generator involve below steps:
 
 
 ## high priority Job
-x1. auto pretty backend and frontend
-x2. fix pages:id issue
-x3. search at backend
-1. remain codes after regenerate (frontend)
-x    - pages
-x    - composable  (no need )
+3. settle instancePath in form
+x17. auto add source code for addarray item
+
+no auto logout after session expired, or auto renew token
     - menulist  ** less priority, can customize manually
-1. remain codes after regenerate (backend)
-x    - service
-x    - schema
-x    - controller
+2. tidy up error at frontend/backend messages
+10.auto bind apiclient methods to compatible with openapi methods
+  a. create backend service method
+  b. create controller handle
+11.add simple and consistent external hook in service class. 
+16. support table details in generator
+  a. render autocomplete readonly field
+  b. add popup dialog for edit table
+  c. separate list table and form table
+  d. 
 5. tenant setting
 6. user management
-2. tidy up error at frontend/backend messages
-3. settle instancePath in form
 5. security of string input, block xss
-x6. fill in data for tenant/org/branch created,updated,createdby,updatedby
-7. update record need replace  updated,updatedby, line item also need headache
-x8. block uniquekey
+12.add pusher listener in apiclient also
+13.have way to create more api using different openapi schema but on same object
+18. add transaction screen templates
+
 
 ## Lower Priority
 3. multi-lingual
 6. audit trails
 7. permissions
-x8. jwt
-x9. frontend authentication
+7. update record need replace  updated,updatedby, line item also need headache
+
 11.frontend add parent/child ui for invoices
+
+[done]
+xauto index x-document-name
+x8. jwt
+ximprove tel control to allow empty string
+x15. some autocomplete wish to allow additional column like 6% tax, now become additional fields
+x9. frontend authentication
+x1. auto pretty backend and frontend
+x2. fix pages:id issue
+x3. search at backend
+1. remain codes after regenerate (backend)
+x    - service
+x    - schema
+x    - controller
+x8. block uniquekey
+1. remain codes after regenerate (frontend)
+x    - pages
+x    - composable  (no need )
+x6. fill in data for tenant/org/branch created,updated,createdby,updatedby
+14. force x-document-no/name is required
+
+
 
 ## Bug fix
 1. Openapi some schema like primarykey/more not generated, cause error in ide

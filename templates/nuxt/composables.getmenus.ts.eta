@@ -6,7 +6,13 @@
  */
 
 export const getMenus =()=>{
-  
+    const logout = async () => {
+        const { signOut } = useAuth();
+        const { data } = await <any>useFetch('/api/auth/logout');
+        const addPath = encodeURIComponent("/login");
+        signOut({ redirect: false });
+        window.location.href = data?.value?.path + addPath;
+    };
   const route = useRoute();
   const xorg = route.params.xorg
   let data =[];
@@ -19,9 +25,13 @@ export const getMenus =()=>{
                 {label: '<%=obj.docname.toLowerCase()%>', to:`/${xorg}/<%=obj.docname.toLowerCase()%>`},
               <%}%>
       ]},      
+      {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
     ]
   }else{
-    data= [{label: 'Home',icon: 'pi pi-fw pi-home', url:'/'},]
+    data= [
+      {label: 'Home',icon: 'pi pi-fw pi-home', url:'/'},
+      {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
+      ]
   }
   return data
 }

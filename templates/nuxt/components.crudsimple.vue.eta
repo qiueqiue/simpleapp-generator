@@ -31,7 +31,7 @@ const router = useRouter()
 const route = useRoute()
 const filters = ref()
 defineShortcuts({
-  'ctrl_i': () => newData()
+  'ctrl_enter': () => newData()
 })
 const refresh = () => {
   obj.list().then((res:any) => {    
@@ -91,7 +91,7 @@ refresh();
  
 <template>
     <div class="simpleapp-crudsimple">    
-      <button class="bg-primary" @click="newData" v-tooltip="'Add new(ctrl+i)'" >New</button>
+      <button class="bg-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" >New</button>
       <SimpleAppDatatable
             @row-dblclick="triggerEdit"
             v-model="recordlist"                                 

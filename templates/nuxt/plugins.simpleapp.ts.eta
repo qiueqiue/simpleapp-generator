@@ -30,6 +30,9 @@ import SimpleAppTextarea from '@simitgroup/simpleapp-vue-component/src/component
 import SimpleAppValue from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppValue.vue'
 import SimpleFieldContainer from '@simitgroup/simpleapp-vue-component/src/components/SimpleFieldContainer.vue'
 import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue'
+import SimpleAppInputTable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppInputTable.vue'
+import SimpleAppDynamicInput from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDynamicInput.vue'
+
 import mitt from 'mitt'
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -66,6 +69,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     .component("SimpleAppTextarea",SimpleAppTextarea)
     .component("SimpleAppValue",SimpleAppValue)
     .component("SimpleFieldContainer",SimpleFieldContainer)
+    .component("SimpleAppDatatable",SimpleAppDatatable)
+    .component("SimpleAppDynamicInput",SimpleAppDynamicInput)
+    .component("SimpleAppInputTable",SimpleAppInputTable)
+    
     //.component("Quill",Quill)  // cause problem in ssr mode
     .use(ToastService)
     .use(ConfirmationService)

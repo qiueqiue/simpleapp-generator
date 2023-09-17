@@ -5,17 +5,23 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
+// import Panel from 'primevue/panel';
+// import ScrollPanel from 'primevue/scrollpanel';
+import Dialog from 'primevue/dialog';
 
+import {ref} from 'vue'
 const modelValue = defineModel()
 const isdebug = ref(useRuntimeConfig().public.DEBUGDATA)
+const visible = ref(false)
 </script>
 <template>
     <div class="floatright" v-if="isdebug=='1'">
-        <h3>data in json</h3>
-            <pre>
-            {{ modelValue }}
-            </pre>
-        </div>
+        <button @click="visible=true">Debug</button>
+        <Dialog v-model:visible="visible" modal header="Debug data" :style="{ width: '80vw' }">
+            <pre>{{ modelValue }}</pre>
+        </Dialog>                
+    </div>
+        
 </template>
 <style scoped>
 .floatright{

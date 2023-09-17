@@ -29,4 +29,6 @@ const schemasetting = {
 };
 
 export const <%= it.doctype %>MongoSchema = new Schema(schemasetting,{collection: '<%= it.name %>'})
-.index({<%=it.autocompletecode%>:1,orgId:1},{unique:true});
+.index({<%=it.autocompletecode%>:1,orgId:1},{unique:true})
+.index({<%=it.autocompletename%>:1,orgId:1});
+
