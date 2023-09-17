@@ -119,8 +119,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     try {
       const filter1 = {};
       const filter2 = {};
-      filter1[this.documentIdentityCode] = { $regex: keyword };
-      filter2[this.documentIdentityName] = { $regex: keyword };
+      filter1[this.documentIdentityCode] = { $regex: keyword,$options:'i' };
+      filter2[this.documentIdentityName] = { $regex: keyword,$options:'i' };
       const filterobj = { $or: [filter1, filter2] };
 
       Object.assign(filterobj, this.getIsolationFilter());
