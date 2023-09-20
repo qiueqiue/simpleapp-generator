@@ -127,7 +127,8 @@ export default defineEventHandler(async (event) => {
             // console.log('#####################################')
 
             if (error.response?.status && error.response.status == '401') {
-                return reject({ statusMessage: 'Unauthorized', statusCode: 401 });
+                //return reject({ statusMessage: 'Unauthorized', statusCode: 401 });
+                return sendRedirect(event, '/login', 401)
                 // throw createError({ statusMessage: 'Unauthorized', statusCode: 401 })
             }
 

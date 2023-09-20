@@ -29,6 +29,6 @@ const visible = ref(false)
     right: 0;
     background-color: antiquewhite;
     font-size: large;    
-    top: 0;
+    top: 20;
 }
 </style>

@@ -5,15 +5,68 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
- </script>
+import { ref, Ref } from "vue";
+import { TenantDoc } from "../simpleapp/simpleappdocs/TenantDoc";
+// import OrderList from 'primevue/orderlist';
+import Panel from "primevue/panel";
+
+const { $event, $listen } = useNuxtApp();
+const route = useRoute();
+const doc = new TenantDoc("", $event, $listen);
+type tenantDataType = {
+  tenantId: number;
+  tenantCode: string;
+  tenantName: string;
+  xorg: string;
+};
+const initialtenant: tenantDataType[] = [];
+const tenantlist = ref(initialtenant);
+
+doc
+  .getApi()
+  .getMyTenant()
+  .then((res: any) => {
+    for (let i = 0; i < res.data.length; i++) {
+      const x = res.data[i];
+      const tmp: tenantDataType = {
+        xorg: x.xOrg,
+        tenantId: x.tenantId,
+        tenantCode: x.tenantCode,
+        tenantName: x.tenantName,
+      };
+      tenantlist.value.push(tmp);
+    }
+    console.log(tenantlist.value);
+  });
+// const mytenant = doc.get
+</script>
 <template>
   <div>
-  <h1>index page</h1>
-  <ul>
-    <li><NuxtLink :external="true" to="/MS0xLTE" >MS0xLTE (1-1-1)</NuxtLink></li>
-    <li><NuxtLink :external="true" to="/Mi0yLTI" >Mi0yLTI (2-2-2)</NuxtLink></li>
-  </ul>
-  
+    
+    <Panel header="Tenant List">
+      <div>
+        <NuxtLink
+          v-for="item in tenantlist"
+          :external="true"
+          :to="item.xorg"
+          class="tenant-link"
+        >
+          <div class="flex flex-wrap p-2 align-items-center gap-3">
+            <div class="flex-1 flex flex-column gap-2">
+              <span class="font-bold">{{ item.tenantName }}</span>
+              <div class="flex align-items-center gap-2">
+                <span>{{ item.xorg }}</span>
+              </div>
+            </div>
+            <span class="font-bold text-900">{{ item.tenantCode }}</span>
+          </div>
+        </NuxtLink>
+      </div>
+    </Panel>
   </div>
-  
 </template>
+<style scoped>
+.p-panel {
+  @apply m-2;
+}
+</style>

@@ -10,6 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import {TenantMiddleware} from './class/TenantMiddleware'
+import {AppController} from './app.controller'
+import {AppService} from './app.service'
 <% for(let i=0;i<it.length; i++){ %>
 import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
 <%}%>
@@ -32,8 +34,10 @@ import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].
       tokenValidation: TokenValidation.ONLINE,
     }),
     <% for(let i=0;i<it.length; i++){ %><%= it[i].docname %>Module,<%}%>],
-  controllers: [],
-  providers: [ {
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
     provide: APP_GUARD,     
     useClass: AuthGuard,
   },

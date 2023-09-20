@@ -5,7 +5,7 @@
 button {
     @apply p-2  border-2
 }
-.simpleapp-input-container{
+.simpleapp-input-container,.simpleapp-input-container,.simpleapp-input-container .simpleapp-inputfield{
     @apply flex flex-col
 }
 .simpleapp-input-container .p-chips ul{
@@ -33,4 +33,17 @@ button {
 }
 .bg-warning{
     @apply bg-orange-600  text-white
+}
+
+.desktop-shortcut-link{
+    @apply m-2 m-2 p-2 space-x-2 rounded-sm text-center grid grid-cols-4 gap-4
+}
+.desktop-shortcut-link div{
+    @apply  bg-teal-300 p-2
+}
+.desktop-shortcut-link div:hover{
+    @apply  bg-teal-600 p-2
+}
+.tenant-link:hover div{
+    @apply bg-gray-300
 }

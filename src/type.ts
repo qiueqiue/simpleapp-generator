@@ -1,6 +1,16 @@
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 export type ChildModels = {
-  [key: string]: { type: string; model: SchemaModel,codeField:string,nameField:string,moreAutoComplete:string[] };
+  [key: string]: { 
+    type: string; 
+    model: SchemaModel,
+    codeField:string,
+    nameField:string,
+    moreAutoComplete:string[],
+    docStatusSettings:DocStatusSetting[],
+    apiSettings:ApiSetting[],
+    requireautocomplete: boolean
+    isolationtype:string
+  };
 };
 export enum Fieldtypes {
   'string' = 'string',
@@ -63,4 +73,37 @@ frontEndCode: string
 backEndCode: string
 controllerCode:string
 apiSchemaCode:string
+docStatusSettings:DocStatusSetting[],
+apiSettings:ApiSetting[],
+requireautocomplete:boolean,
+isolationtype:string
+}
+
+export type DocStatusSetting = {
+  statusCode:string,
+  statusName:string,
+  allowApi:string[],
+  readonly?:boolean,
+  description?:''
+}
+
+export type ApiSetting = {
+  method:string,
+  action:string,  
+  setDocStatus?:'',
+  description?:'',
+  bpmnApi?:'',
+  data?:any
+}
+export type DocSetting = {
+  docName:string,
+  docType:string,
+  colDocNo:string,
+  colDocLabel:string,
+  collectionName:string,
+  autocompleteFields:string[],
+  docStatusSettings:DocStatusSetting[],
+  apiSettings:ApiSetting[],
+  requireautocomplete:boolean
+  isolationtype:string
 }

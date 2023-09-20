@@ -55,7 +55,7 @@
         <% } else if(obj.type=='array'  && obj.items && obj.items.type =='string' ){ %>              
             <SimpleAppChip   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
         <% } else if(obj.type=='object'  && typeof obj['x-foreignkey']!='undefined'){ %>              
-            <SimpleAppAutocomplete  :getAutocomplete="getAutocomplete" :setting="o.getField('#/properties/<%= key %>')"
+            <SimpleAppAutocomplete :setting="o.getField('#/properties/<%= key %>')"
                     v-model="data.<%= key %>" optionLabel="label" :remote-src="getAutocomplete('<%=obj['x-foreignkey']%>')"/>
         <% } else if(obj.type=='string'){ %>            
                 <% if(obj.format=='date'){ %>

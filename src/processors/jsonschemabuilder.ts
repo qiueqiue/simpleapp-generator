@@ -13,32 +13,64 @@ import {
   ChildModels,
   SchemaModel,
   TypeForeignKey,
-  TypeForeignKeyCatalogue
+  TypeForeignKeyCatalogue,
+  DocSetting,ApiSetting,DocStatusSetting,
+  
 } from '../type';
 import { json } from 'stream/consumers';
 const log: Logger<ILogObj> = new Logger();
-const X_DOCUMENT_NO='x-document-no'
-const X_DOCUMENT_NAME='x-document-name'
-const X_AUTOCOMPLETE_FIELD='x-autocomplete-field'
-const FOREIGNKEY_PROPERTY='x-foreignkey'
 
+const X_DOCUMENT_NO='x-document-no'
+const X_DOCUMENT_LABEL='x-document-label'
+const X_AUTOCOMPLETE_FIELD='x-autocomplete-field'
+const X_DOCUMENT_NAME='x-document-name'
+const X_DOCUMENT_TYPE='x-document-type'
+const X_COLLECTION_NAME='x-document-collection'
+const X_DOCUMENT_STATUS='x-document-status'
+const X_DOCUMENT_API='x-document-api'
+const X_IGNORE_AUTOCOMPLETE='x-ignore-autocomplete'
+const FOREIGNKEY_PROPERTY='x-foreignkey'
 const X_TEL_NO='x-tel'
+const X_ISOLATION_TYPE='x-isolation-type'
+
+let docSetting:DocSetting={} as DocSetting
+
+
+
 let allmodels: ChildModels = {};
 let fullschema={}
-let fieldAutoCompleteCode=''
-let fieldAutoCompleteName=''
+// let fieldAutoCompleteCode=''
+// let fieldAutoCompleteName=''
 let moreAutoComplete:string[]=[]
+
+
+const newDocSetting=(doctype:string,docname:string):DocSetting=>{
+  return {
+    docName:docname,  //done
+    docType:doctype,  //done
+    colDocNo:'',      //done
+    colDocLabel:'',   //done
+    collectionName:docname, //done
+    autocompleteFields:[],
+    docStatusSettings:[],
+    apiSettings:[],
+    requireautocomplete:true,
+    isolationtype:"org"
+
+  }
+}
 export const readJsonSchemaBuilder = async (
   doctype: string,
   docname: string,
   orijsondata:JSONSchema7,
   allforeignkeys:TypeForeignKeyCatalogue
 ) => {
-  
-  fieldAutoCompleteCode=''
-  fieldAutoCompleteName=''
+  docSetting=newDocSetting(doctype,docname)
+  // fieldAutoCompleteCode=''
+  // fieldAutoCompleteName=''
   moreAutoComplete=[]
   allmodels = {};
+  
   const validateddata: JSONSchema7 = { ...orijsondata };
   let schema: SchemaModel | SchemaModel[];
   const  tmpjsondata = await $RefParser.dereference(orijsondata).then((schema)=>{
@@ -56,12 +88,12 @@ export const readJsonSchemaBuilder = async (
   } else if (jsondata.type == 'array') {
     throw(`unsupport array type for ${docname}.${doctype}`)
   }
-  if(fieldAutoCompleteCode=='') {
+  if(docSetting.colDocNo=='' && docSetting.requireautocomplete) {
     log.error(`you shall define 1 field with format:'${X_DOCUMENT_NO}'`)
     throw "missing field format"
   }
-  if(fieldAutoCompleteName=='') {
-    log.error(`you shall define 1 field with format: '${X_DOCUMENT_NAME}'}`)
+  if(docSetting.colDocLabel=='' && docSetting.requireautocomplete) {
+    log.error(`you shall define 1 field with format: '${X_DOCUMENT_LABEL}'}`)
     throw "missing field format"
   }
   
@@ -86,6 +118,50 @@ const processObject =  (doctype: string,
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updatedby'] = {type: 'string',description: 'Control value, dont edit it',};
+
+    if(jsondata[X_ISOLATION_TYPE] && ['none','tenant','org','branch'].includes(jsondata[X_ISOLATION_TYPE])  ){      
+      docSetting.isolationtype=jsondata[X_ISOLATION_TYPE]
+    }
+    if(jsondata[X_IGNORE_AUTOCOMPLETE] && jsondata[X_IGNORE_AUTOCOMPLETE]==true){
+      docSetting.requireautocomplete=false
+    }
+    if(jsondata[X_DOCUMENT_API] && Array.isArray(jsondata[X_DOCUMENT_API])){
+      log.warn("x-document-api exists:")
+      log.warn(jsondata[X_DOCUMENT_API])
+      for(let i=0; i<jsondata[X_DOCUMENT_API].length;i++){
+        const tmp:ApiSetting =jsondata[X_DOCUMENT_API][i]
+        if(!tmp.action){
+          const errmsg = "x-document-api defined but undefine property 'action'"
+          log.error(errmsg)
+          
+          throw errmsg
+        }
+        if(!tmp.method){
+          const errmsg = "x-document-api defined but undefine property 'method'"
+          log.error(errmsg)
+          throw errmsg
+        }
+        docSetting.apiSettings.push(tmp)
+      }
+    }
+      if(jsondata[X_DOCUMENT_STATUS] && Array.isArray(jsondata[X_DOCUMENT_STATUS])){
+        for(let i=0; i<jsondata[X_DOCUMENT_STATUS].length;i++){
+          const tmp:DocStatusSetting =jsondata[X_DOCUMENT_STATUS][i]
+          if(tmp.statusCode ===undefined){
+            const errmsg = "x-document-status defined but undefine property 'statusCode'"
+            log.error(errmsg)
+            throw errmsg
+          }
+          if(!tmp.statusName ===undefined){
+            const errmsg = "x-document-status defined but undefine property 'statusName'"
+            log.error(errmsg)
+            throw errmsg            
+          }
+          docSetting.docStatusSettings.push(tmp)
+        }
+     }
+
+
     return genSchema(
       capitalizeFirstLetter(docname),
       'object',
@@ -94,12 +170,8 @@ const processObject =  (doctype: string,
     );
 }
 
-const genSchema = (
-  docname: string,
-  schematype: string,
-  jsondata: JsonSchemaProperties,//JSONSchema7,//|JsonSchemaProperties|JSONSchema7Definition,
-  requiredlist: string[] | undefined,
-): SchemaModel => {
+const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProperties,
+  requiredlist: string[] | undefined): SchemaModel => {
   const newmodel: SchemaModel = {};
   const props = Object.getOwnPropertyNames(jsondata ??{});
   // console.log('==== jsondata', jsondata);
@@ -116,18 +188,25 @@ const genSchema = (
     const isrequired = requiredlist && requiredlist.includes(key);
     const newName: string = docname + capitalizeFirstLetter(key);
    if(obj.format && obj.format==X_DOCUMENT_NO){
-    fieldAutoCompleteCode=key
+    docSetting.colDocNo=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
    }
-   if(obj.format && obj.format==X_DOCUMENT_NAME){
-    fieldAutoCompleteName=key
+   if(obj.format && obj.format==X_DOCUMENT_LABEL){
+    docSetting.colDocLabel=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
    }
+   
+   if(obj[X_COLLECTION_NAME]){
+    docSetting.collectionName=key    
+   }
+
+
    if(obj[X_AUTOCOMPLETE_FIELD]){
-    moreAutoComplete.push(key)
+    docSetting.autocompleteFields.push(key)
    }
+   
 
   //  if(obj.format && obj.format==X_TEL_NO){
   //   obj.pattern=obj.pattern ?? '/^\d{7,15}$/gm'
@@ -177,7 +256,18 @@ const genSchema = (
       // console.log(key,'--------newmodel',obj, newmodel[key]);
     }
   }
-  allmodels[docname] = { type: schematype, model: newmodel,codeField: fieldAutoCompleteCode ,nameField: fieldAutoCompleteName,moreAutoComplete:moreAutoComplete };
+  allmodels[docname] = { 
+    type: schematype, 
+    model: newmodel,
+    codeField: docSetting.colDocNo ,
+    nameField: docSetting.colDocLabel,
+    moreAutoComplete:docSetting.autocompleteFields,
+    docStatusSettings:docSetting.docStatusSettings,
+    apiSettings:docSetting.apiSettings,
+    requireautocomplete:docSetting.requireautocomplete,
+    isolationtype:docSetting.isolationtype
+  };
+  // console.warn(docname,docSetting.isolationtype)
   return newmodel;
 };
 
@@ -216,3 +306,4 @@ const getField = (
   }
   return f;
 };
+

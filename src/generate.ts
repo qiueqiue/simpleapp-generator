@@ -110,6 +110,10 @@ const generate = (
       backEndCode: '',
       controllerCode:'',
       apiSchemaCode:'',
+      docStatusSettings:allmodels[capitalizeFirstLetter(docname)].docStatusSettings,
+      apiSettings:allmodels[capitalizeFirstLetter(docname)].apiSettings,
+      requireautocomplete:allmodels[capitalizeFirstLetter(docname)].requireautocomplete,
+      isolationtype:allmodels[capitalizeFirstLetter(docname)].isolationtype
     };
 
     // console.log('generate 2', JSON.stringify(variables));
@@ -271,8 +275,9 @@ const prepareEnvironments = (backendfolder:string,frontendfolder:string)=>{
   
   copyFileSync(`${constants.templatedir}/nest/SimpleAppService.eta`,`${targetfolder}/SimpleAppService.ts`)
   copyFileSync(`${constants.templatedir}/nest/SimpleAppController.eta`,`${targetfolder}/SimpleAppController.ts`)
+  copyFileSync(`${constants.templatedir}/nest/Workflow.eta`,`${targetfolder}/Workflow.ts`)
   copyFileSync(`${constants.templatedir}/nest/TenantMiddleware.eta`,`${targetfolder}/TenantMiddleware.ts`)
-  copyFileSync(`${constants.templatedir}/nest/User.eta`,`${targetfolder}/User.ts`)
+  copyFileSync(`${constants.templatedir}/nest/UserProvider.eta`,`${targetfolder}/UserProvider.ts`)
 
   //copy over frontend apiabstract class
   // copyFileSync(`${constants.templatedir}/nuxt.apigateway.eta`,`${targetfrontendfolder}/[...].ts`)
@@ -291,6 +296,12 @@ const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:strin
   const eta = new Eta({views:constants.templatedir});
   const txtMainModule = eta.render('./nest/app.module.eta', modules);
   writeFileSync(`${backendfolder}/src/app.module.ts`, txtMainModule);
+  
+  const txtMainService = eta.render('./nest/app.service.eta', modules);
+  writeFileSync(`${backendfolder}/src/app.service.ts`, txtMainService);
+
+  const txtAppController = eta.render('./nest/app.controller.eta', modules);
+  writeFileSync(`${backendfolder}/src/app.controller.ts`, txtAppController);
 
   const foreignkeyfile =`${backendfolder}/src/dicts/foreignkeys.json`
   writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));

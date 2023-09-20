@@ -6,6 +6,7 @@
  * last change 2023-09-09
  * Author: Ks Tan
  */
+import { UserProvider } from '../../class/UserProvider'
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -20,7 +21,7 @@ export class <%= it.typename %>Service extends SimpleAppService<<%= it.typename 
   protected documentIdentityName='<%~ it.autocompletename %>'
     constructor(@InjectModel('<%= it.name %>')  mydoc: Model<<%= it.typename %>>,
   ) {
-    super('<%= it.doctype %>','<%= it.name %>',mydoc,IsolationType.org);
+    super('<%= it.doctype %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>);
     this.setSchema(<%= it.typename%>JsonSchema)
     
     <%if(it.moreAutoComplete.length>0){%>
@@ -34,7 +35,22 @@ export class <%= it.typename %>Service extends SimpleAppService<<%= it.typename 
     
   }
 
-  
+  /***************************** x-document-api definations *****************************************/
+
+  <%for(let i=0;i<it.apiSettings.length;i++){%>
+  <% let api = it.apiSettings[i] %>
+  async exec<%=capitalizeFirstLetter(api.action)%>(id:string){
+    <%if(api.bpmn!==undefined){%>
+    return await this.executeWorkFlow(id,"<%=api.bpmn%>","<%=api.setDocumentStatus%>")
+    <%}else if (api.setDocumentStatus !== undefined){%>
+    return await this.setDocumentStatus(id,'<%=api.setDocumentStatus%>')
+    <%}else {%>
+      return Promise.resolve("unknown action")
+    <%}%>
+    
+  } 
+  <%}%>
+
   /*****************************customized frontend + backend code*****************************************/
     
   <%~ it.bothEndCode %>

@@ -13,5 +13,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "paths": {"@": ["./"]}
-    }
+    },
+    "exclude": [
+      "node_modules" , "./dist" , "./tools"
+   ]
   }

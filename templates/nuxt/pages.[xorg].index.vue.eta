@@ -5,15 +5,16 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
- </script>
+const menus = getMenus();
+</script>
 <template>
   <div>
-  <h1>index page</h1>
-  <ul>
-    <li><NuxtLink :external="true" to="/MS0xLTE" >MS0xLTE (1-1-1)</NuxtLink></li>
-    <li><NuxtLink :external="true" to="/Mi0yLTI" >Mi0yLTI (2-2-2)</NuxtLink></li>
-  </ul>
-  
+    
+
+    <div class="desktop-shortcut-link">
+      <div v-for="menu in menus[1].items" class="">
+        <NuxtLink :external="true" :to="menu.to">{{ menu.label }}</NuxtLink>
+      </div>
+    </div>
   </div>
-  
 </template>

@@ -6,6 +6,7 @@
  * Author: Ks Tan
  */
 import { SimpleAppClient } from "@simitgroup/simpleapp-vue-component/src/SimpleAppClient";
+import {AxiosResponse} from 'axios'
 
 // import { JSONSchema7 } from 'json-schema';
 import { Configuration,
@@ -26,6 +27,9 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityName='<%~ it.autocompletename %>'
   constructor(xorg:string,event:any,listen?:any) {    
+    if(!xorg){
+      xorg='MC0wLTA' //0-0-0
+    }
     const apiconfig = new Configuration({ basePath:  `${useRuntimeConfig().public.APP_URL}/api/${xorg}` });
     const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
     super(apiobj,'<%= it.doctype %>','<%=it.name %>')
@@ -90,6 +94,21 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
     <%}%>
   <%})%>
   
+
+  <%for(let i=0;i<it.apiSettings.length;i++){%>
+  <% let api = it.apiSettings[i] %>
+  async exec<%=capitalizeFirstLetter(api.action)%>(){
+    const recordid: string = this.data.value._id ?? '';
+    return await this.docapi.exec<%=capitalizeFirstLetter(api.action)%>(recordid)
+    .then((res: AxiosResponse) => {
+      if(this.event){this.event('info:<%=capitalizeFirstLetter(api.action)%>',res.data)}
+      return res;
+    }).catch((res:any)=>{
+      if(this.event){this.event('error:<%=capitalizeFirstLetter(api.action)%>',res)}
+      return Promise.reject(res)
+    });
+  } 
+  <%}%>
 
   /*****************************customized frontend + backend code*****************************************/
     

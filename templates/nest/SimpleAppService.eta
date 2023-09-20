@@ -1,67 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 import foreignkeys from '../dicts/foreignkeys.json';
-
+import { Workflow } from './Workflow';
 import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common/exceptions';
-import { User } from './User';
+import { UserProvider } from './UserProvider';
 
 export enum IsolationType {
+  'none' = 'none',
   'org' = 'org',
   'tenant' = 'tenant',
   'branch' = 'branch',
 }
 export enum HookType {
-  'init'='init',
-  'beforeSearch'='beforeSearch',
-  'afterSearch'='afterSearch',
-  'beforeValidation'='beforeValidation',
-  'afterValidation'='afterValidation',
-  'beforeCreate'='beforeCreate',
-  'afterCreate'='afterCreate',
-  'beforeUpdate'='beforeUpdate',
-  'afterUpdate'='afterUpdate',
-  'beforeDelete'='beforeDelete',
-  'afterDelete'='afterDelete',
-  'beforeFetchRecord'='beforeFetchRecord',
-  'afterFetchRecord'='afterFetchRecord',
-
-
+  'init' = 'init',
+  'beforeSearch' = 'beforeSearch',
+  'afterSearch' = 'afterSearch',
+  'beforeValidation' = 'beforeValidation',
+  'afterValidation' = 'afterValidation',
+  'beforeCreate' = 'beforeCreate',
+  'afterCreate' = 'afterCreate',
+  'beforeUpdate' = 'beforeUpdate',
+  'afterUpdate' = 'afterUpdate',
+  'beforeDelete' = 'beforeDelete',
+  'afterDelete' = 'afterDelete',
+  'beforeFetchRecord' = 'beforeFetchRecord',
+  'afterFetchRecord' = 'afterFetchRecord',
 }
 export type MoreProjectionType = {
-  [key:string]:string
-}
+  [key: string]: string;
+};
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
+  protected logger = new Logger();
   protected jsonschema = { type: 'object', properties: {}, required: [] };
   protected documentIdentityCode = 'code';
   protected documentIdentityName = 'label';
   protected documentName = '-unknowndocname-';
   protected documentType = '-unknowndoctype-';
   protected LIMITPERPAGE = 20;
-  protected moreAutoCompleteField:MoreProjectionType={}
+  protected moreAutoCompleteField: MoreProjectionType = {};
   protected isolationtype: IsolationType = IsolationType.org;
   protected isolationFilter: any = {};
   protected data: T = { _id: '' } as T;
   private doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
   constructor(
-    doctype:string,
-    docname:string,
+    doctype: string,
+    docname: string,
     newdoc: Model<T>,
     isolationtype: IsolationType = IsolationType.org,
   ) {
-    this.documentType=doctype
-    this.documentName=docname
+    this.documentType = doctype;
+    this.documentName = docname;
     this.doc = newdoc;
     this.isolationtype = isolationtype;
-    this.hook(HookType.init,this.documentName)
+    this.hook(HookType.init, this.documentName);
     // this.tenantdoc = tenantdoc
   }
   getRecordId = (): string => this.data._id;
@@ -79,15 +79,18 @@ export class SimpleAppService<T extends { _id?: string }> {
   getIsolationFilter = () => {
     let isolationFilter = {};
     switch (this.isolationtype) {
+      case 'none':
+        isolationFilter = {};
+        break;
       case 'branch':
-        isolationFilter = User.getInstance().getBranchFilter();
+        isolationFilter = UserProvider.getInstance().getBranchFilter();
         break;
       case 'tenant':
-        isolationFilter = User.getInstance().getTenantFilter();
+        isolationFilter = UserProvider.getInstance().getTenantFilter();
         break;
       case 'org':
       default:
-        isolationFilter = User.getInstance().getOrgFilter();
+        isolationFilter = UserProvider.getInstance().getOrgFilter();
         break;
     }
     return isolationFilter;
@@ -106,21 +109,21 @@ export class SimpleAppService<T extends { _id?: string }> {
       throw new InternalServerErrorException(err.message);
     }
   }
-  addAutoCompleteField = (morefield:MoreProjectionType)=>{
-    const props = Object.getOwnPropertyNames(morefield)
-    console.log('addAutoCompleteField',props)
-    for(let i=0;i<props.length;i++){
-      const key = props[i]
-      this.moreAutoCompleteField[key] = '$'+morefield[key]
+  addAutoCompleteField = (morefield: MoreProjectionType) => {
+    const props = Object.getOwnPropertyNames(morefield);
+    console.log('addAutoCompleteField', props);
+    for (let i = 0; i < props.length; i++) {
+      const key = props[i];
+      this.moreAutoCompleteField[key] = '$' + morefield[key];
     }
-    console.log(this.moreAutoCompleteField)
-  }
+    console.log(this.moreAutoCompleteField);
+  };
   async getAutoComplete(keyword: string) {
     try {
       const filter1 = {};
       const filter2 = {};
-      filter1[this.documentIdentityCode] = { $regex: keyword,$options:'i' };
-      filter2[this.documentIdentityName] = { $regex: keyword,$options:'i' };
+      filter1[this.documentIdentityCode] = { $regex: keyword, $options: 'i' };
+      filter2[this.documentIdentityName] = { $regex: keyword, $options: 'i' };
       const filterobj = { $or: [filter1, filter2] };
 
       Object.assign(filterobj, this.getIsolationFilter());
@@ -129,8 +132,8 @@ export class SimpleAppService<T extends { _id?: string }> {
         label: `\$${this.documentIdentityCode}`,
         name: `\$${this.documentIdentityName}`,
       };
-      if(this.moreAutoCompleteField){
-        Object.assign(projections,this.moreAutoCompleteField)
+      if (this.moreAutoCompleteField) {
+        Object.assign(projections, this.moreAutoCompleteField);
       }
       const products = await this.doc.find(filterobj, projections, {
         limit: this.LIMITPERPAGE,
@@ -145,14 +148,13 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async search(filters: Object) {
     try {
-      
       Object.assign(filters, this.getIsolationFilter());
-      await this.hook(HookType.beforeSearch,filters)
+      await this.hook(HookType.beforeSearch, filters);
       const products = await this.doc.find(filters);
       const productlist = products.map((p: T) => {
         return p;
       });
-      await this.hook(HookType.afterSearch,productlist)
+      await this.hook(HookType.afterSearch, productlist);
       //   console.log(products);
       return productlist;
     } catch (err) {
@@ -161,9 +163,9 @@ export class SimpleAppService<T extends { _id?: string }> {
     // return this;
   }
   async findById(id: string) {
-    await this.hook(HookType.beforeFetchRecord,id)
+    await this.hook(HookType.beforeFetchRecord, id);
     const data = await this.search({ _id: id });
-    await this.hook(HookType.afterFetchRecord,data)
+    await this.hook(HookType.afterFetchRecord, data);
     if (data.length == 1) {
       // console.log('data0', data[0]);
       return data[0];
@@ -176,13 +178,13 @@ export class SimpleAppService<T extends { _id?: string }> {
     let result;
 
     try {
-      await this.hook(HookType.beforeCreate,this.data)
-      Object.assign(this.data, User.getInstance().getCreateFilter());
+      await this.hook(HookType.beforeCreate, this.data);
+      Object.assign(this.data, UserProvider.getInstance().getCreateFilter());
       delete this.data._id;
       await this.validateData(this.data);
       const newdoc = new this.doc(this.data);
       result = await newdoc.save();
-      await this.hook(HookType.afterCreate,result)
+      await this.hook(HookType.afterCreate, result);
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
@@ -190,7 +192,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async update() {
     const id: string = this.getRecordId();
-    Object.assign(this.data, User.getInstance().getUpdateFilter());
+    Object.assign(this.data, UserProvider.getInstance().getUpdateFilter());
     await this.findIdThenUpdate(id, this.data);
   }
   async delete() {
@@ -202,44 +204,56 @@ export class SimpleAppService<T extends { _id?: string }> {
       return dependency;
     }
   }
-  hook = async (type: string, data?: any) =>{
-    console.log("Default hook",data)
+  hook = async (type: string, data?: any) => {
+    // console.log('Default hook', data);
     return true;
-  }
+  };
   async validateData(data: T) {
     const ajv = new Ajv({ allErrors: true });
     addFormats(ajv);
     addErrors(ajv);
 
     ajv.addFormat('x-document-no', /.*$/);
-    ajv.addFormat('x-document-name', /.*$/);
-    ajv.addFormat('x-text', /.*$/);
+    ajv.addFormat('x-document-label', /.*$/);
     ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
+    ajv.addFormat('x-text', /.*$/);
     ajv.addFormat('x-html', /.*$/);
-    ajv.addKeyword({
-      keyword: 'x-foreignkey',
-      type: 'string',
-    });
 
-    const issuccess = await this.hook(HookType.beforeValidation, data)
+    ajv.addKeyword({ keyword: 'x-document-status', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-document-api', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-ignore-autocomplete', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-isolation-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-collection-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-autocomplete-field', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-foreignkey', type: 'string' });
+
+    const issuccess = await this.hook(HookType.beforeValidation, data);
     if (!issuccess) {
       const erromsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {
         erromsg.push(this.errorlist[i].message);
       }
-      
+      this.logger.log('run hook during validation');
       throw new InternalServerErrorException(erromsg.join('\n'));
     }
-    const validate = ajv.compile(this.jsonschema);
+
+    let validate;
+    try {
+      validate = ajv.compile(this.jsonschema);
+    } catch (err) {
+      this.logger.error('compile error', err);
+    }
+
     const valid = validate(data);
-    //console.log(validate.errors);
     if (!valid) {
-      // console.log(validate.errors);
+      this.logger.error(validate.errors);
       const erromsg: string[] = [];
       for (let i = 0; i < ajv.errors.length; i++) {
         erromsg.push(ajv.errors[i].message);
       }
-      console.log('ajv erromsg: ', erromsg);
+      this.logger.error('ajv erromsg: ', erromsg);
       throw new InternalServerErrorException(erromsg.join('\n'));
     }
     await this.hook(HookType.afterValidation, data);
@@ -248,7 +262,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   async findIdThenDelete(id: string): Promise<any> {
     // const data = await this.findById(id);
     try {
-      await this.hook(HookType.beforeDelete,id)
+      await this.hook(HookType.beforeDelete, id);
       //console.log('deletedeletedeletedelete');
       const dependency = await this.getRelatedRecords(id);
       if (!dependency) {
@@ -256,7 +270,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         filter['_id'] = id;
         const deleteresult = await this.doc.deleteOne(filter);
         // this.doc.findByIdAndDelete(id)
-        await this.hook(HookType.afterDelete,deleteresult)
+        await this.hook(HookType.afterDelete, deleteresult);
         //this.doc.findByIdAndDelete(id);
         return deleteresult;
       } else {
@@ -273,15 +287,15 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   findIdThenUpdate = async (id: string, data: T) => {
     const existingdata = await this.findById(id);
-    await this.hook(HookType.beforeUpdate,data)
+    await this.hook(HookType.beforeUpdate, data);
     try {
-      Object.assign(data, User.getInstance().getUpdateFilter());
+      Object.assign(data, UserProvider.getInstance().getUpdateFilter());
       Object.assign(existingdata, data);
       await this.validateData(data);
       let filter = this.getIsolationFilter();
       filter['_id'] = id;
       const result = await this.doc.findOneAndUpdate(filter, data);
-      await this.hook(HookType.afterUpdate,data)
+      await this.hook(HookType.afterUpdate, data);
       return result;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
@@ -316,5 +330,37 @@ export class SimpleAppService<T extends { _id?: string }> {
       }
     }
     return Promise.resolve(null);
+  }
+
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async setDocumentStatus(id: string, docstatus: string) {
+    const partialdata: T = {} as T;
+    partialdata['documentStatus'] = docstatus;
+    return this.findIdThenUpdate(id, partialdata);
+  }
+
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async executeWorkFlow(id: string, bpmnname: string, docstatus: string) {
+    const data = await this.findById(id);
+    return Workflow.getInstance().executeWorkFlow(
+      id,
+      bpmnname,
+      docstatus,
+      data,
+    );
+  }
+
+  async getMyUserTask() {
+    return Workflow.getInstance().getMyUserTask();
   }
 }
