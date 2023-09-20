@@ -312,5 +312,9 @@ const finalize=(modules:ModuleObject[],backendfolder:string,frontendfolder:strin
 
   const txtMenus = eta.render('./nuxt/composables.getmenus.ts.eta', modules);
   writeFileSync(`${frontendfolder}/composables/getMenus.ts`, txtMenus);
+
+  const txtStringHelper= eta.render('./nuxt/composables.stringHelper.ts.eta', modules);
+  writeFileSync(`${frontendfolder}/composables/stringHelper.ts`, txtStringHelper);
+  
   
 }

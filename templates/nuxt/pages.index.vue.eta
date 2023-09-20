@@ -42,7 +42,6 @@ doc
 </script>
 <template>
   <div>
-    
     <Panel header="Tenant List">
       <div>
         <NuxtLink

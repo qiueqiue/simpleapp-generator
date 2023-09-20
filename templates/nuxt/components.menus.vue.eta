@@ -11,9 +11,11 @@
 // const route = useRoute()
 // const menus = getMenus(route.params.xorg)
 import MenuIndex from "../pages/[xorg]/index.vue"
+import TenantIndex from "../pages/index.vue"
 import Dialog from 'primevue/dialog';
 import {ref} from 'vue'
 const visible = ref(false)
+const visibletenant = ref(false)
 const logout = async () => {
         const { signOut } = useAuth();
         const { data } = await <any>useFetch('/api/auth/logout');
@@ -26,14 +28,21 @@ const logout = async () => {
     <!-- <header>       -->
         <!-- <MegaMenu :model="getMenus()" orientation="horizontal" />               -->
     <div class="bg-white border-b-2 border-b-gray-300  h-10 flex">
-        <Dialog v-model:visible="visible" modal header="Header" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">
+        <Dialog v-model:visible="visible" modal header="Pick Document" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">
             <MenuIndex></MenuIndex>
         </Dialog>
+        <Dialog v-model:visible="visibletenant" modal header="Pick Tenant" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">
+            <TenantIndex></TenantIndex>
+        </Dialog>
+        
         <div class="flex-1">
             <NuxtLink to="/"><i class="pi pi-home m-2"></i>Home</NuxtLink>     
         </div>
         <div class="flex-1 p-1">
             <A class="text-center  cursor-pointer"  @click="visible=true"><i class="pi pi-microsoft mr-2"></i>Menu</A>
+        </div>
+        <div class="flex-1 p-1">
+            <A class="text-center  cursor-pointer"  @click="visibletenant=true"><i class="pi pi-globe mr-2"></i>Switch Tenant</A>
         </div>
         <div class="flex-1 text-right p-1">
             <A class=" cursor-pointer" @click="logout()">
