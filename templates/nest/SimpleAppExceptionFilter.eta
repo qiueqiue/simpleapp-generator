@@ -1,0 +1,37 @@
+import {
+  ExceptionFilter,
+  HttpStatus,
+  BadRequestException,
+  Catch,
+  ArgumentsHost,
+  InternalServerErrorException,
+  HttpException,
+} from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
+
+import { Request, Response } from 'express';
+
+@Catch()
+export class SimpleAppExceptionFilter implements ExceptionFilter {
+ 
+  catch(exception: any, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+
+    if(exception.message && exception.message[0]=='['){
+      response.status(400).json({
+        statusCode: 400,        
+        message:"Validation failed",
+        errors: JSON.parse(exception.message)
+      });
+    }else{
+      response.status(status).json({
+        statusCode: status,        
+        message:exception.message        
+      });
+
+    }
+  }  
+}

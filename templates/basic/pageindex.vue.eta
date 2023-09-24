@@ -7,14 +7,9 @@
  * author: Ks Tan
  */
 <% let skipcolumns = ['_id','createdby','created','updatedby','updated','orgId','branchId','tenantId','doctype'] %>
-
-  import { <%= it.typename %>Doc } from "../../../simpleapp/simpleappdocs/<%= it.typename %>Doc";
-  import SimpleAppDatatable from "@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue";
   import {InputTableColumnType,InputTableColumn} from "@simitgroup/simpleapp-vue-component/src/type";
-  const { $event, $listen } = useNuxtApp();
-  const route = useRoute()  
-  const doc = new <%= it.typename %>Doc(route.params.xorg.toString(),$event, $listen);
-  const documentpath = `/${route.params.xorg}/<%= it.name %>`;
+  const {$<%= it.typename %>Doc } = useNuxtApp();
+  const doc = $<%= it.typename %>Doc()
   const data = doc.getReactiveData();
   const columns = [
     <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
@@ -36,17 +31,18 @@
         ]  
     <%}%>
   <%})%>
-  
+  //end
 </script>
 <template>
     <div>    
     <CrudSimple :document="doc"  title="<%= it.typename %>"
      #default="o" 
-     :path="documentpath"
+     :path="`/${useRoute().params.xorg}/<%= it.name %>`"
     :listColumns="columns"> 
     
       <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
-        <% let obj=it.jsonschema.properties[key] %>        
+      
+        <% let obj=it.jsonschema.properties[key] %>
         <% if(skipcolumns.indexOf(key)>=0){ %>
         <% } else if(obj.type=='boolean'){ %>
             <SimpleAppCheckbox  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
@@ -67,7 +63,7 @@
                 <% } else if(obj.format=='email'){ %>
                     <SimpleAppText  autofocus type="<%=obj.type%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.enum){ %>
-                    <SimpleAppRadio  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+                    <SimpleAppSelect  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
                 <% } else {%>
                         <SimpleAppText   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% }%>  
@@ -106,8 +102,7 @@
             <%})%>   
             </SimpleAppValue>            
         <% } else if(obj.type=='array' && obj.items.type=='object'){%>
-            <button @click="doc.add<%=key%>()" type="button">+</button>
-            <SimpleAppInputTable :getAutocomplete="getAutocomplete" :getField="o.getField"
+            <SimpleAppInputTable :getAutocomplete="getAutocomplete" :getField="o.getField" class="col-span-2"
                 :setting="o.getField('#/properties/<%=key%>')" #default="row" v-model="data.<%=key%>" :columns="<%=it.name%>_<%=key%>"></SimpleAppInputTable>
         <% } else{%>
             <!-- Can auto generate <%=obj.key %> -->  

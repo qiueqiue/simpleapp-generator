@@ -22,19 +22,22 @@ import { Configuration,
 
 
 
-export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= it.doctype.toUpperCase()%>Api>{
+export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<%= it.doctype.toUpperCase()%>Api>{
   public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityName='<%~ it.autocompletename %>'
-  constructor(xorg:string,event:any,listen?:any) {    
+  constructor() {    
+    const {$event,$listen,$axios}=useNuxtApp()
+    let xorg = getTenant()
     if(!xorg){
       xorg='MC0wLTA' //0-0-0
     }
+
     const apiconfig = new Configuration({ basePath:  `${useRuntimeConfig().public.APP_URL}/api/${xorg}` });
-    const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig)
+    const apiobj = new <%= it.doctype.toUpperCase()%>Api(apiconfig,apiconfig.basePath,$axios)
     super(apiobj,'<%= it.doctype %>','<%=it.name %>')
-    this.event=event
-    this.listen=listen
+    this.event=$event
+    this.listen=$listen
     
     this.setNew();    
   }
@@ -68,7 +71,7 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
     
     <% if(obj.type=='array' && obj.items.type=='object' && obj.items['properties']){ %>
         <%let tablefields = Object.keys(obj.items.properties) %>
-       add<%=key%> = () => {
+       public add<%=key%> = () => {
         const tmp:<%=it.typename%><%=capitalizeFirstLetter(key)%> = {
           <% for(let a=0;a<tablefields.length;a++){%>
               <% const skey =  tablefields[a] %>
@@ -94,21 +97,23 @@ export class <%= it.typename%>Doc extends SimpleAppClient<<%= it.typename%>,<%= 
     <%}%>
   <%})%>
   
+  /*****************************x-document-api code*****************************************/
 
   <%for(let i=0;i<it.apiSettings.length;i++){%>
   <% let api = it.apiSettings[i] %>
-  async exec<%=capitalizeFirstLetter(api.action)%>(){
-    const recordid: string = this.data.value._id ?? '';
-    return await this.docapi.exec<%=capitalizeFirstLetter(api.action)%>(recordid)
+  async <%=api.execute%>(){
+    //const recordid: string = this.data.value._id ?? '';
+    return await this.docapi.<%=api.execute%>()
     .then((res: AxiosResponse) => {
-      if(this.event){this.event('info:<%=capitalizeFirstLetter(api.action)%>',res.data)}
+      if(this.event){this.event('info:<%=api.execute%>',res.data)}
       return res;
     }).catch((res:any)=>{
-      if(this.event){this.event('error:<%=capitalizeFirstLetter(api.action)%>',res)}
+      if(this.event){this.event('error:<%=api.execute%>',res)}
       return Promise.reject(res)
     });
   } 
   <%}%>
+
 
   /*****************************customized frontend + backend code*****************************************/
     

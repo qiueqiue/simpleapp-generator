@@ -5,7 +5,7 @@
  * author: Ks Tan
  */
  
-import * as o from "../simpleapp/openapi";
+import * as o from "../generate/openapi";
 import axios from 'axios'
 const getAutoComplete = (apiname: string): any => {
   //const { csrf } = useCsrf()    

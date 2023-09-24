@@ -8,6 +8,7 @@ import foreignkeys from '../dicts/foreignkeys.json';
 import { Workflow } from './Workflow';
 import {
   NotFoundException,
+  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common/exceptions';
 import { UserProvider } from './UserProvider';
@@ -177,7 +178,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   async create() {
     let result;
 
-    try {
+    // try {
       await this.hook(HookType.beforeCreate, this.data);
       Object.assign(this.data, UserProvider.getInstance().getCreateFilter());
       delete this.data._id;
@@ -185,9 +186,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       const newdoc = new this.doc(this.data);
       result = await newdoc.save();
       await this.hook(HookType.afterCreate, result);
-    } catch (err) {
-      throw new InternalServerErrorException(err.message);
-    }
+   
     return result as T;
   }
   async update() {
@@ -213,8 +212,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     addFormats(ajv);
     addErrors(ajv);
 
-    ajv.addFormat('x-document-no', /.*$/);
-    ajv.addFormat('x-document-label', /.*$/);
+    // ajv.addFormat('x-document-no', /.*$/);
+    // ajv.addFormat('x-document-label', /.*$/);
     ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
     ajv.addFormat('x-text', /.*$/);
     ajv.addFormat('x-html', /.*$/);
@@ -231,32 +230,29 @@ export class SimpleAppService<T extends { _id?: string }> {
 
     const issuccess = await this.hook(HookType.beforeValidation, data);
     if (!issuccess) {
-      const erromsg: string[] = [];
+      const errormsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {
-        erromsg.push(this.errorlist[i].message);
+        errormsg.push(this.errorlist[i].message);
       }
       this.logger.log('run hook during validation');
-      throw new InternalServerErrorException(erromsg.join('\n'));
+      throw new BadRequestException(JSON.stringify(errormsg));
     }
 
     let validate;
     try {
       validate = ajv.compile(this.jsonschema);
+    
+
+      const valid = validate(data);
+      if (!valid) {
+        this.logger.error(JSON.stringify(validate.errors),"validate errors:")
+        throw new BadRequestException(JSON.stringify(validate.errors));
+      }
+      await this.hook(HookType.afterValidation, data);
     } catch (err) {
       this.logger.error('compile error', err);
+      throw new InternalServerErrorException(err.message);
     }
-
-    const valid = validate(data);
-    if (!valid) {
-      this.logger.error(validate.errors);
-      const erromsg: string[] = [];
-      for (let i = 0; i < ajv.errors.length; i++) {
-        erromsg.push(ajv.errors[i].message);
-      }
-      this.logger.error('ajv erromsg: ', erromsg);
-      throw new InternalServerErrorException(erromsg.join('\n'));
-    }
-    await this.hook(HookType.afterValidation, data);
   }
 
   async findIdThenDelete(id: string): Promise<any> {
@@ -288,7 +284,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   findIdThenUpdate = async (id: string, data: T) => {
     const existingdata = await this.findById(id);
     await this.hook(HookType.beforeUpdate, data);
-    try {
+    // try {
       Object.assign(data, UserProvider.getInstance().getUpdateFilter());
       Object.assign(existingdata, data);
       await this.validateData(data);
@@ -297,9 +293,9 @@ export class SimpleAppService<T extends { _id?: string }> {
       const result = await this.doc.findOneAndUpdate(filter, data);
       await this.hook(HookType.afterUpdate, data);
       return result;
-    } catch (err) {
-      throw new InternalServerErrorException(err.message);
-    }
+    // } catch (err) {
+    //   throw new InternalServerErrorException(err.message);
+    // }
   };
 
   //find what foreign key constraint
@@ -362,5 +358,30 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   async getMyUserTask() {
     return Workflow.getInstance().getMyUserTask();
+  }
+
+  //hardcoded tenant service, temporary no place can park since initial project totally empty
+  async getMyTenants() {
+    const filter = {
+      $or: [
+        { 'owner.ssoId': UserProvider.getInstance().getUid() },
+        { 'users.user.ssoId': UserProvider.getInstance().getUid() },
+      ],
+    };
+    let data = await this.search(filter);
+    let res = [];
+    const { encodeText } = require('@darkwolf/base64url');
+    for (let i = 0; i < data.length; i++) {
+      const t = data[i];
+      const tmp = {
+        tenantId: t['tenantId'],
+        tenantCode: t['tenantCode'],
+        tenantName: t['tenantName'],
+        xOrg: encodeText(`${t['tenantId']}-1-1`),
+      };
+
+      res.push(tmp);
+    }
+    return res;
   }
 }

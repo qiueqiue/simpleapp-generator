@@ -1,0 +1,42 @@
+{
+    "type": "object",
+    "x-isolation-type":"none",
+    "x-document-api":[
+      {
+        "action":"mytenants",
+        "method":"get", 
+        "execute":"getMyTenants",
+        "bpmn":"", 
+        "returntype":[{ "tenantId": "", "tenantCode": "", "tenantName": "", "xOrg": "" } ],
+        "description":"Get available tenant for current user"
+      }
+    ],
+    "properties": {
+      "tenantId": {"type": "integer","format":"x-document-no","examples": [1]},
+      "tenantCode": {"type": "string","examples": ["T1"]},
+      "tenantName": {"type": "string","format":"x-document-label","examples": ["tenant1"]},
+      "isactive": {"type": "boolean","examples": [true]},
+      "description": {"type": "string","examples": ["sample desc"]},
+      "owner": {"type": "object","x-foreignkey":"user","properties": {
+        "_id": {"type": "string","examples": ["aa"]},
+        "label": {"type": "string","examples": ["aaaa"]}}
+      },
+      "users": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user": {"type": "object","x-foreignkey":"user",
+              "properties": {
+                "_id": {"type": "string","examples": ["aa","aa"]},
+                "label": {"type": "string","examples": ["aaaa","aaaa"]}
+              }
+            },
+            "type": {"type": "string","enum":["user","owner","billing","guest"],"examples": ["users","guests"]},
+            "isactive": {"type": "boolean","examples": [true]
+            }
+          }
+        }
+      }
+    }
+  }

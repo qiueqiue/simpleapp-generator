@@ -6,13 +6,13 @@
  * author: Ks Tan
  */
 import { ref, Ref } from "vue";
-import { TenantDoc } from "../simpleapp/simpleappdocs/TenantDoc";
+import { TenantDoc } from "../simpleapp/TenantDoc";
 // import OrderList from 'primevue/orderlist';
 import Panel from "primevue/panel";
 
 const { $event, $listen } = useNuxtApp();
 const route = useRoute();
-const doc = new TenantDoc("", $event, $listen);
+const doc = new TenantDoc();
 type tenantDataType = {
   tenantId: number;
   tenantCode: string;
@@ -22,9 +22,7 @@ type tenantDataType = {
 const initialtenant: tenantDataType[] = [];
 const tenantlist = ref(initialtenant);
 
-doc
-  .getApi()
-  .getMyTenant()
+doc.getApi().getMyTenants()
   .then((res: any) => {
     for (let i = 0; i < res.data.length; i++) {
       const x = res.data[i];

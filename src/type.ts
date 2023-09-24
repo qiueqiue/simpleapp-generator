@@ -5,9 +5,9 @@ export type ChildModels = {
     model: SchemaModel,
     codeField:string,
     nameField:string,
-    moreAutoComplete:string[],
-    docStatusSettings:DocStatusSetting[],
-    apiSettings:ApiSetting[],
+    moreAutoComplete?:string[],
+    docStatusSettings?:DocStatusSetting[],
+    apiSettings?:ApiSetting[],
     requireautocomplete: boolean
     isolationtype:string
   };

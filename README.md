@@ -1,3 +1,14 @@
+todo:
+## high priority Job
+[x] fix error reporting and success reporting at frontend
+[ ] define some allow override and some not
+[ ] add special search like isolate by user for autocomplete
+[ ] permission user/group
+[ ] focus on functions customer, product, invoice and receipt
+
+
+
+
 # Quick start 
 ** You need to have mongodb installed **
 1. git clone from simpleapp-generator
@@ -25,13 +36,13 @@ pnpm dev
 ```sh
 code ~/mydoc
 ```
-explore codes in:
-* myapp/backend/src/class/docs/*, especially `controller,service,apischema`   
+you can change your project at:
 * myapp/backend/.env
-* myapp/backend/dicts/foreignkeys.json 
-* myapp/frontend/pages/*
-* myapp/frontend/simpleapps/docs
+* myapp/backend/src/hooks/*
+
 * myapp/frontend/.env
+* myapp/frontend/pages/*
+
 
 
 # Special Properties:
@@ -99,9 +110,6 @@ Development using simpleapp-generator involve below steps:
 Special Root Level property
 [x] x-ignore-autocomplete: optional boolean, define it to allow undefine x-document-no & x-document-label
 [x] x-isolation-type: optional string, how data isolated, 'none,tenant,org,branch', default 'org'
-[ ] x-document-type: optional string, use to override default document type which is defined in file name
-[ ] x-document-name: optional string, use to override default document name which is defined in file name
-[ ] x-collection-name: optional string, use to define data save into which mongodb collection, defaultvalue same as documentName
 
 Special Field Level property
 
@@ -135,15 +143,36 @@ workflow ideal
 3. bind hook to workflow?
 
 
-## high priority Job
+
+
+
+1. try possibility of no backend modifications
+3. completely hide all generated codes of frontend and backend, except allow change items
+1. define hidden control infra of admin tenant, user api+ui (like need special role system-admin from keycloak)
+add lodash  plugin at both side
+
+
+autocomplete can have more dependency filter like setting in jsonschema
+2. way in jsonschema to use share source code for frontend/backend like
+  calculate tax
+  calculate subtotal
+
+5. new transaction crud
+d. windows
+new user no tenant record how to do?
+8. way to handle :id/api
+9. service class which not using source code
+
+
+
 1. create follow data
   a. users
   b. tenant / users
   c. org
       branch/user
       group
-  d. windows
-  e. permission user/group
+  
+  
 3. json schema setting can define isolation type
 2. page/index first login can pick tenant
 3. create all window as xorg/index

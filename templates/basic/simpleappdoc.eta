@@ -1,0 +1,5 @@
+import  {<%=it.typename%>Client} from "~/generate/docs/<%=it.typename%>Client"
+
+export class <%=it.typename%>Doc extends <%=it.typename%>Client{
+
+}

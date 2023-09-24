@@ -6,7 +6,8 @@ import  {Eta}  from 'eta';
 const log: Logger<ILogObj> = new Logger();
 
 let config = {
-    "definationsFolder":"./definations",
+    "jsonschemaFolder":"./jsonschemaFolder",
+    "bpmnFolder":"./bpmn",
     "backendFolder":"./mybackend", 
     "backendPort":"8000",
     "mongoConnectStr":'mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT',
@@ -106,7 +107,7 @@ export const prepareNuxt = (callback:Function)=>{
         exec(`cd ${targetfolder};pnpm install;pnpm install -D @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
-                exec(`cd ${targetfolder};pnpm install --save @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+                exec(`cd ${targetfolder};pnpm install --save @nuxt/kit @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
                 console.log(error, stdout, stderr)
                 
                 fs.mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})
@@ -132,7 +133,7 @@ export const prepareNuxt = (callback:Function)=>{
                     './pages.index.vue.eta':'pages/index.vue',
                     './pages.[xorg].index.vue.eta':'pages/[xorg]/index.vue',
                     './pages.login.vue.eta':'pages/login.vue',
-                    './plugins.simpleapp.ts.eta':'plugins/simpleapp.ts',
+                    './plugins.10.simpleapp.ts.eta':'plugins/10.simpleapp.ts',
                     './tailwind.config.ts.eta':'tailwind.config.ts',
                     './tailwind.css.eta':'assets/css/tailwind.css',                    
                     './env.eta':'.env',
@@ -160,7 +161,7 @@ export const prepareNuxt = (callback:Function)=>{
 }
 
 export const prettyNuxt = ()=>{
-    exec(`cd ${config.frontendFolder};npx prettier --write "./pages/**/*.vue" "./simpleapp/**/*" `)
+    exec(`cd ${config.frontendFolder};npx prettier --write "./pages/**/*.vue" "./generate/docs/*.ts" `)
                         
 }
 export const prettyNest = ()=>{
@@ -168,5 +169,5 @@ export const prettyNest = ()=>{
 }
 
 export const prepareOpenApiClient = () => {
-    exec(`openapi-generator-cli generate -i ${config.openapi3Yaml} -o ${config.frontendFolder}/simpleapp/openapi -g typescript-axios --skip-validate-spec`)
+    exec(`openapi-generator-cli generate -i ${config.openapi3Yaml} -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`)
 }

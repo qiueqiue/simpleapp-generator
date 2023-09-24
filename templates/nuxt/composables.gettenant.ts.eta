@@ -1,0 +1,4 @@
+export const getTenant=()=>{
+    let xorg = typeof useRoute().params.xorg =='string'? useRoute().params.xorg : ''
+    return xorg
+}

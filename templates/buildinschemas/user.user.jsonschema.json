@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "x-isolation-type":"none",
+  "properties": {
+    "ssoId": {
+      "type": "string",
+      "format":"x-document-no",
+      "examples": [
+        "xxxxx-yyyyy-zzzzz-aaa"
+      ]
+    },
+    "email": {
+      "type": "string",      
+
+      "examples": [
+        "myemail@abc.com"
+      ],
+      "format": "email"
+    },
+    "isactive": {
+      "type": "boolean",
+      "examples": [
+        true
+      ]
+    },
+    "fullname": {
+      "type": "string",
+      "format":"x-document-label",
+      "examples": [
+        "user 1"
+      ]
+    },
+    "username": {
+      "type": "string",
+      "examples": [
+        "u1"
+      ]
+    },
+    "gender": {
+      "type": "string",
+      "enum":["","M","F"],
+      "examples": [
+        "M"
+      ]
+    },
+    "dob": {
+      "type": "string",
+      "format":"date",
+      "examples": [
+        "dateofbirth"
+      ]
+    },
+    "tel": {
+      "type": "string",
+      "format":"tel",
+      "examples": [
+        "0197654321"
+      ]
+    }
+  }
+}

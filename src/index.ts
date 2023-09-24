@@ -22,7 +22,7 @@ let version=pj.version
 program
   .version(version)
   .description("An simpleapp CLI tool for generate frontend (vuejs) and backend(nestjs) codes")  
-  .option("-c, --config-file <value>", 'configuration file content such as:{"definationsFolder":"./definations", "backendFolder":"./nestproject/src/docs", "frontendFolder":"./nuxt/server"}')
+  .option("-c, --config-file <value>", 'configuration file')
   .parse(process.argv);
 
 let path=''
@@ -44,7 +44,8 @@ if(!options.configFile){
   }
   const configs = require(path)
   console.log("configurations: ",configs)
-  const definationsFolder = configs.definationsFolder
+  const jsonschemaFolder = configs.jsonschemaFolder
+  const bpmnFolder = configs.bpmnFolder
   const backendFolder = configs.backendFolder 
   const frontendFolder = configs.frontendFolder 
   const openapi3Yaml = configs.openapi3Yaml
@@ -55,7 +56,7 @@ const run = async()=>{
         fw.runCreateNest(()=>{
             fw.prepareNest(()=>{
                 fw.prepareNuxt(()=>{
-                    generate.initialize(definationsFolder,backendFolder,frontendFolder,()=>{
+                    generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
                         fw.prepareOpenApiClient()
                         fw.prettyNuxt()    
                         fw.prettyNest()                                                

@@ -88,6 +88,7 @@ export const readJsonSchemaBuilder = async (
   } else if (jsondata.type == 'array') {
     throw(`unsupport array type for ${docname}.${doctype}`)
   }
+
   if(docSetting.colDocNo=='' && docSetting.requireautocomplete) {
     log.error(`you shall define 1 field with format:'${X_DOCUMENT_NO}'`)
     throw "missing field format"
@@ -107,17 +108,23 @@ const processObject =  (doctype: string,
     if(!jsondata['properties']){      
       throw ("Invalid json schema {doctype}.{docname}, no 'properties' defined")
     }
+    log.info("processObject document type",doctype,docname)
     
+
     //ensure some field exists, also override it
     jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
-    jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
+    
     jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updatedby'] = {type: 'string',description: 'Control value, dont edit it',};
+
+    if(doctype !='tenant'){
+      jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
+    }
 
     if(jsondata[X_ISOLATION_TYPE] && ['none','tenant','org','branch'].includes(jsondata[X_ISOLATION_TYPE])  ){      
       docSetting.isolationtype=jsondata[X_ISOLATION_TYPE]
@@ -127,9 +134,11 @@ const processObject =  (doctype: string,
     }
     if(jsondata[X_DOCUMENT_API] && Array.isArray(jsondata[X_DOCUMENT_API])){
       log.warn("x-document-api exists:")
-      log.warn(jsondata[X_DOCUMENT_API])
+      // log.warn(jsondata[X_DOCUMENT_API])
       for(let i=0; i<jsondata[X_DOCUMENT_API].length;i++){
+        
         const tmp:ApiSetting =jsondata[X_DOCUMENT_API][i]
+        // console.log(i,jsondata[X_DOCUMENT_API]['action'])
         if(!tmp.action){
           const errmsg = "x-document-api defined but undefine property 'action'"
           log.error(errmsg)
@@ -142,8 +151,19 @@ const processObject =  (doctype: string,
           throw errmsg
         }
         docSetting.apiSettings.push(tmp)
-      }
+
+        for(let i =0; i< docSetting.apiSettings.length ; i++){
+          const apiobj = docSetting.apiSettings[i]
+          log.info(docname," validate:tmp["+tmp['action']+"]==apiobj["+apiobj['action'] +"]&&tmp["+ tmp['method']+"] == apiobj["+apiobj['method']+"]")
+          if(tmp['action']==apiobj['action'] && tmp['method'] == apiobj['method']){
+            //skip
+          }else{
+            docSetting.apiSettings.push(tmp)
+          }
+        }
+     }
     }
+    log.warn("docSetting.apiSettings",docSetting.apiSettings)
       if(jsondata[X_DOCUMENT_STATUS] && Array.isArray(jsondata[X_DOCUMENT_STATUS])){
         for(let i=0; i<jsondata[X_DOCUMENT_STATUS].length;i++){
           const tmp:DocStatusSetting =jsondata[X_DOCUMENT_STATUS][i]
@@ -161,13 +181,18 @@ const processObject =  (doctype: string,
         }
      }
 
-
-    return genSchema(
+    //  moreAutoComplete:docSetting.autocompleteFields,
+    // docStatusSettings:docSetting.docStatusSettings,
+    // apiSettings:docSetting.apiSettings,
+    // SchemaModel | SchemaModel[]
+    let data =  genSchema(
       capitalizeFirstLetter(docname),
       'object',
       jsondata.properties,
       jsondata['required'] ? jsondata['required'] : [],
     );
+    
+    return data
 }
 
 const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProperties,
@@ -187,7 +212,9 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
 
     const isrequired = requiredlist && requiredlist.includes(key);
     const newName: string = docname + capitalizeFirstLetter(key);
+    log.info("property is:",key,newName,obj)
    if(obj.format && obj.format==X_DOCUMENT_NO){
+    
     docSetting.colDocNo=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
@@ -267,7 +294,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     requireautocomplete:docSetting.requireautocomplete,
     isolationtype:docSetting.isolationtype
   };
-  // console.warn(docname,docSetting.isolationtype)
+  // console.warn("-------------apiSettings-----",docname,"::::",docSetting.apiSettings)
   return newmodel;
 };
 

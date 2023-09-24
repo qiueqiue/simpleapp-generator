@@ -7,7 +7,7 @@
  */
 import { Module } from '@nestjs/common';
 import { <%= it.typename %>Controller } from './<%= it.doctype %>.controller';
-import { <%= it.typename %>Service } from './<%= it.doctype %>.service';
+import { <%= it.typename %>ServiceHook } from '../../hooks/<%= it.doctype %>.hook';
 import { MongooseModule } from '@nestjs/mongoose';
 import { <%= it.doctype %>MongoSchema } from './<%= it.doctype %>.model';
 @Module({
@@ -17,6 +17,6 @@ import { <%= it.doctype %>MongoSchema } from './<%= it.doctype %>.model';
     ]),
   ],
   controllers: [<%= it.typename %>Controller],
-  providers: [<%= it.typename %>Service],
+  providers: [<%= it.typename %>ServiceHook],
 })
 export class <%= it.typename %>Module {}

@@ -1,23 +1,40 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { SimpleAppExceptionFilter } from './class/SimpleAppExceptionFilter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const app = await NestFactory.create(AppModule,{
+    logger: ['error', 'warn','fatal','log','debug'],
+  });
+  // app.enableCors();
+  app.useGlobalFilters(new SimpleAppExceptionFilter());
+
   const config = new DocumentBuilder()
     .setTitle(process.env.PROJECT_NAME)
     .setDescription(process.env.PROJECT_DESCRIPTION)
     .setVersion(process.env.PROJECT_VERSION)
-    .addApiKey({
-        in: 'header',name: 'x-org',type: 'apiKey',description: 'base 64 url encode. example: MS0xLTE',
-      },'x-org',)
-    .addOAuth2({
-        type:'oauth2',flows:{          
-          implicit:{          
+    .addApiKey(
+      {
+        in: 'header',
+        name: 'x-org',
+        type: 'apiKey',
+        description: 'base 64 url encode. example: MS0xLTE',
+      },
+      'x-org',
+    )
+    .addOAuth2(
+      {
+        type: 'oauth2',
+        flows: {
+          implicit: {
             authorizationUrl: `${process.env.OAUTH2_CONFIGURL}/protocol/openid-connect/auth`,
-            scopes:{},                      
-          }}},'oauth2')
+            scopes: {},
+          },
+        },
+      },
+      'oauth2',
+    )
     .addSecurityRequirements('x-org')
     .addSecurityRequirements('oauth2')
     .build();

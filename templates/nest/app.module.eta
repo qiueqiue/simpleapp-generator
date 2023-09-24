@@ -13,7 +13,7 @@ import {TenantMiddleware} from './class/TenantMiddleware'
 import {AppController} from './app.controller'
 import {AppService} from './app.service'
 <% for(let i=0;i<it.length; i++){ %>
-import {<%= it[i].docname %>Module} from './docs/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
+import {<%= it[i].docname %>Module} from './generate/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
 <%}%>
 
 @Module({

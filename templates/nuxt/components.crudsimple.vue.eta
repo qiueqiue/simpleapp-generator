@@ -5,7 +5,7 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-
+import {ref} from 'vue'
 import { SimpleAppClient } from '@simitgroup//simpleapp-vue-component/src/SimpleAppClient';
 import SimpleAppForm from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppForm.vue';
 import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue';
@@ -57,9 +57,19 @@ const editRecord = (id:string) => {
 const saveData = () => {
   disabled.value=true
   if (data.value._id == "") {
-    obj.create().then(()=>{visible.value=false}).finally(() => refresh());
+    obj.create().then(()=>{
+      visible.value=false
+      refresh()
+    }).catch(err=>{
+      console.error(err.response.data)
+    }).finally(()=>disabled.value=false)
   } else {
-    obj.update().then(()=>visible.value=false).finally(() => refresh());
+    obj.update().then(()=>{
+      visible.value=false
+      refresh()
+    }).catch(err=>{
+      console.error(err.response.data)
+    }).finally(()=>disabled.value=false)
   }
 };
 const deleteData = (event:Event) => {
@@ -104,10 +114,10 @@ refresh();
     </div>
 
     <Dialog v-model:visible="visible" modal header="Header" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
-        <SimpleAppForm :document="obj" :title="title" #default="o">     
-          <div class="simpleapp-tool-bar"   >
+        <SimpleAppForm :document="obj"  #default="o">     
+          <div class="simpleapp-tool-bar col-span-2 text-left"  >
             <button class="bg-default" :disabled="disabled" @click="newData" type="button">New</button>
-            <button class="bg-primary" :disabled="disabled" @click="saveData" type="submit">Save</button>
+            <button class="bg-primary" :disabled="disabled" @click="saveData" type="button">Save</button>
             <button class="bg-danger" :disabled="disabled" @click="deleteData($event)" type="button">Delete</button>
             <ProgressSpinner v-if="disabled==true" style="width: 2rem; height: 2rem" ></ProgressSpinner>
             <ConfirmPopup></ConfirmPopup>

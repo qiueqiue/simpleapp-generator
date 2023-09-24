@@ -8,6 +8,15 @@ button {
 .simpleapp-input-container,.simpleapp-input-container,.simpleapp-input-container .simpleapp-inputfield{
     @apply flex flex-col
 }
+.simpleapp-input-container input[type=date] , .simpleapp-input-container .p-dropdown{
+    @apply flex-row text-left
+}
+.simpleapp-input-container >label{
+    @apply text-left
+}
+.p-inputnumber > input{
+    @apply text-right
+}
 .simpleapp-input-container .p-chips ul{
     width: 100%
 }
@@ -37,6 +46,9 @@ button {
 
 .desktop-shortcut-link{
     @apply m-2 m-2 p-2 space-x-2 rounded-sm text-center grid grid-cols-4 gap-4
+}
+.simpleapp-form{
+    @apply m-2 m-2 p-2 space-x-2 rounded-sm text-center grid grid-cols-2 gap-2
 }
 .desktop-shortcut-link div{
     @apply  bg-teal-300 p-2

@@ -45,6 +45,16 @@ const emitter = mitt()
 export default defineNuxtPlugin((nuxtApp) => {
     //const { csrf } = useCsrf()    
     //axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
+    const myaxios = axios.create()
+    myaxios.interceptors.response.use((response) => response, (error) => {
+      if(error.response.status==401){
+        console.error("sso session expired, redirect to logout page")
+        const { signOut } = useAuth();
+        signOut({redirect:false});
+      }else{
+        return Promise.reject(error)
+      }
+    });
     nuxtApp.vueApp.use(PrimeVue, { ripple: true });
     nuxtApp.vueApp
     .component("SimpleAppAutocomplete",SimpleAppAutocomplete)
@@ -81,7 +91,9 @@ export default defineNuxtPlugin((nuxtApp) => {
     return {
         provide: {
           event: emitter.emit, // Will emit an event
-          listen: emitter.on // Will register a listener for an event
+          listen: emitter.on, // Will register a listener for an event
+          axios: myaxios
+
         }
     }
     //other components that you need
