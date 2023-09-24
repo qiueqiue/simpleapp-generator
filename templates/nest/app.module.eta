@@ -1,29 +1,52 @@
-import { Module,MiddlewareConsumer,NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
 import {
-  AuthGuard, KeycloakConnectModule,
-  ResourceGuard,TokenValidation,
-  RoleGuard,PolicyEnforcementMode
+  AuthGuard,
+  KeycloakConnectModule,
+  ResourceGuard,
+  TokenValidation,
+  RoleGuard,
+  PolicyEnforcementMode,
 } from 'nest-keycloak-connect';
+import {RolesGuard} from './roles/roles.guard'
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import {TenantMiddleware} from './class/TenantMiddleware'
-import {AppController} from './app.controller'
-import {AppService} from './app.service'
-<% for(let i=0;i<it.length; i++){ %>
-import {<%= it[i].docname %>Module} from './generate/<%= it[i].doctype %>/<%= it[i].doctype %>.module'
-<%}%>
+import { TenantMiddleware } from './class/TenantMiddleware';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { GlobaluserModule } from './generate/globaluser/globaluser.module';
+import { TenantModule } from './generate/tenant/tenant.module';
+import { AccesslevelModule } from './generate/acl/acl.module';
+import { CategoryModule } from './generate/cat/cat.module';
+import { ClassroomModule } from './generate/room/room.module';
+import { CustomerModule } from './generate/customer/customer.module';
+import { CustomergroupModule } from './generate/cgroup/cgroup.module';
+import { DocnoformatModule } from './generate/docno/docno.module';
+import { InvoiceModule } from './generate/inv/inv.module';
+import { LevelModule } from './generate/lvl/lvl.module';
+import { OrganizationModule } from './generate/org/org.module';
+import { ParentModule } from './generate/parent/parent.module';
+import { PaymenttypeModule } from './generate/paytype/paytype.module';
+import { ProductModule } from './generate/prd/prd.module';
+import { RaceModule } from './generate/race/race.module';
+import { ReligionModule } from './generate/religion/religion.module';
+import { SalesagentModule } from './generate/sagent/sagent.module';
+import { SchoolModule } from './generate/school/school.module';
+import { StudentModule } from './generate/stu/stu.module';
+import { StudentgroupModule } from './generate/stg/stg.module';
+import { TaxsettingModule } from './generate/tax/tax.module';
+import { TuitionclassModule } from './generate/tuition/tuition.module';
 
 @Module({
-    //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
+  //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URL),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public_html'),
-      exclude: ['/api/(.*)'],      
+      exclude: ['/api/(.*)'],
     }),
     KeycloakConnectModule.register({
       authServerUrl: process.env.OAUTH2_BASEURL,
@@ -33,32 +56,53 @@ import {<%= it[i].docname %>Module} from './generate/<%= it[i].doctype %>/<%= it
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
       tokenValidation: TokenValidation.ONLINE,
     }),
-    <% for(let i=0;i<it.length; i++){ %><%= it[i].docname %>Module,<%}%>],
+    GlobaluserModule,
+    TenantModule,
+    AccesslevelModule,
+    CategoryModule,
+    ClassroomModule,
+    CustomerModule,
+    CustomergroupModule,
+    DocnoformatModule,
+    InvoiceModule,
+    LevelModule,
+    OrganizationModule,
+    ParentModule,
+    PaymenttypeModule,
+    ProductModule,
+    RaceModule,
+    ReligionModule,
+    SalesagentModule,
+    SchoolModule,
+    StudentModule,
+    StudentgroupModule,
+    TaxsettingModule,
+    TuitionclassModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
     {
-    provide: APP_GUARD,     
-    useClass: AuthGuard,
-  },
-  {
-    provide: APP_GUARD,
-    useClass: ResourceGuard,
-  },
-  {
-    provide: APP_GUARD,
-    useClass: RoleGuard,
-  },],
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ResourceGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, //use simpleapp own roleguard
+    },
+  ],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
       // .exclude('/api-yaml')
       // .exclude('/api-json')
       // .exclude('/api')
-      .forRoutes('*')
-      
-      
+      .forRoutes('*');
   }
 }

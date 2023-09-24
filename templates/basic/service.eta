@@ -17,7 +17,7 @@ import { <%Object.keys(it.models).forEach(function(key) { %> <%=key %>, <%})%> }
 @Injectable()
 export class <%= it.typename %>Service extends SimpleAppService<<%= it.typename %>> {
   protected documentIdentityCode='<%~ it.autocompletecode %>'
-  protected documentIdentityName='<%~ it.autocompletename %>'
+  protected documentIdentityLabel='<%~ it.autocompletename %>'
     constructor(@InjectModel('<%= it.name %>')  mydoc: Model<<%= it.typename %>>,
   ) {
     super('<%= it.doctype %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>);

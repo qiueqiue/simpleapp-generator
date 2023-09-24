@@ -4,14 +4,14 @@
   "properties": {
     "ssoId": {
       "type": "string",
-      "format":"x-document-no",
+      "x-document-no":true,
       "examples": [
         "xxxxx-yyyyy-zzzzz-aaa"
       ]
     },
     "email": {
-      "type": "string",      
-
+      "type": "string",    
+      "x-document-label":true,  
       "examples": [
         "myemail@abc.com"
       ],
@@ -19,13 +19,13 @@
     },
     "isactive": {
       "type": "boolean",
+      "default":true,
       "examples": [
         true
       ]
     },
     "fullname": {
       "type": "string",
-      "format":"x-document-label",
       "examples": [
         "user 1"
       ]

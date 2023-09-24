@@ -13,7 +13,6 @@ let config = {
     "mongoConnectStr":'mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT',
     "frontendFolder":"./myfrontend",
     "frontendPort":"8080",
-    "openapi3Yaml":"../openapi.yaml",
     "keycloaksetting":{
         "OAUTH2_BASEURL":"https://keycloak-server-url/",
         "OAUTH2_REALM":"realm-name",
@@ -67,7 +66,7 @@ export const prepareNest = (callback:Function)=>{
     if(!fs.existsSync(`${targetfolder}/.env`)){
 
     
-        exec(`cd ${targetfolder};pnpm install --save nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
+        exec(`cd ${targetfolder};pnpm install --save yaml lodash @types/lodash nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
             // log.info(`dependency installed`)
             if(!error){
                 fs.mkdirSync(`${targetfolder}/public_html`,{recursive:true})
@@ -104,7 +103,7 @@ export const prepareNuxt = (callback:Function)=>{
     const targetfolder = config.frontendFolder
     if(!fs.existsSync(`${targetfolder}/.env`)){
         //asume no environment. prepare now
-        exec(`cd ${targetfolder};pnpm install;pnpm install -D @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
+        exec(`cd ${targetfolder};pnpm install;pnpm install -D nuxt-lodash  @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
                 exec(`cd ${targetfolder};pnpm install --save @nuxt/kit @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
@@ -169,5 +168,5 @@ export const prettyNest = ()=>{
 }
 
 export const prepareOpenApiClient = () => {
-    exec(`openapi-generator-cli generate -i ${config.openapi3Yaml} -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`)
+    exec(`openapi-generator-cli generate -i  ${config.backendFolder}/openapi.yaml -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`)
 }

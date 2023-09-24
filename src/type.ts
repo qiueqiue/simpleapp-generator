@@ -54,6 +54,7 @@ export type TypeForeignKey={
 export type ModuleObject = {
   doctype:string
   docname:string
+  api:any[]
 }
 export type TypeGenerateDocumentVariable ={
 name: string

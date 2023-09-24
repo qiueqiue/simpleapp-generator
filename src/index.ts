@@ -48,7 +48,6 @@ if(!options.configFile){
   const bpmnFolder = configs.bpmnFolder
   const backendFolder = configs.backendFolder 
   const frontendFolder = configs.frontendFolder 
-  const openapi3Yaml = configs.openapi3Yaml
 
 const run = async()=>{
     fw.setConfiguration(configs)

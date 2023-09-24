@@ -1,7 +1,7 @@
 import { Injectable, Scope } from '@nestjs/common';
 import Base64URL from '@darkwolf/base64url';
 import * as jwt from 'jsonwebtoken';
-
+import { Role } from '../roles/roles.enum';
 @Injectable({
   scope: Scope.REQUEST,
 })
@@ -19,6 +19,7 @@ export class UserProvider {
   protected token: string = '';
   protected refreshtoken: string = '';
   protected groups: string[] = [];
+  protected roles: Role[] = [Role.SuperAdmin,Role.User];
   constructor() {}
   public static getInstance(): UserProvider {
     if (!UserProvider.instance) {
@@ -34,6 +35,7 @@ export class UserProvider {
   getBranchId = () => this.branchId;
   getEmail = () => this.email;
   getGroups = () => this.groups;
+  getRoles = () => this.roles;
   setUserToken = (tokenstr: string) => {
     const tokeninfo = jwt.decode(tokenstr);
     // realm_access: {

@@ -133,8 +133,11 @@ export default defineEventHandler(async (event) => {
             }
 
             // reject(error.data)
-            reject({ statusMessage: error.response.statusText, statusCode: error.response.status });
-            // resolve({ status: 'ok' })
+            reject({ 
+                statusMessage: error.response.statusText, 
+                statusCode: error.response.status ,
+                data: error.response.data
+            });            // resolve({ status: 'ok' })
             // throw createError({ statusMessage: 'Bad Requests', statusCode: 404 })
         })
 

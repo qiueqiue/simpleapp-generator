@@ -61,14 +61,14 @@ const saveData = () => {
       visible.value=false
       refresh()
     }).catch(err=>{
-      console.error(err.response.data)
+      console.error(err)
     }).finally(()=>disabled.value=false)
   } else {
     obj.update().then(()=>{
       visible.value=false
       refresh()
     }).catch(err=>{
-      console.error(err.response.data)
+      console.error(err)
     }).finally(()=>disabled.value=false)
   }
 };

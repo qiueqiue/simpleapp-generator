@@ -133,7 +133,7 @@ const processObject =  (doctype: string,
       docSetting.requireautocomplete=false
     }
     if(jsondata[X_DOCUMENT_API] && Array.isArray(jsondata[X_DOCUMENT_API])){
-      log.warn("x-document-api exists:")
+      // log.warn("x-document-api exists:")
       // log.warn(jsondata[X_DOCUMENT_API])
       for(let i=0; i<jsondata[X_DOCUMENT_API].length;i++){
         
@@ -154,7 +154,7 @@ const processObject =  (doctype: string,
 
         for(let i =0; i< docSetting.apiSettings.length ; i++){
           const apiobj = docSetting.apiSettings[i]
-          log.info(docname," validate:tmp["+tmp['action']+"]==apiobj["+apiobj['action'] +"]&&tmp["+ tmp['method']+"] == apiobj["+apiobj['method']+"]")
+          // log.info(docname," validate:tmp["+tmp['action']+"]==apiobj["+apiobj['action'] +"]&&tmp["+ tmp['method']+"] == apiobj["+apiobj['method']+"]")
           if(tmp['action']==apiobj['action'] && tmp['method'] == apiobj['method']){
             //skip
           }else{
@@ -163,7 +163,7 @@ const processObject =  (doctype: string,
         }
      }
     }
-    log.warn("docSetting.apiSettings",docSetting.apiSettings)
+    // log.warn("docSetting.apiSettings",docSetting.apiSettings)
       if(jsondata[X_DOCUMENT_STATUS] && Array.isArray(jsondata[X_DOCUMENT_STATUS])){
         for(let i=0; i<jsondata[X_DOCUMENT_STATUS].length;i++){
           const tmp:DocStatusSetting =jsondata[X_DOCUMENT_STATUS][i]
@@ -212,22 +212,22 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
 
     const isrequired = requiredlist && requiredlist.includes(key);
     const newName: string = docname + capitalizeFirstLetter(key);
-    log.info("property is:",key,newName,obj)
-   if(obj.format && obj.format==X_DOCUMENT_NO){
+    // log.info("property is:",key,newName,obj)
+   if(obj[X_DOCUMENT_NO]){
     
     docSetting.colDocNo=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
    }
-   if(obj.format && obj.format==X_DOCUMENT_LABEL){
+   if(obj[X_DOCUMENT_LABEL]){
     docSetting.colDocLabel=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
    }
    
-   if(obj[X_COLLECTION_NAME]){
-    docSetting.collectionName=key    
-   }
+  //  if(obj[X_COLLECTION_NAME]){
+  //   docSetting.collectionName=key    
+  //  }
 
 
    if(obj[X_AUTOCOMPLETE_FIELD]){

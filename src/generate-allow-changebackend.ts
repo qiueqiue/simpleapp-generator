@@ -58,7 +58,7 @@ export const initialize =  async (defFolder:string,bpmnFolder:string,backendfold
         //foreignkeycatalogues
         // foreignkeys
         generate(docname, doctype, rendertype, allmodels,backendfolder,frontendfolder);        
-        activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname)})
+        activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname),api:jsondata['x-document-api']})
       } else {
         log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
       }      

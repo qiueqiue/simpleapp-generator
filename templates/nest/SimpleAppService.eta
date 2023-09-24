@@ -42,7 +42,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected logger = new Logger();
   protected jsonschema = { type: 'object', properties: {}, required: [] };
   protected documentIdentityCode = 'code';
-  protected documentIdentityName = 'label';
+  protected documentIdentityLabel = 'label';
   protected documentName = '-unknowndocname-';
   protected documentType = '-unknowndoctype-';
   protected LIMITPERPAGE = 20;
@@ -124,14 +124,14 @@ export class SimpleAppService<T extends { _id?: string }> {
       const filter1 = {};
       const filter2 = {};
       filter1[this.documentIdentityCode] = { $regex: keyword, $options: 'i' };
-      filter2[this.documentIdentityName] = { $regex: keyword, $options: 'i' };
+      filter2[this.documentIdentityLabel] = { $regex: keyword, $options: 'i' };
       const filterobj = { $or: [filter1, filter2] };
 
       Object.assign(filterobj, this.getIsolationFilter());
       let projections = {
         id: `\$_id`,
-        label: `\$${this.documentIdentityCode}`,
-        name: `\$${this.documentIdentityName}`,
+        label: `\$${this.documentIdentityLabel}`,
+        code: `\$${this.documentIdentityCode}`,
       };
       if (this.moreAutoCompleteField) {
         Object.assign(projections, this.moreAutoCompleteField);
@@ -179,14 +179,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     let result;
 
     // try {
-      await this.hook(HookType.beforeCreate, this.data);
-      Object.assign(this.data, UserProvider.getInstance().getCreateFilter());
-      delete this.data._id;
-      await this.validateData(this.data);
-      const newdoc = new this.doc(this.data);
-      result = await newdoc.save();
-      await this.hook(HookType.afterCreate, result);
-   
+    await this.hook(HookType.beforeCreate, this.data);
+    Object.assign(this.data, UserProvider.getInstance().getCreateFilter());
+    delete this.data._id;
+    await this.validateData(this.data);
+    const newdoc = new this.doc(this.data);
+    result = await newdoc.save();
+    await this.hook(HookType.afterCreate, result);
+
     return result as T;
   }
   async update() {
@@ -212,12 +212,12 @@ export class SimpleAppService<T extends { _id?: string }> {
     addFormats(ajv);
     addErrors(ajv);
 
-    // ajv.addFormat('x-document-no', /.*$/);
-    // ajv.addFormat('x-document-label', /.*$/);
     ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
     ajv.addFormat('x-text', /.*$/);
     ajv.addFormat('x-html', /.*$/);
 
+    ajv.addKeyword({ keyword: 'x-document-no', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-label', type: 'boolean' });
     ajv.addKeyword({ keyword: 'x-document-status', type: 'array' });
     ajv.addKeyword({ keyword: 'x-document-api', type: 'array' });
     ajv.addKeyword({ keyword: 'x-ignore-autocomplete', type: 'boolean' });
@@ -241,11 +241,10 @@ export class SimpleAppService<T extends { _id?: string }> {
     let validate;
     try {
       validate = ajv.compile(this.jsonschema);
-    
 
       const valid = validate(data);
       if (!valid) {
-        this.logger.error(JSON.stringify(validate.errors),"validate errors:")
+        this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
         throw new BadRequestException(JSON.stringify(validate.errors));
       }
       await this.hook(HookType.afterValidation, data);
@@ -285,14 +284,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     const existingdata = await this.findById(id);
     await this.hook(HookType.beforeUpdate, data);
     // try {
-      Object.assign(data, UserProvider.getInstance().getUpdateFilter());
-      Object.assign(existingdata, data);
-      await this.validateData(data);
-      let filter = this.getIsolationFilter();
-      filter['_id'] = id;
-      const result = await this.doc.findOneAndUpdate(filter, data);
-      await this.hook(HookType.afterUpdate, data);
-      return result;
+    Object.assign(data, UserProvider.getInstance().getUpdateFilter());
+    Object.assign(existingdata, data);
+    await this.validateData(data);
+    let filter = this.getIsolationFilter();
+    filter['_id'] = id;
+    const result = await this.doc.findOneAndUpdate(filter, data);
+    await this.hook(HookType.afterUpdate, data);
+    return result;
     // } catch (err) {
     //   throw new InternalServerErrorException(err.message);
     // }
@@ -364,10 +363,11 @@ export class SimpleAppService<T extends { _id?: string }> {
   async getMyTenants() {
     const filter = {
       $or: [
-        { 'owner.ssoId': UserProvider.getInstance().getUid() },
-        { 'users.user.ssoId': UserProvider.getInstance().getUid() },
+        { 'owner.code': UserProvider.getInstance().getUid() },
+        { 'users.user.code': UserProvider.getInstance().getUid() },
       ],
     };
+    console.log(filter)
     let data = await this.search(filter);
     let res = [];
     const { encodeText } = require('@darkwolf/base64url');

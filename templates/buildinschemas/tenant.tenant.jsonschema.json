@@ -12,12 +12,11 @@
       }
     ],
     "properties": {
-      "tenantId": {"type": "integer","format":"x-document-no","examples": [1]},
-      "tenantCode": {"type": "string","examples": ["T1"]},
-      "tenantName": {"type": "string","format":"x-document-label","examples": ["tenant1"]},
-      "isactive": {"type": "boolean","examples": [true]},
+      "tenantId": {"type": "integer","x-document-no":true,"examples": [1]},
+      "tenantName": {"type": "string","x-document-label":true,"examples": ["tenant1"]},
+      "isactive": {"type": "boolean","examples": [true],"default":true},
       "description": {"type": "string","examples": ["sample desc"]},
-      "owner": {"type": "object","x-foreignkey":"user","properties": {
+      "owner": {"type": "object","x-foreignkey":"globaluser","properties": {
         "_id": {"type": "string","examples": ["aa"]},
         "label": {"type": "string","examples": ["aaaa"]}}
       },
@@ -26,7 +25,7 @@
         "items": {
           "type": "object",
           "properties": {
-            "user": {"type": "object","x-foreignkey":"user",
+            "user": {"type": "object","x-foreignkey":"globaluser",
               "properties": {
                 "_id": {"type": "string","examples": ["aa","aa"]},
                 "label": {"type": "string","examples": ["aaaa","aaaa"]}

@@ -2,10 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SimpleAppExceptionFilter } from './class/SimpleAppExceptionFilter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
+import yaml from 'yaml';
+import fs from 'fs';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule,{
-    logger: ['error', 'warn','fatal','log','debug'],
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'fatal', 'log', 'debug'],
   });
   // app.enableCors();
   app.useGlobalFilters(new SimpleAppExceptionFilter());
@@ -42,6 +43,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: { showExtensions: true, persistAuthorization: true },
   });
+
+  fs.writeFileSync('./openapi.yaml', yaml.stringify(document));
 
   await app.listen(process.env.HTTP_PORT ?? 8000); //listen which port
 }

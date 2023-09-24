@@ -64,7 +64,7 @@ const processSchema=async (file:string,defFolder:string)=>{
       jsonschemas[docname] = jsondata;
       allmodels = await readJsonSchemaBuilder(doctype, docname, jsondata,foreignkeys);
       generate(docname, doctype, rendertype, allmodels);        
-      activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname)})
+      activatemodules.push({doctype:doctype,docname:capitalizeFirstLetter(docname),api:jsondata['x-document-api']})
     } else {
       log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
     }      
@@ -125,24 +125,31 @@ const generate = (
     };
 
     const targetfiles = {
-      './type':`${targetfolder}/${doctype}.type.ts`,
-      './jsonschema':`${targetfolder}/${doctype}.jsonschema.ts`,
-      './model':`${targetfolder}/${doctype}.model.ts`,
-      './apischema':`${targetfolder}/${doctype}.apischema.ts`,
-      './service':`${targetfolder}/${doctype}.service.ts`,
-      './controller':`${targetfolder}/${doctype}.controller.ts`,
-      './module':`${targetfolder}/${doctype}.module.ts`,
-      './hook':`${hooksfolder}/${doctype}.hook.ts`,
-      './simpleappclient.eta': `${frontendFolder}/generate/docs/${variables.typename}Client.ts`,
-      './simpleappdoc.eta': `${frontendFolder}/simpleapp/${variables.typename}Doc.ts`,
+      './type': { target: `${targetfolder}/${doctype}.type.ts`, override:true},
+      './jsonschema':{ target: `${targetfolder}/${doctype}.jsonschema.ts`, override:true},
+      './model':{ target: `${targetfolder}/${doctype}.model.ts`, override:true},
+      './apischema':{ target: `${targetfolder}/${doctype}.apischema.ts`, override:true},
+      './service':{ target: `${targetfolder}/${doctype}.service.ts`, override:true},
+      './controller':{ target: `${targetfolder}/${doctype}.controller.ts`, override:true},
+      './module':{ target: `${targetfolder}/${doctype}.module.ts`, override:true},      
+      './simpleappclient.eta': { target: `${frontendFolder}/generate/docs/${variables.typename}Client.ts`, override:true},
+      
+      './simpleappdoc.eta': { target: `${frontendFolder}/simpleapp/${variables.typename}Doc.ts`, override:false},
+      './hook':{ target: `${hooksfolder}/${doctype}.hook.ts`, override:false},
       
     }
     const templates = Object.getOwnPropertyNames(targetfiles)
     for(let i=0;i<templates.length;i++){
       const sourcefile = templates[i]
-      const targetfile = targetfiles[sourcefile]
-      log.info("Writing:",targetfile)
-      writeFileSync(targetfile,eta.render(sourcefile, variables));
+      const targetsetting = targetfiles[sourcefile]
+      const targetfile = targetsetting.target
+      if(targetsetting.override==false && existsSync(targetfile)){
+        log.warn(targetfile," exists, skip generate")
+      }else{
+        log.info("Writing:",targetfile)
+        writeFileSync(targetfile,eta.render(sourcefile, variables));
+      }
+      
     }    
     generateClientPage(variables,eta)    
     log.info(`- write completed: ${doctype}`)        
@@ -151,6 +158,7 @@ const generate = (
 
 const generateClientPage=(variables:TypeGenerateDocumentVariable,eta)=>{
   const docname = variables.name
+  log.warn("Write page",docname)
   const targetfolder = `${frontendpagefolder}/${docname}`
   const overridefilename = `${targetfolder}/delete-me-for-avoid-override`
   if(!existsSync(targetfolder)){
@@ -168,6 +176,7 @@ const prepareEnvironments = ()=>{
   const backendClassFolder = `${backendFolder}/src/class`
   const targetfrontendfolder = `${frontendFolder}/server/api`
   mkdirSync(`${backendFolder}/src/dicts/`,{ recursive: true });
+  mkdirSync(`${backendFolder}/src/roles/`,{ recursive: true });
   mkdirSync(`${frontendFolder}/composables/`,{ recursive: true });
   mkdirSync(backendClassFolder,{recursive:true});
   mkdirSync(targetfrontendfolder,{recursive:true});
@@ -192,6 +201,9 @@ const finalize=(modules:ModuleObject[])=>{
     './nest/app.module.eta':`${backendFolder}/src/app.module.ts`,
     './nest/app.service.eta':`${backendFolder}/src/app.service.ts`,
     './nest/app.controller.eta':`${backendFolder}/src/app.controller.ts`,
+    './nest/roles.enum.eta':`${backendFolder}/src/roles/roles.enum.ts`,
+    './nest/roles.guard.eta':`${backendFolder}/src/roles/roles.guard.ts`,
+    './nest/roles.decorator.eta':`${backendFolder}/src/roles/roles.decorator.ts`,
     './nuxt/composables.getautocomplete.ts.eta':`${frontendFolder}/composables/getAutocomplete.ts`,
     './nuxt/composables.getmenus.ts.eta':`${frontendFolder}/composables/getMenus.ts`,
     './nuxt/composables.stringHelper.ts.eta':`${frontendFolder}/composables/stringHelper.ts`,

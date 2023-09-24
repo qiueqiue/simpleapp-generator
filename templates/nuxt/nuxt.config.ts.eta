@@ -21,6 +21,7 @@ tailwindcss: {
   modules: [
     '@sidebase/nuxt-auth',
     "nuxt-security",    
+    "nuxt-lodash",
     '@vueuse/nuxt',
     '@nuxt/ui'
   ],  
