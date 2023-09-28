@@ -37,7 +37,7 @@ export const initialize =  async (defFolder:string,bpmnFolder:string,parabackend
     const file = buildinschemas[i]
     await processSchema(file,buildinschemafolder)
   }
-  //load available bpmn into array
+  // load available bpmn into array
   const files = readdirSync(defFolder)
   for(let j = 0; j< files.length;j++){
     const file = files[j]
@@ -177,19 +177,24 @@ const prepareEnvironments = ()=>{
   const targetfrontendfolder = `${frontendFolder}/server/api`
   mkdirSync(`${backendFolder}/src/dicts/`,{ recursive: true });
   mkdirSync(`${backendFolder}/src/roles/`,{ recursive: true });
+  mkdirSync(`${backendFolder}/src/shares/`,{ recursive: true });
   mkdirSync(`${frontendFolder}/composables/`,{ recursive: true });
+  mkdirSync(`${frontendFolder}/components/`,{ recursive: true });
+  mkdirSync(`${frontendFolder}/shares/`,{ recursive: true });
   mkdirSync(backendClassFolder,{recursive:true});
   mkdirSync(targetfrontendfolder,{recursive:true});
   mkdirSync(`${frontendFolder}/simpleapp`,{ recursive: true });
+  mkdirSync(`${frontendFolder}/generate/docs`,{ recursive: true });  
   mkdirSync(frontendpagefolder,{recursive:true})
+  
   copyFileSync(`${constants.templatedir}/nest/SimpleAppService.eta`,`${backendClassFolder}/SimpleAppService.ts`)
   copyFileSync(`${constants.templatedir}/nest/SimpleAppController.eta`,`${backendClassFolder}/SimpleAppController.ts`)
   copyFileSync(`${constants.templatedir}/nest/Workflow.eta`,`${backendClassFolder}/Workflow.ts`)
   copyFileSync(`${constants.templatedir}/nest/TenantMiddleware.eta`,`${backendClassFolder}/TenantMiddleware.ts`)
   copyFileSync(`${constants.templatedir}/nest/UserProvider.eta`,`${backendClassFolder}/UserProvider.ts`)
-  copyFileSync(`${constants.templatedir}/nest/SimpleAppExceptionFilter.eta`,`${backendClassFolder}/SimpleAppExceptionFilter.ts`)
-  
-
+  copyFileSync(`${constants.templatedir}/nest/SimpleAppExceptionFilter.eta`,`${backendClassFolder}/SimpleAppExceptionFilter.ts`)  
+  // copyFileSync(`${constants.templatedir}/nuxt/SimpleAppClient.eta`,`${frontendFolder}/generate/docs/SimpleAppClient.ts`)
+  copyFileSync(`${constants.templatedir}/nuxt/SimpleAppClient.eta`,`${frontendFolder}/components/SimpleAppClient.ts`)
   
 }
 
@@ -222,6 +227,19 @@ const finalize=(modules:ModuleObject[])=>{
   const foreignkeyfile =`${backendFolder}/src/dicts/foreignkeys.json`
   writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));
   log.info("write to foreignkey file ",foreignkeyfile)
-  
+ 
+  // const files = readdirSync(`${constants.templatedir}/nuxt/components`)
+  // for(let j = 0; j< files.length;j++){
+  //   const file = files[j]
+  //   copyFileSync(`${constants.templatedir}/nuxt/components/${file}`,`${frontendFolder}/components/${file}`)
+  // }
+
+  // const sharelibfolder = `${backendFolder}/../shares`
+  // const sharefiles = readdirSync(sharelibfolder)
+  // for(let j = 0; j< sharefiles.length;j++){
+  //   const file = sharefiles[j]
+  //   copyFileSync(`${sharelibfolder}/${file}`,`${frontendFolder}/shares/${file}`)
+  //   copyFileSync(`${sharelibfolder}/${file}`,`${backendFolder}/src/shares/${file}`)
+  // }
   
 }

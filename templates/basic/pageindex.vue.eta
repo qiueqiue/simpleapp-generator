@@ -6,8 +6,9 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-<% let skipcolumns = ['_id','createdby','created','updatedby','updated','orgId','branchId','tenantId','doctype'] %>
+<% let skipcolumns = ['_id','createdby','created','updatedby','updated','orgId','branchId','tenantId','doctype'] %>  
   import {InputTableColumnType,InputTableColumn} from "@simitgroup/simpleapp-vue-component/src/type";
+  import Column from "primevue/column";
   const {$<%= it.typename %>Doc } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()
   const data = doc.getReactiveData();
@@ -19,6 +20,7 @@
     <%})%>
     ]
   //prepare subtable if exists
+  /*
   <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
     <% let obj=it.jsonschema.properties[key] %>
     
@@ -31,6 +33,7 @@
         ]  
     <%}%>
   <%})%>
+  */
   //end
 </script>
 <template>
@@ -64,6 +67,19 @@
                     <SimpleAppText  autofocus type="<%=obj.type%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.enum){ %>
                     <SimpleAppSelect  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>
+                <% } else if(obj['anyOf']){ %>
+                    <% for(let f = 0; f < obj['anyOf'].length; f++){ %>
+                        <%if(obj['anyOf'][f]['format']){ %>
+                            <SimpleAppText type='<%=obj['anyOf'][f]['format']%>'  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                        <%}%>
+                    <%}%>
+                <% } else if(obj['oneOf']){ %>
+                    <% for(let f = 0; f < obj['oneOf'].length; f++){ %>
+                        <%if(obj['oneOf'][f]['format']){ %>
+                            <SimpleAppText type='<%=obj['oneOf'][f]['format']%>'  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
+                        <%}%>
+                    <%}%>
+
                 <% } else {%>
                         <SimpleAppText   autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% }%>  
@@ -102,8 +118,46 @@
             <%})%>   
             </SimpleAppValue>            
         <% } else if(obj.type=='array' && obj.items.type=='object'){%>
-            <SimpleAppInputTable :getAutocomplete="getAutocomplete" :getField="o.getField" class="col-span-2"
-                :setting="o.getField('#/properties/<%=key%>')" #default="row" v-model="data.<%=key%>" :columns="<%=it.name%>_<%=key%>"></SimpleAppInputTable>
+            <SimpleAppInputTable :getAutocomplete="getAutocomplete" :getField="o.getField" class="col-span-4"
+                :setting="o.getField('#/properties/<%=key%>')" v-model="data.<%=key%>">
+                    <%let tablefields = Object.keys(obj.items.properties) %>
+                    <% for(let a=0;a<tablefields.length;a++){%>
+                        <%let col= tablefields[a] %>
+                        <%let subobj = obj.items.properties[col] %>
+                        <column field="<%=col%>" #body="{index}" :header="camelCaseToWords('<%=col%>')">
+                            <%if(subobj['x-foreignkey']){%>
+                                <SimpleAppAutocomplete v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :remoteSrc="getAutocomplete('<%=subobj[`x-foreignkey`]%>')"
+                                    optionLabel="label"
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <% } else if(subobj.type=='number' || subobj.type=='integer'){%>
+                                <SimpleAppNumber v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <%} else if(subobj.type=='string' && subobj.format){%>
+                                <SimpleAppText v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    text="subobj.format"
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <%} else if(subobj.type=='string' && !subobj.format){%>        
+                                <SimpleAppText v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <%} else if(subobj.type=='number'){%>
+                                <SimpleAppDynamicInput v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <%}%>
+                        </column>
+                    <%}%>
+                    
+            </SimpleAppInputTable>
         <% } else{%>
             <!-- Can auto generate <%=obj.key %> -->  
             <!--  <%~ JSON.stringify(obj) %>-->  

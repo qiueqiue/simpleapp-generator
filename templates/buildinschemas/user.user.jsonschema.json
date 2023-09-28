@@ -1,7 +1,6 @@
 {
   "type": "object",
-  "x-isolation-type":"none",
-  "required":["ssoId","email","isactive","fullname"],
+  "x-isolation-type":"tenant",
   "properties": {
     "ssoId": {
       "type": "string",

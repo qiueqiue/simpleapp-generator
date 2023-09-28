@@ -16,28 +16,11 @@ import { join } from 'path';
 import { TenantMiddleware } from './class/TenantMiddleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { GlobaluserModule } from './generate/globaluser/globaluser.module';
-import { TenantModule } from './generate/tenant/tenant.module';
-import { AccesslevelModule } from './generate/acl/acl.module';
-import { CategoryModule } from './generate/cat/cat.module';
-import { ClassroomModule } from './generate/room/room.module';
-import { CustomerModule } from './generate/customer/customer.module';
-import { CustomergroupModule } from './generate/cgroup/cgroup.module';
-import { DocnoformatModule } from './generate/docno/docno.module';
-import { InvoiceModule } from './generate/inv/inv.module';
-import { LevelModule } from './generate/lvl/lvl.module';
-import { OrganizationModule } from './generate/org/org.module';
-import { ParentModule } from './generate/parent/parent.module';
-import { PaymenttypeModule } from './generate/paytype/paytype.module';
-import { ProductModule } from './generate/prd/prd.module';
-import { RaceModule } from './generate/race/race.module';
-import { ReligionModule } from './generate/religion/religion.module';
-import { SalesagentModule } from './generate/sagent/sagent.module';
-import { SchoolModule } from './generate/school/school.module';
-import { StudentModule } from './generate/stu/stu.module';
-import { StudentgroupModule } from './generate/stg/stg.module';
-import { TaxsettingModule } from './generate/tax/tax.module';
-import { TuitionclassModule } from './generate/tuition/tuition.module';
+<% for(let i=0;i<it.length; i++){ %>
+  <% let obj = it[i]%>
+  import { <%=obj.docname%>Module } from './generate/<%=obj.doctype.toLowerCase()%>/<%=obj.doctype.toLowerCase()%>.module';
+<%}%>
+
 
 @Module({
   //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
@@ -56,28 +39,10 @@ import { TuitionclassModule } from './generate/tuition/tuition.module';
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
       tokenValidation: TokenValidation.ONLINE,
     }),
-    GlobaluserModule,
-    TenantModule,
-    AccesslevelModule,
-    CategoryModule,
-    ClassroomModule,
-    CustomerModule,
-    CustomergroupModule,
-    DocnoformatModule,
-    InvoiceModule,
-    LevelModule,
-    OrganizationModule,
-    ParentModule,
-    PaymenttypeModule,
-    ProductModule,
-    RaceModule,
-    ReligionModule,
-    SalesagentModule,
-    SchoolModule,
-    StudentModule,
-    StudentgroupModule,
-    TaxsettingModule,
-    TuitionclassModule,
+    <% for(let i=0;i<it.length; i++){ %>
+    <% let obj = it[i]%>
+    <%=obj.docname%>Module,
+    <%}%>
   ],
   controllers: [AppController],
   providers: [

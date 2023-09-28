@@ -1,0 +1,120 @@
+{
+    "type": "object",
+    "x-isolation-type":"tenant",
+    "required":["orgId","orgCode","orgName"],
+    "properties": {
+      "orgId": {
+        "type": "integer",
+        "x-document-no":true,
+        "examples": [
+          1
+        ]
+      },
+      "orgCode": {
+        "type": "string",  
+        "minLength":1,      
+        "examples": [
+          "org1"
+        ]
+      },
+      "orgName": {
+        "type": "string",
+        "x-document-label":true,
+        "examples": [
+          "Organization 1"
+        ]
+      },
+      "isactive": {
+        "type": "boolean",
+        "default":true,
+        "examples": [
+          true
+        ]
+      },
+      "description": {
+        "type": "string",
+        "format":"x-text",
+        "examples": [
+          "desc 1"
+        ]
+      },
+      "timezone": {
+        "type": "string",
+        "examples": [
+          "Asia/Kuala_Lumpur"
+        ]
+      },
+      "branches": {
+        "type": "array",
+        "minItems":1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "branchId": {
+              "type": "integer",
+              "examples": [
+                100
+              ]
+            },
+            "branchCode": {
+              "type": "string",
+              "examples": [
+                "B1"
+              ]
+            },
+            "branchName": {
+              "type": "string",
+              "examples": [
+                "Branch1"
+              ]
+            },
+            "isactive": {
+              "type": "boolean",
+              "examples": [
+                true
+              ]
+            },
+            "description": {
+              "type": "string",
+              "format":"x-text",
+              "examples": [
+                "desc"
+              ]
+            }
+          }
+        }
+      },
+      "usergroup": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "groupCode": {
+              "type": "string",
+              "examples": [
+                "CASHIER"
+              ]
+            },
+            "groupName": {
+              "type": "string",
+              "examples": [
+                "Front desk casher"
+              ]
+            },
+            "isactive": {
+              "type": "boolean",
+              "examples": [
+                true
+              ]
+            },
+            "description": {
+              "type": "string",
+              "examples": [
+                "desc"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }

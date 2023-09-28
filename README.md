@@ -1,13 +1,20 @@
 todo:
 ## high priority Job
 [x] fix error reporting and success reporting at frontend
-[ ] define some allow override and some not
-[ ] add special search like isolate by user for autocomplete
-[ ] permission user/group
+[x] define some allow override and some not
+[ ] permission user/group (pick hard coded group from enum)
+[ ] add special search like isolate by user for autocomplete (add property of)
+[ ] create tenant/org/branch auto increasement
 [ ] focus on functions customer, product, invoice and receipt
-
-
-
+[ ] repeat same typscript formula at frontend and backend
+[ ] frontend search
+[ ] new transaction CRUD ui
+[ ] student UI
+[ ] create invoice and receipt
+[ ] hide no permission window
+[ ] hide no permission buttons
+[ ] document status control
+[ ] document api touch up
 
 # Quick start 
 ** You need to have mongodb installed **

@@ -19,7 +19,7 @@ export class UserProvider {
   protected token: string = '';
   protected refreshtoken: string = '';
   protected groups: string[] = [];
-  protected roles: Role[] = [Role.SuperAdmin,Role.User];
+  protected roles: Role[] = [Role.SuperUser,Role.User];
   constructor() {}
   public static getInstance(): UserProvider {
     if (!UserProvider.instance) {

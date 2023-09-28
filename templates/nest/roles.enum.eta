@@ -1,6 +1,7 @@
 
 export enum Role {
     SuperAdmin = 'SuperAdmin',
+    SuperUser = 'SuperUser',
     User = 'User',
     <% for(let i=0;i<it.length; i++){ %>
 

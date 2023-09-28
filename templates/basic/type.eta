@@ -13,11 +13,11 @@
       <%Object.keys(schema.model).forEach(function(key){ %>     
       <% const obj = schema.model[key] %>
         <% if(typeof obj == 'string') {%>
-          <%= key %>?: <%= obj  %>; //child object
+          <%= key %> <%if(obj.required){%>?<%}%>: <%= obj  %>; //child object
         <% }else if( Array.isArray( obj)){%>
-          <%= key %>?: <%= obj[0] %>[]; //array 
+          <%= key %><%if(obj.required){%>?<%}%>: <%= obj[0] %>[]; //array 
         <% }else if( obj.type == 'array'){%>
-          <%= key %>?: <%= obj.items.type %>[]; //array 
+          <%= key %><%if(obj.required){%>?<%}%>: <%= obj.items.type %>[]; //array 
         <% }else{%>
           <%= key %> <% if(!obj.required || obj.required==false){%>?<%}%>: <%= obj.type %>;   // <%~ JSON.stringify(obj) %>
         <% } %>

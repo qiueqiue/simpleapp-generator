@@ -90,12 +90,12 @@ export const readJsonSchemaBuilder = async (
   }
 
   if(docSetting.colDocNo=='' && docSetting.requireautocomplete) {
-    log.error(`you shall define 1 field with format:'${X_DOCUMENT_NO}'`)
-    throw "missing field format"
+    log.error(`you shall define 1 field with property:'${X_DOCUMENT_NO}'`)
+    throw "missing field property"
   }
   if(docSetting.colDocLabel=='' && docSetting.requireautocomplete) {
-    log.error(`you shall define 1 field with format: '${X_DOCUMENT_LABEL}'}`)
-    throw "missing field format"
+    log.error(`you shall define 1 field with property: '${X_DOCUMENT_LABEL}'}`)
+    throw "missing field property"
   }
   
   return Promise.resolve(allmodels);
@@ -114,8 +114,6 @@ const processObject =  (doctype: string,
     //ensure some field exists, also override it
     jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
-    
-    jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
@@ -125,7 +123,10 @@ const processObject =  (doctype: string,
     if(doctype !='tenant'){
       jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
     }
-
+    if(doctype !='org'){
+      jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
+    }
+    
     if(jsondata[X_ISOLATION_TYPE] && ['none','tenant','org','branch'].includes(jsondata[X_ISOLATION_TYPE])  ){      
       docSetting.isolationtype=jsondata[X_ISOLATION_TYPE]
     }
@@ -150,16 +151,19 @@ const processObject =  (doctype: string,
           log.error(errmsg)
           throw errmsg
         }
-        docSetting.apiSettings.push(tmp)
-
+        
+        let isexists = false
         for(let i =0; i< docSetting.apiSettings.length ; i++){
           const apiobj = docSetting.apiSettings[i]
           // log.info(docname," validate:tmp["+tmp['action']+"]==apiobj["+apiobj['action'] +"]&&tmp["+ tmp['method']+"] == apiobj["+apiobj['method']+"]")
           if(tmp['action']==apiobj['action'] && tmp['method'] == apiobj['method']){
             //skip
-          }else{
-            docSetting.apiSettings.push(tmp)
+            isexists=true
+            break;
           }
+        }
+        if(!isexists){
+          docSetting.apiSettings.push(tmp)
         }
      }
     }
@@ -189,7 +193,7 @@ const processObject =  (doctype: string,
       capitalizeFirstLetter(docname),
       'object',
       jsondata.properties,
-      jsondata['required'] ? jsondata['required'] : [],
+      jsondata['required'] ?? [],
     );
     
     return data
@@ -200,7 +204,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
   const newmodel: SchemaModel = {};
   const props = Object.getOwnPropertyNames(jsondata ??{});
   // console.log('==== jsondata', jsondata);
-  
+  console.log("requiredlist:::::",docname,"::::",requiredlist)
   for (let i = 0; i < props.length; i++) {    
     const key = props[i];
     
@@ -210,7 +214,10 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     const objectitem:JSONSchema7= {} as JSONSchema7    
     Object.assign(objectitem,obj.items);
 
-    const isrequired = requiredlist && requiredlist.includes(key);
+    let isrequired = false
+    if(requiredlist &&  requiredlist.includes(key)){
+      isrequired=true
+    }
     const newName: string = docname + capitalizeFirstLetter(key);
     // log.info("property is:",key,newName,obj)
    if(obj[X_DOCUMENT_NO]){
@@ -271,7 +278,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
       //array need submodel
       // console.log("======",newName,key)
-      genSchema(newName, obj.type, objectitem?.properties, obj.required);
+      genSchema(newName, obj.type, objectitem?.properties, obj.items['required']);
       newmodel[key] = [newName];
     } else if (obj.type == 'array' && objectitem?.type != 'object') {
       //array need submodel

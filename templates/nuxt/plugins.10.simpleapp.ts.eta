@@ -57,6 +57,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     });
     nuxtApp.vueApp.use(PrimeVue, { ripple: true });
     nuxtApp.vueApp
+    /*
     .component("SimpleAppAutocomplete",SimpleAppAutocomplete)
     .component("SimpleAppAutocompletemulti",SimpleAppAutocompletemulti)
     .component("SimpleAppCalendar",SimpleAppCalendar)
@@ -82,7 +83,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     .component("SimpleAppDatatable",SimpleAppDatatable)
     .component("SimpleAppDynamicInput",SimpleAppDynamicInput)
     .component("SimpleAppInputTable",SimpleAppInputTable)
-    
+    */
     //.component("Quill",Quill)  // cause problem in ssr mode
     .use(ToastService)
     .use(ConfirmationService)

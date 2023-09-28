@@ -4,6 +4,8 @@
     "x-document-api":[
       {
         "action":"mytenants",
+        "entrypoint":"mytenants",
+        "requiredrole":["User"],
         "method":"get", 
         "execute":"getMyTenants",
         "bpmn":"", 
@@ -11,9 +13,11 @@
         "description":"Get available tenant for current user"
       }
     ],
+    "required":["tenantId","tenantName","isactive","owner","uuid"],
     "properties": {
       "tenantId": {"type": "integer","x-document-no":true,"examples": [1]},
       "tenantName": {"type": "string","x-document-label":true,"examples": ["tenant1"]},
+      "uuid": {"type": "string","minLength":16,"format":"uuid","examples": ["xxxxx-yyyyy-zzzzzz-aaaa"]},
       "isactive": {"type": "boolean","examples": [true],"default":true},
       "description": {"type": "string","examples": ["sample desc"]},
       "owner": {"type": "object","x-foreignkey":"globaluser","properties": {
@@ -32,8 +36,7 @@
               }
             },
             "type": {"type": "string","enum":["user","owner","billing","guest"],"examples": ["users","guests"]},
-            "isactive": {"type": "boolean","examples": [true]
-            }
+            "isactive": {"type": "boolean","examples": [true], "default":true}
           }
         }
       }

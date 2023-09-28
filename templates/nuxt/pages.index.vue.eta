@@ -22,7 +22,9 @@ type tenantDataType = {
 const initialtenant: tenantDataType[] = [];
 const tenantlist = ref(initialtenant);
 
-doc.getApi().getMyTenants()
+doc
+  .getApi()
+  .mytenants()
   .then((res: any) => {
     for (let i = 0; i < res.data.length; i++) {
       const x = res.data[i];
@@ -62,8 +64,12 @@ doc.getApi().getMyTenants()
     </Panel>
   </div>
 </template>
+
 <style scoped>
 .p-panel {
   @apply m-2;
+}
+.tenant-link:hover div{
+    @apply bg-gray-300
 }
 </style>

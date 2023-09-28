@@ -1,0 +1,65 @@
+{
+    "type": "object",
+    "x-ignore-autocomplete":true,
+    "properties": {
+      "type": {
+        "type": "string",
+        "examples": [
+          "user"
+        ]
+      },
+      "user": {
+        "type": "object",
+        "x-foreignkey":"user",
+        "properties": {
+          "_id": {
+            "type": "string",            
+            "examples": [
+              "aaa"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "examples": [
+              "aaaa"
+            ]
+          }
+        }
+      },
+      "group": {
+        "type": "object",
+        "x-foreignkey":"group",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "examples": [
+              "aaa"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "examples": [
+              "aaaa"
+            ]
+          }
+        }
+      },
+      "permission": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "doctype": {
+              "type": "string",
+              "examples": [
+                "invoice"
+              ]
+            },
+            "actions": {
+              "type": "array"
+            }
+          }
+        }
+      }
+    }
+  }

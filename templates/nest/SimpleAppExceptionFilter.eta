@@ -1,7 +1,7 @@
 import {
   ExceptionFilter,
   HttpStatus,
-  BadRequestException,
+  BadRequestException,  
   Catch,
   ArgumentsHost,
   InternalServerErrorException,
@@ -11,27 +11,55 @@ import { BaseExceptionFilter } from '@nestjs/core';
 
 import { Request, Response } from 'express';
 
+@Catch(BadRequestException)
+export class SimpleAppExceptionFilter implements ExceptionFilter {
+  catch(exception: BadRequestException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    console.log("-----exception",exception)
+    const status = exception !==undefined? exception.getStatus() : 500;
+
+    if (exception.message && exception.message[0] == '[') {
+      response.status(400).json({
+        statusCode: 400,
+        message: 'Validation failed',
+        errors: JSON.parse(exception.message),
+      });
+    } else {
+      response.status(status).json({
+        statusCode: status,
+        message: exception.message,
+      });
+    }
+    // else{
+    //   super.catch(exception, host);
+    // }
+  }
+}
+
+/*
 @Catch()
 export class SimpleAppExceptionFilter implements ExceptionFilter {
- 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
+    console.log("-----exception",exception)
+    const status = exception !==undefined? exception.getStatus() : 500;
 
-    if(exception.message && exception.message[0]=='['){
+    if (exception.message && exception.message[0] == '[') {
       response.status(400).json({
-        statusCode: 400,        
-        message:"Validation failed",
-        errors: JSON.parse(exception.message)
+        statusCode: 400,
+        message: 'Validation failed',
+        errors: JSON.parse(exception.message),
       });
-    }else{
+    } else {
       response.status(status).json({
-        statusCode: status,        
-        message:exception.message        
+        statusCode: status,
+        message: exception.message,
       });
-
     }
-  }  
+  }
 }
+*/

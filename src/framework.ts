@@ -66,7 +66,7 @@ export const prepareNest = (callback:Function)=>{
     if(!fs.existsSync(`${targetfolder}/.env`)){
 
     
-        exec(`cd ${targetfolder};pnpm install --save yaml lodash @types/lodash nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
+        exec(`cd ${targetfolder};pnpm install --save @casl/ability yaml lodash @types/lodash nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
             // log.info(`dependency installed`)
             if(!error){
                 fs.mkdirSync(`${targetfolder}/public_html`,{recursive:true})
@@ -103,10 +103,10 @@ export const prepareNuxt = (callback:Function)=>{
     const targetfolder = config.frontendFolder
     if(!fs.existsSync(`${targetfolder}/.env`)){
         //asume no environment. prepare now
-        exec(`cd ${targetfolder};pnpm install;pnpm install -D nuxt-lodash  @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
+        exec(`cd ${targetfolder};pnpm install;pnpm install -D @nuxtjs/tailwindcss @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
-                exec(`cd ${targetfolder};pnpm install --save @nuxt/kit @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+                exec(`cd ${targetfolder};pnpm install --save @nuxt/kit lodash @types/lodash @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
                 console.log(error, stdout, stderr)
                 
                 fs.mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})
@@ -119,11 +119,7 @@ export const prepareNuxt = (callback:Function)=>{
                 const eta = new Eta({views: `${constants.templatedir}/nuxt`});              
                 const variables=config
                 const writes = {
-                    './app.vue.eta':'app.vue',            
-                    './components.eventmonitor.vue.eta':'components/EventMonitor.vue',
-                    './components.menus.vue.eta':'components/Menus.vue',
-                    './components.crudsimple.vue.eta':'components/CrudSimple.vue',            
-                    './components.debugdocdata.vue.eta':'components/DebugDocumentData.vue',            
+                    './app.vue.eta':'app.vue',                                
                     './layouts.default.vue.eta':'layouts/default.vue',
                     './server.api.ts.eta':'server/api/[xorg]/[...].ts',
                     './server.api.auth.logout.ts.eta':'server/api/auth/logout.ts',
@@ -148,6 +144,16 @@ export const prepareNuxt = (callback:Function)=>{
                     fs.writeFileSync(file, txt);    
                 }
                
+
+                const frontendtsconfigpath = process.cwd()+'/'+`${targetfolder}/tsconfig.json`
+                const frontendtsconfig ={  
+                    "extends": "./.nuxt/tsconfig.json",
+                    "compilerOptions": {
+                    "strictNullChecks":false
+                    }
+                  }                                    
+                fs.writeFileSync(frontendtsconfigpath, JSON.stringify(frontendtsconfig));
+                exec(`openapi-generator-cli generate -i  ${config.backendFolder}/openapi.yaml -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`)
                 log.info("nuxt project completed")                
                 callback()
                 })
@@ -160,6 +166,7 @@ export const prepareNuxt = (callback:Function)=>{
 }
 
 export const prettyNuxt = ()=>{
+    prepareOpenApiClient()
     exec(`cd ${config.frontendFolder};npx prettier --write "./pages/**/*.vue" "./generate/docs/*.ts" `)
                         
 }

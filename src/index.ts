@@ -23,6 +23,7 @@ program
   .version(version)
   .description("An simpleapp CLI tool for generate frontend (vuejs) and backend(nestjs) codes")  
   .option("-c, --config-file <value>", 'configuration file')
+  .option("-g, --generate-type <value>", 'generate type all, backend, frontend')
   .parse(process.argv);
 
 let path=''
@@ -55,8 +56,7 @@ const run = async()=>{
         fw.runCreateNest(()=>{
             fw.prepareNest(()=>{
                 fw.prepareNuxt(()=>{
-                    generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
-                        fw.prepareOpenApiClient()
+                    generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
                         fw.prettyNuxt()    
                         fw.prettyNest()                                                
                     })                    
@@ -66,4 +66,43 @@ const run = async()=>{
      })
 }
 
-run()
+
+const runbackend = async()=>{
+  fw.setConfiguration(configs)
+      fw.runCreateNest(()=>{
+          fw.prepareNest(()=>{
+                  generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                      fw.prettyNest()                                                
+                  })                    
+        })                
+      
+    })
+}
+
+const runfrontend = async()=>{
+  fw.setConfiguration(configs)
+  fw.runCreateNuxt(()=>{
+              fw.prepareNuxt(()=>{
+                  generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                      fw.prettyNuxt()    
+                  })                    
+      })
+   })
+}
+
+
+switch(options.generateType){
+  case 'frontend':
+    runfrontend()
+  break;
+  case 'backend':
+    runbackend()
+  break;
+  case 'all':
+    run()
+  break;
+  default:
+    log.error("unknown generate type")
+  break;
+
+}

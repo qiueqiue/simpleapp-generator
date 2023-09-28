@@ -52,6 +52,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected data: T = { _id: '' } as T;
   private doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
+
   constructor(
     doctype: string,
     docname: string,
@@ -77,6 +78,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.data = { ...newdata };
     return this;
   };
+  reCalculate() {}
   getIsolationFilter = () => {
     let isolationFilter = {};
     switch (this.isolationtype) {
@@ -227,7 +229,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     ajv.addKeyword({ keyword: 'x-collection-name', type: 'string' });
     ajv.addKeyword({ keyword: 'x-autocomplete-field', type: 'boolean' });
     ajv.addKeyword({ keyword: 'x-foreignkey', type: 'string' });
-
+    ajv.addKeyword({ keyword: "x-import-lib", type: "array" });
+    ajv.addKeyword({ keyword: "x-compute", type: "array" });
     const issuccess = await this.hook(HookType.beforeValidation, data);
     if (!issuccess) {
       const errormsg: string[] = [];
@@ -328,6 +331,12 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
 
   /**
+   * dummy ping 
+   */
+  ping(txt:string=''){
+    return `hello ${txt}`
+  }
+  /**
    * change property documentStatus for specific document, no workflow execution
    * @param id
    * @param docstatus
@@ -367,7 +376,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         { 'users.user.code': UserProvider.getInstance().getUid() },
       ],
     };
-    console.log(filter)
+    console.log(filter);
     let data = await this.search(filter);
     let res = [];
     const { encodeText } = require('@darkwolf/base64url');
