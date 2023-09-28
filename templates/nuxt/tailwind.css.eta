@@ -22,3 +22,7 @@ button {
 .simpleapp-input-container >label{
     @apply text-left
 }
+
+.error-text{
+    @apply text-red-600;
+}
