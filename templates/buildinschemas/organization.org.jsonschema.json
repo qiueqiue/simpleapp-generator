@@ -82,6 +82,7 @@
             },
             "isactive": {
               "type": "boolean",
+              "default":true,
               "examples": [
                 true
               ]

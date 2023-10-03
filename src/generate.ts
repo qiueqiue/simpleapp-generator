@@ -236,7 +236,8 @@ const finalize=(modules:ModuleObject[])=>{
     './nuxt/composables.stringHelper.ts.eta':`${frontendFolder}/composables/stringHelper.ts`,
     './nuxt/composables.gettenant.ts.eta':`${frontendFolder}/composables/getTenant.ts`,    
     './nuxt/plugins.50.simpleapp-client.ts.eta':`${frontendFolder}/plugins/50.simpleapp-client.ts`,
-    './nuxt/user.index.vue.eta':`${frontendFolder}/pages/[xorg]/user/index.vue`
+    './nuxt/pages.user.vue.eta':`${frontendFolder}/pages/[xorg]/user/index.vue`,
+    './nuxt/pages.organization.vue.eta':`${frontendFolder}/pages/[xorg]/organization/index.vue`
     
   };
   const eta = new Eta({views:constants.templatedir});
