@@ -9,6 +9,7 @@ let config = {
     "jsonschemaFolder":"./jsonschemaFolder",
     "bpmnFolder":"./bpmn",
     "backendFolder":"./mybackend", 
+    "groupFolder":"./groups",
     "backendPort":"8000",
     "mongoConnectStr":'mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT',
     "frontendFolder":"./myfrontend",
@@ -106,7 +107,7 @@ export const prepareNuxt = (callback:Function)=>{
         exec(`cd ${targetfolder};pnpm install;pnpm install -D @nuxtjs/tailwindcss @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
-                exec(`cd ${targetfolder};pnpm install --save @nuxt/kit lodash @types/lodash @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+                exec(`cd ${targetfolder};pnpm install --save  pinia @pinia/nuxt @nuxt/kit lodash @types/lodash @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill @types/uuid uuid primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
                 console.log(error, stdout, stderr)
                 
                 fs.mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})

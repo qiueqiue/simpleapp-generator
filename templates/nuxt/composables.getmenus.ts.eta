@@ -4,7 +4,7 @@
  * last change 2023-09-10
  * author: Ks Tan
  */
-
+import _ from 'lodash'
 export const getMenus =()=>{
     const logout = async () => {
         const { signOut } = useAuth();
@@ -13,18 +13,35 @@ export const getMenus =()=>{
         signOut({ redirect: false });
         window.location.href = data?.value?.path + addPath;
     };
+  const {$userstore}=useNuxtApp()
   const route = useRoute();
   const xorg = route.params.xorg
   let data =[];
+  let allmenus = [
+    <% for(let i=0;i<it.length; i++){ %>
+    <% let obj = it[i]%>
+    '<%=obj.docname%>',
+    <%}%>
+  ]
+
+ const roles = $userstore().getUserInfo().roles
+  let allowmenus=[]
+  for(let i=0; i< allmenus.length;i++){
+    const keyword = allmenus[i]
+    // if(m.label)
+   const isexists = _.find(roles, (item)=>{
+      return item == keyword+':search' || item == keyword+':create'
+    })
+    if(isexists){
+      const m = {label: keyword, to:`/${xorg}/${keyword}`}
+      allowmenus.push(m)
+    }     
+  }
+
   if(xorg){
     data =[
       {label: 'Home',icon: 'pi pi-fw pi-home', url:'/'},
-      {label: 'Cruds',icon: 'pi pi-fw pi-pencil',items:[
-               <% for(let i=0;i<it.length; i++){ %>
-                <% let obj = it[i]%>
-                {label: '<%=obj.docname.toLowerCase()%>', to:`/${xorg}/<%=obj.docname.toLowerCase()%>`},
-              <%}%>
-      ]},      
+      {label: 'Cruds',icon: 'pi pi-fw pi-pencil',items:allowmenus},      
       {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
     ]
   }else{

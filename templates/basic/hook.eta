@@ -5,11 +5,13 @@
  * Author: Ks Tan
  */
 import { Injectable } from '@nestjs/common';
-import { <%= it.typename %>Service} from '../generate/<%= it.doctype %>/<%= it.doctype %>.service';
+import { SimpleAppService } from '../class/SimpleAppService';
+
+import { <%= it.typename %>} from '../generate/<%= it.doctype %>/<%= it.doctype %>.type';
 
 
 @Injectable()
-export class <%= it.typename %>ServiceHook extends <%= it.typename %>Service {
+export class <%= it.typename %>ServiceHook extends SimpleAppService<<%= it.typename %>> {
 //    hook = async (type: string, data?: any) => {
 //     switch(type){    
 //         case 'init':

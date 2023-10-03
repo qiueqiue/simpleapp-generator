@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+
 import { Model } from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -149,14 +150,33 @@ export class SimpleAppService<T extends { _id?: string }> {
       throw new InternalServerErrorException(err.message);
     }
   }
-  async search(filters: Object) {
+  private async searchNoIsolation(filters: Object) {
     try {
-      Object.assign(filters, this.getIsolationFilter());
       await this.hook(HookType.beforeSearch, filters);
       const products = await this.doc.find(filters);
       const productlist = products.map((p: T) => {
         return p;
       });
+      await this.hook(HookType.afterSearch, productlist);
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+    // return this;
+  }
+  async search(filters: Object) {
+    try {
+      Object.assign(filters, this.getIsolationFilter());      
+      await this.hook(HookType.beforeSearch, filters);
+      // console.log("before _find",filters)
+      // console.log("this.doc",this.doc)
+      const products = await this.doc.find(filters);
+      // console.log("after search",products)
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      // console.log("after map",productlist)
       await this.hook(HookType.afterSearch, productlist);
       //   console.log(products);
       return productlist;
@@ -368,29 +388,70 @@ export class SimpleAppService<T extends { _id?: string }> {
     return Workflow.getInstance().getMyUserTask();
   }
 
-  //hardcoded tenant service, temporary no place can park since initial project totally empty
-  async getMyTenants() {
-    const filter = {
-      $or: [
-        { 'owner.code': UserProvider.getInstance().getUid() },
-        { 'users.user.code': UserProvider.getInstance().getUid() },
-      ],
-    };
-    console.log(filter);
-    let data = await this.search(filter);
-    let res = [];
-    const { encodeText } = require('@darkwolf/base64url');
-    for (let i = 0; i < data.length; i++) {
-      const t = data[i];
-      const tmp = {
-        tenantId: t['tenantId'],
-        tenantCode: t['tenantCode'],
-        tenantName: t['tenantName'],
-        xOrg: encodeText(`${t['tenantId']}-1-1`),
-      };
 
-      res.push(tmp);
+  async getAllOrganization(){
+    const res:any[] = await this.search({}) //search all organization
+    // const res
+    const allbranches =[]
+    // console.log("resresres",res)
+    for(let i=0; i< res.length;i++){
+      // console.log("bbb",res[i].branches)
+      for (let j=0;j<res[i].branches.length; j++){
+        const b = res[i].branches[j]
+        
+        allbranches.push({
+          branchId:b.branchId,
+          branchCode:b.branchCode,
+          branchName:b.branchName,
+          orgId:res[i].orgId,
+          orgCode:res[i].orgCode,
+          orgName:res[i].orgName
+        })
+      }
     }
-    return res;
+    return allbranches
   }
+  async getAllMyOrganization(){
+    const u = UserProvider.getInstance()
+    const filter = { ssoId:u.getUid(),isactive:true }
+    const res = await this.searchNoIsolation(filter)
+    return res
+  }
+  //hardcoded tenant service, temporary no place can park since initial project totally empty
+  // async getMyTenants() {
+  //   const ssoId = UserProvider.getInstance().getUid()
+  //   const filter = {
+  //     $or: [
+  //       { 'owner.code': ssoId },
+  //       { 'users.user.code': ssoId },
+  //     ],
+  //   };
+  //   console.log(filter);
+  //   let data = await this.search(filter);
+  //   //tenantId
+  //   let res = [];
+  //   let tenantList:number[]=[]
+  //   const { encodeText } = require('@darkwolf/base64url');
+  //   for (let i = 0; i < data.length; i++) {
+  //     const t = data[i];
+  //     const tenantId = t['tenantId']
+
+  //     tenantList.push(tenantId)
+  //     const tmp = {
+  //       tenantId: tenantId,
+  //       tenantCode: t['tenantCode'],
+  //       tenantName: t['tenantName'],
+  //       xOrg: encodeText(`${t['tenantId']}-1-1`),
+  //     };
+  //     res.push(tmp);
+  //   }
+
+  //   const filerUser = {
+  //     'ssoId': ssoId,
+  //     'tenantId': {$in: tenantList}
+  //   };
+
+  //   console.log("filerUser",filerUser)
+  //   return res;
+  // }
 }

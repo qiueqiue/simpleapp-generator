@@ -7,7 +7,7 @@ const log: Logger<ILogObj> = new Logger();
 const clc = require("cli-color");
 const path = require('path');
 import {mkdirSync, readdir,readFileSync,writeFileSync,existsSync,copyFileSync, readdirSync} from 'fs'
-
+import _ from 'lodash'
 
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
@@ -17,13 +17,15 @@ const X_COLLECTION_NAME='x-collection-name'
 const extFb = '.xfb.json';
 const extHfb = '.xhfb.json';
 const extjsonschema = '.jsonschema.json';
+const extgroups = '.group.json';
 let jsonschemas = {};
 const docs = [];
 let frontendFolder=''
 let backendFolder=''
 let frontendpagefolder=''
+const allroles:any={}
 let activatemodules:ModuleObject[]=[]
-export const initialize =  async (defFolder:string,bpmnFolder:string,parabackendfolder:string,parafrontendfolder:string,callback:Function) => {
+export const initialize =  async (defFolder:string,groupFolder:string,bpmnFolder:string,parabackendfolder:string,parafrontendfolder:string,callback:Function) => {
   frontendFolder=parafrontendfolder
   backendFolder=parabackendfolder
   frontendpagefolder = `${frontendFolder}/pages/[xorg]`  
@@ -43,7 +45,26 @@ export const initialize =  async (defFolder:string,bpmnFolder:string,parabackend
     const file = files[j]
     await processSchema(file,defFolder)    
   }
+  
+  //generate group to role 
+  // extgroups
+  const systemgroups = readdirSync(`${groupFolder}`)
+  
+  for(let g = 0; g< systemgroups.length;g++){
+    const groupfile = systemgroups[g]
+    const groupjsonstr = readFileSync(`${groupFolder}/${groupfile}`, 'utf-8');      
+    console.log(groupfile,groupjsonstr)
+    const groupdata = JSON.parse(groupjsonstr);
+    const documentname = groupfile.split('.')[0]
+    const roles = prepareRoles(groupdata)
+    allroles[documentname]=roles
+  }
+  
+  
   finalize(activatemodules)
+
+
+
   callback()
 }
 
@@ -121,7 +142,7 @@ const generate = (
       docStatusSettings:allmodels[capitalizeFirstLetter(docname)].docStatusSettings,
       apiSettings:allmodels[capitalizeFirstLetter(docname)].apiSettings,
       requireautocomplete:allmodels[capitalizeFirstLetter(docname)].requireautocomplete,
-      isolationtype:allmodels[capitalizeFirstLetter(docname)].isolationtype
+      isolationtype:allmodels[capitalizeFirstLetter(docname)].isolationtype,      
     };
 
     const targetfiles = {
@@ -209,11 +230,14 @@ const finalize=(modules:ModuleObject[])=>{
     './nest/roles.enum.eta':`${backendFolder}/src/roles/roles.enum.ts`,
     './nest/roles.guard.eta':`${backendFolder}/src/roles/roles.guard.ts`,
     './nest/roles.decorator.eta':`${backendFolder}/src/roles/roles.decorator.ts`,
+    './nest/user.service.eta':`${backendFolder}/src/generate/user/user.service.ts`,
     './nuxt/composables.getautocomplete.ts.eta':`${frontendFolder}/composables/getAutocomplete.ts`,
     './nuxt/composables.getmenus.ts.eta':`${frontendFolder}/composables/getMenus.ts`,
     './nuxt/composables.stringHelper.ts.eta':`${frontendFolder}/composables/stringHelper.ts`,
     './nuxt/composables.gettenant.ts.eta':`${frontendFolder}/composables/getTenant.ts`,    
-    './nuxt/plugins.50.simpleapp-client.ts.eta':`${frontendFolder}/plugins/50.simpleapp-client.ts`
+    './nuxt/plugins.50.simpleapp-client.ts.eta':`${frontendFolder}/plugins/50.simpleapp-client.ts`,
+    './nuxt/user.index.vue.eta':`${frontendFolder}/pages/[xorg]/user/index.vue`
+    
   };
   const eta = new Eta({views:constants.templatedir});
   const sources = Object.getOwnPropertyNames(writefiles)
@@ -224,22 +248,31 @@ const finalize=(modules:ModuleObject[])=>{
     writeFileSync(targetfile, eta.render(templatename, modules));
   }
 
+  //prepare group to role mapping
+  console.log("allroles",allroles)
+  writeFileSync(`${backendFolder}/src/roles/roles.group.ts`, 
+      eta.render('./nest/roles.group.eta', allroles));
+
+
   const foreignkeyfile =`${backendFolder}/src/dicts/foreignkeys.json`
   writeFileSync(foreignkeyfile, JSON.stringify(foreignkeys));
   log.info("write to foreignkey file ",foreignkeyfile)
  
-  // const files = readdirSync(`${constants.templatedir}/nuxt/components`)
-  // for(let j = 0; j< files.length;j++){
-  //   const file = files[j]
-  //   copyFileSync(`${constants.templatedir}/nuxt/components/${file}`,`${frontendFolder}/components/${file}`)
-  // }
-
-  // const sharelibfolder = `${backendFolder}/../shares`
-  // const sharefiles = readdirSync(sharelibfolder)
-  // for(let j = 0; j< sharefiles.length;j++){
-  //   const file = sharefiles[j]
-  //   copyFileSync(`${sharelibfolder}/${file}`,`${frontendFolder}/shares/${file}`)
-  //   copyFileSync(`${sharelibfolder}/${file}`,`${backendFolder}/src/shares/${file}`)
-  // }
   
+}
+
+
+const prepareRoles =(groupsettings) => {
+  let roles = []
+  const docnames = Object.getOwnPropertyNames(groupsettings)
+  for(let i = 0; i< docnames.length; i++){
+    let docname = docnames[i]
+    let docpermissions:string[] = groupsettings[docname]
+    for(let j=0;j<docpermissions.length;j++){
+      const perm = docpermissions[j]
+      const typename = _.upperFirst(docname)
+      roles.push(`${typename}_${perm}`)
+    }
+  }
+  return roles
 }

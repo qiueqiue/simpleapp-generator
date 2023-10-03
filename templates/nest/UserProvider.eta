@@ -1,7 +1,15 @@
 import { Injectable, Scope } from '@nestjs/common';
 import Base64URL from '@darkwolf/base64url';
+import { Model,model,connect } from 'mongoose';
+import _ from 'lodash'
+import { Module } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { Role } from '../roles/roles.enum';
+import * as rolegroups from '../roles/roles.group'
+import { UserService } from '../generate/user/user.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { userMongoSchema } from '../generate/user/user.model';
+import {  UserBranchesBranch,  UserBranches,  User,  }  from '../generate/user/user.type';
 @Injectable({
   scope: Scope.REQUEST,
 })
@@ -18,8 +26,8 @@ export class UserProvider {
   protected accessrights: any = {};
   protected token: string = '';
   protected refreshtoken: string = '';
-  protected groups: string[] = [];
-  protected roles: Role[] = [Role.SuperUser,Role.User];
+  protected group: string = '';
+  protected roles: string[] = [Role.SuperUser,Role.User];
   constructor() {}
   public static getInstance(): UserProvider {
     if (!UserProvider.instance) {
@@ -34,9 +42,15 @@ export class UserProvider {
   getOrgId = () => this.orgId;
   getBranchId = () => this.branchId;
   getEmail = () => this.email;
-  getGroups = () => this.groups;
+  getGroup = () => this.group;
   getRoles = () => this.roles;
-  setUserToken = (tokenstr: string) => {
+
+  setCurrentUserInfo = (tokenstr: string,xorg)=>{
+    this.setUserToken(tokenstr)
+    this.setXorg(xorg);      
+  }
+  setUserToken = async (tokenstr: string) => {
+    
     const tokeninfo = jwt.decode(tokenstr);
     // realm_access: {
     //   roles: [
@@ -60,11 +74,48 @@ export class UserProvider {
     u.uid = tokeninfo.sub;
     u.email = tokeninfo.email;
     u.uname = tokeninfo.preferred_username;
-    u.fullname = tokeninfo.name;
-    u.groups = ['superuser', 'accountant', 'directors'];
+    u.fullname = tokeninfo.name;    
     u.accessrights = tokeninfo.resource_access;
+    // u.group = 
+    // console.log("begin want get group")
+    await connect(process.env.MONGODB_URL);
+
+    const usermodel = model<User>('user',userMongoSchema,'user')
+    const mydoc= new UserService(usermodel)
+    
+    // console.log("Service hook init")
+    const xorgfilter ={
+      //filter tenant is auto
+      ssoId:u.uid,
+      'branches.branch.orgId':this.orgId,
+      'branches.branch.branchId':this.branchId
+    }
+    //console.log("before search ",xorgfilter)
+    const userinfo = await mydoc.search(xorgfilter) 
+    if(!userinfo || userinfo.length ==0){
+      return "user not found"
+    }
+    const searchresult = userinfo[0]['branches']
+    // console.log("userinfo ",searchresult)
+    const currentbranch=this.branchId
+    const currentorg = this.orgId   
+    const currentbranchinfo = _.filter(searchresult,(item)=>{
+      return item['isactive']== true && item['branch']['branchId']==currentbranch && item['branch']['orgId']==currentorg
+    })
+    
+    //console.log("currentbranchinfo",currentbranchinfo)
+    if( currentbranchinfo.length>0){
+      u.group = currentbranchinfo[0]['group'] ?? ''
+      u.roles = rolegroups[u.group]        
+    }else{
+      u.group = ''
+      u.roles = []
+    }
+    
   };
+  
   getInfo = () => {
+    
     return UserProvider.getInstance();
   };
   getBranchFilter = () => {
@@ -118,7 +169,7 @@ export class UserProvider {
         const u = UserProvider.getInstance();
         u.tenantId = Number(arrXorg[0]);
         u.orgId = Number(arrXorg[1]);
-        u.branchId = Number(arrXorg[2]);
+        u.branchId = Number(arrXorg[2]);        
       } else {
         throw 'invalid x-org';
       }
@@ -126,4 +177,57 @@ export class UserProvider {
       throw err;
     }
   };
+
+
+  async getUserInfo(){
+    
+    // @InjectModel('user')  
+    const usermodel = model<User>('user',userMongoSchema)
+    const mydoc= new UserService(usermodel)
+    // const schema =  
+    const allorgs:any[] = await mydoc.getAllMyOrganization()
+    const allxorgs = []
+    // console.log('allorgs',allorgs)
+    for(let i=0; i<allorgs.length; i++){
+      const o = allorgs[i]
+      const tenantId = o.tenantId
+      const orgId=o.orgId
+      
+      for(let j=0; j<o.branches.length;j++){
+        const b = o.branches[j]
+        
+        if(b.isactive == true && b.group!='' ){
+          const rawxorg = tenantId+'-'+b.branch.orgId+'-'+b.branch.branchId        
+          
+          const tmp = {
+            "orgId":b.branch.orgId,
+            "orgCode":b.branch.orgCode,
+            "orgName":b.branch.orgName,
+            "branchName":b.branch.branchName,
+            "branchCode":b.branch.branchCode,
+            "branchId":b.branch.branchId,
+            "xorg":Base64URL.encodeText(rawxorg)
+          }
+          // console.log("RES",rawxorg,tmp)
+          allxorgs.push(tmp)
+          
+        }
+      }
+
+    }
+
+    const u = UserProvider.getInstance()
+    const userinfo = {
+      tenantId: u.getTenantId(),
+      orgId:u.getOrgId(),
+      branchId:u.getBranchId(),
+      email:u.getEmail(),
+      ssoId:u.getUid(),
+      fullName:u.getFullname(),
+      xOrgList:allxorgs
+    }
+
+    return userinfo
+  }
+
 }

@@ -1,6 +1,18 @@
 {
     "type": "object",
     "x-isolation-type":"tenant",
+    "x-document-api":[
+      {
+        "action":"branchlist",
+        "entrypoint":"branchlist",
+        "requiredrole":["User"],
+        "method":"get", 
+        "execute":"getAllOrganization",
+        "bpmn":"", 
+        "returntype":[{ "orgId": 0, "orgCode": "", "orgName": "", "branchId": 0,"branchCode":"","branchName":"" } ],
+        "description":"Get list of branches"
+      }
+    ],
     "required":["orgId","orgCode","orgName"],
     "properties": {
       "orgId": {
@@ -83,38 +95,6 @@
             }
           }
         }
-      },
-      "usergroup": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "groupCode": {
-              "type": "string",
-              "examples": [
-                "CASHIER"
-              ]
-            },
-            "groupName": {
-              "type": "string",
-              "examples": [
-                "Front desk casher"
-              ]
-            },
-            "isactive": {
-              "type": "boolean",
-              "examples": [
-                true
-              ]
-            },
-            "description": {
-              "type": "string",
-              "examples": [
-                "desc"
-              ]
-            }
-          }
-        }
-      }
+      }    
     }
   }

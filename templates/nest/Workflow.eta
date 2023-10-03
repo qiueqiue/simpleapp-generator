@@ -34,7 +34,7 @@ export class Workflow{
     }
     async getMyUserTask(){        
         const uid = UserProvider.getInstance().getUid()
-        const groups = UserProvider.getInstance().getGroups()
+        const groups = UserProvider.getInstance().getGroup()
         // 'assignments.candidateUsers': User.getInstance().getUid(),
         // 'assignments.candidateGroups': User.getInstance().getGroups
         

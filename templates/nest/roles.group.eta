@@ -1,0 +1,10 @@
+import {Role} from './roles.enum'
+
+<% Object.getOwnPropertyNames(it).forEach((key)=>{ %>
+export const <%=key%>=[
+    Role.User,
+    <%for(let i=0; i <it[key].length; i++){%>
+    Role.<%=it[key][i]%>,
+    <%}%>
+]
+<%})%>

@@ -19,7 +19,7 @@ import {
   HttpStatus
 } from '@nestjs/common';
 import { SimpleAppController } from '../../class/SimpleAppController';
-import { <%= it.typename %>ServiceHook } from '../../hooks/<%= it.doctype %>.hook';
+import { <%= it.typename %>Service } from '../../generate/<%= it.doctype %>/<%= it.doctype %>.service';
 import * as <%= it.doctype %>type from './<%= it.doctype %>.type';
 import * as <%= it.doctype %>apischema from './<%= it.doctype %>.apischema';
 import { ApiTags, ApiBody, ApiResponse,ApiOperation } from '@nestjs/swagger';
@@ -32,11 +32,11 @@ const doctype = '<%= it.doctype %>'.toUpperCase();
 @ApiTags(doctype)
 @Controller(doctype.toLowerCase())
 export class <%= it.typename %>Controller extends SimpleAppController<
-  <%= it.typename %>ServiceHook,
+  <%= it.typename %>Service,
   <%= it.doctype %>apischema.<%= it.typename %>,
   <%= it.doctype %>type.<%= it.typename %>
 > {
-  constructor(service: <%= it.typename %>ServiceHook) {
+  constructor(service: <%= it.typename %>Service) {
     super(service);
   }
   

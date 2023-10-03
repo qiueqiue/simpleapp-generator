@@ -48,15 +48,14 @@ if(!options.configFile){
   const jsonschemaFolder = configs.jsonschemaFolder
   const bpmnFolder = configs.bpmnFolder
   const backendFolder = configs.backendFolder 
-  const frontendFolder = configs.frontendFolder 
-
+  const frontendFolder = configs.frontendFolder   
 const run = async()=>{
     fw.setConfiguration(configs)
     fw.runCreateNuxt(()=>{
         fw.runCreateNest(()=>{
             fw.prepareNest(()=>{
                 fw.prepareNuxt(()=>{
-                    generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
+                    generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
                         fw.prettyNuxt()    
                         fw.prettyNest()                                                
                     })                    
@@ -71,7 +70,7 @@ const runbackend = async()=>{
   fw.setConfiguration(configs)
       fw.runCreateNest(()=>{
           fw.prepareNest(()=>{
-                  generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                  generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
                       fw.prettyNest()                                                
                   })                    
         })                
@@ -83,7 +82,7 @@ const runfrontend = async()=>{
   fw.setConfiguration(configs)
   fw.runCreateNuxt(()=>{
               fw.prepareNuxt(()=>{
-                  generate.initialize(jsonschemaFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                  generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
                       fw.prettyNuxt()    
                   })                    
       })

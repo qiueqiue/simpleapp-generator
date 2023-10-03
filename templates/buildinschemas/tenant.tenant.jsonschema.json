@@ -1,18 +1,6 @@
 {
     "type": "object",
-    "x-isolation-type":"none",
-    "x-document-api":[
-      {
-        "action":"mytenants",
-        "entrypoint":"mytenants",
-        "requiredrole":["User"],
-        "method":"get", 
-        "execute":"getMyTenants",
-        "bpmn":"", 
-        "returntype":[{ "tenantId": "", "tenantCode": "", "tenantName": "", "xOrg": "" } ],
-        "description":"Get available tenant for current user"
-      }
-    ],
+    "x-isolation-type":"none",    
     "required":["tenantId","tenantName","isactive","owner","uuid"],
     "properties": {
       "tenantId": {"type": "integer","x-document-no":true,"examples": [1]},

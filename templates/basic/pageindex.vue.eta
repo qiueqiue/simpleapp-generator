@@ -110,7 +110,7 @@
                         <% } else if(sobj.format=='email'){ %>
                             <SimpleAppText  autofocus type="<%=~obj.type%>" instancePath="<%=instancePath%>" :setting="<%=fieldpath%>" v-model="<%= vmodel %>"/>  
                         <% } else if(sobj.enum){ %>
-                            <SimpleAppRadio  autofocus :setting="<%~fieldpath%>" instancePath="<%=instancePath%>" v-model="<%= vmodel %>"/>
+                            <SimpleAppSelect  autofocus :setting="<%~fieldpath%>" instancePath="<%=instancePath%>" v-model="<%= vmodel %>"/>
                         <% } else {%>
                                 <SimpleAppText   autofocus :setting="<%~fieldpath%>" instancePath="<%=instancePath%>" v-model="<%= vmodel %>"/>  
                         <% }%> 
@@ -132,6 +132,11 @@
                                     optionLabel="label"
                                     :hidelabel="true"
                                     :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                            <% } else if(subobj.type=='boolean'){%>
+                                <SimpleAppCheckbox v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
                             <% } else if(subobj.type=='number' || subobj.type=='integer'){%>
                                 <SimpleAppNumber v-model="data.<%=key%>[index].<%=col%>" 
                                     :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
@@ -143,7 +148,12 @@
                                     text="subobj.format"
                                     :hidelabel="true"
                                     :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
-                            <%} else if(subobj.type=='string' && !subobj.format){%>        
+                            <%} else if(subobj.type=='string' && subobj['enum']){%>        
+                                <SimpleAppSelect v-model="data.<%=key%>[index].<%=col%>" 
+                                    :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
+                                    :hidelabel="true"
+                                    :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
+                             <%} else if(subobj.type=='string' ){%>        
                                 <SimpleAppText v-model="data.<%=key%>[index].<%=col%>" 
                                     :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 
                                     :hidelabel="true"
@@ -154,9 +164,11 @@
                                     :hidelabel="true"
                                     :instancePath="`/<%=key%>/${index}/<%=col%>`"/>
                             <%}%>
-                        </column>
+                        </column>                        
                     <%}%>
-                    
+                    <column #body="{index}" header="Delete">
+                            <button class="btn-danger" type="button" @click="data.<%=key%>.splice(index,1)">X</button>
+                        </column>
             </SimpleAppInputTable>
         <% } else{%>
             <!-- Can auto generate <%=obj.key %> -->  

@@ -1,20 +1,41 @@
 todo:
 ## high priority Job
+
+[ ] add special search like isolate by user for autocomplete (add property of)
+    choose org then branch
+[ ] create invoice and receipt
 [x] fix error reporting and success reporting at frontend
 [x] define some allow override and some not
-[ ] permission user/group (pick hard coded group from enum)
-[ ] add special search like isolate by user for autocomplete (add property of)
-[ ] create tenant/org/branch auto increasement
+
+[ ] create tenant/org/branch auto increament
 [ ] focus on functions customer, product, invoice and receipt
-[ ] repeat same typscript formula at frontend and backend
+[~] repeat same typscript formula at frontend and backend
 [ ] frontend search
 [ ] new transaction CRUD ui
 [ ] student UI
-[ ] create invoice and receipt
+
+Permission and Authorization
 [ ] hide no permission window
 [ ] hide no permission buttons
+[ ] permission user/group (pick hard coded group from enum)
+1. copy group-to-role to both frontend and backend 
+2. loop backend role code, and define into user role
+3. loop frontend role code, and 
+    1 update to getMenus, 
+    2. existing all menus store as permission list
+    3. crud and etc page need verify existing user can go in this menu or not. if can't will render no permission
+    4. use directive to control show or not show button (new, save, delete)
+
+
+
+Custom Document Status and API
 [ ] document status control
 [ ] document api touch up
+1. auto add document status column
+2. change document status when change status
+3. enum document status, but UI dont show the field
+4. have document action, then show document button
+
 
 # Quick start 
 ** You need to have mongodb installed **

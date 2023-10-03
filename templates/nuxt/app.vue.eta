@@ -1,6 +1,15 @@
+<script setup lang="ts">
+
+
+onMounted(()=>{
+  const {$userstore} = useNuxtApp()
+  $userstore().loadRemoteUserInfo()
+
+})
+</script>
 <template>
   <div>
-    <NuxtLayout>
+    <NuxtLayout>      
       <EventMonitor/>
       <NuxtPage />
     </NuxtLayout>

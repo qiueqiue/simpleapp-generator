@@ -10,35 +10,25 @@ import { TenantDoc } from "../simpleapp/TenantDoc";
 // import OrderList from 'primevue/orderlist';
 import Panel from "primevue/panel";
 
-const { $event, $listen } = useNuxtApp();
+const { $event, $listen, $userstore } = useNuxtApp();
 const route = useRoute();
-const doc = new TenantDoc();
-type tenantDataType = {
-  tenantId: number;
-  tenantCode: string;
-  tenantName: string;
-  xorg: string;
-};
-const initialtenant: tenantDataType[] = [];
-const tenantlist = ref(initialtenant);
-
-doc
-  .getApi()
-  .mytenants()
-  .then((res: any) => {
-    for (let i = 0; i < res.data.length; i++) {
-      const x = res.data[i];
-      const tmp: tenantDataType = {
-        xorg: x.xOrg,
-        tenantId: x.tenantId,
-        tenantCode: x.tenantCode,
-        tenantName: x.tenantName,
-      };
-      tenantlist.value.push(tmp);
+const userinfo =ref()
+const tenantlist = ref()
+onMounted(()=>{
+  $userstore().loadRemoteUserInfo().then((res)=>{
+    console.log("res",res)
+    userinfo.value = $userstore().getUserInfo();
+    tenantlist.value=userinfo.value.xOrgList
+    console.log('tenantlist',tenantlist.value)
+    const firstxorg = userinfo.value.xOrgList[0].xorg;
+    if(firstxorg){
+      navigateTo(`/${firstxorg}`)
     }
-    console.log(tenantlist.value);
-  });
-// const mytenant = doc.get
+  })
+  
+})
+
+
 </script>
 <template>
   <div>
@@ -52,16 +42,16 @@ doc
         >
           <div class="flex flex-wrap p-2 align-items-center gap-3">
             <div class="flex-1 flex flex-column gap-2">
-              <span class="font-bold">{{ item.tenantName }}</span>
+              <span class="font-bold">{{ item.orgCode }} - {{ item.orgName }}</span>
               <div class="flex align-items-center gap-2">
-                <span>{{ item.xorg }}</span>
+                <span>{{ item.branchCode }}</span>
               </div>
             </div>
-            <span class="font-bold text-900">{{ item.tenantCode }}</span>
+            <span class="font-bold text-900">{{ item.xorg }}</span>
           </div>
         </NuxtLink>
       </div>
-    </Panel>
+    </Panel> 
   </div>
 </template>
 
@@ -69,7 +59,7 @@ doc
 .p-panel {
   @apply m-2;
 }
-.tenant-link:hover div{
-    @apply bg-gray-300
+.tenant-link:hover div {
+  @apply bg-gray-300;
 }
 </style>

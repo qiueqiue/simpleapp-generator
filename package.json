@@ -32,6 +32,7 @@
     "fs": "0.0.1-security",
     "json-schema": "^0.4.0",
     "json-schema-ref-parser": "^9.0.9",
+    "lodash": "^4.17.21",
     "path": "^0.12.7",
     "tslog": "^4.9.1"
   },
