@@ -8,7 +8,7 @@ import { UserProvider } from '../generate/commons/providers/UserProvider';
 export class ProfileService{
 
     constructor(@Inject('UserProvider')private readonly userprovider: UserProvider){
-        console.log("init Profile services ",this.userprovider.getEmail())
+        //console.log("init Profile services ",this.userprovider.getEmail())
     }
     async getProfile(){
         return await this.userprovider.getUserInfo()

@@ -28,7 +28,7 @@ import {ProfileService} from '../../services/profile.service'
 @Controller({path:"profile",scope: Scope.REQUEST,})
 export class ProfileController{            
     constructor(private profileservice: ProfileService) {
-        console.log("init Profile Controller ")
+        //console.log("init Profile Controller ")
     }
 
   @Get()

@@ -119,12 +119,12 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   addAutoCompleteField = (morefield: MoreProjectionType) => {
     const props = Object.getOwnPropertyNames(morefield);
-    console.log('addAutoCompleteField', props);
+    // console.log('addAutoCompleteField', props);
     for (let i = 0; i < props.length; i++) {
       const key = props[i];
       this.moreAutoCompleteField[key] = '$' + morefield[key];
     }
-    console.log(this.moreAutoCompleteField);
+    // console.log(this.moreAutoCompleteField);
   };
   async getAutoComplete(keyword: string) {
     try {

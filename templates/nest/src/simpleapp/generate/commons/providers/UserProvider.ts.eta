@@ -44,7 +44,7 @@ export class UserProvider {
   protected group: string = '';
   protected roles: string[] = [Role.SuperAdmin,Role.SuperUser,Role.User];
   constructor() {
-    console.log("Init userprovider")
+    
   }
   // public static getInstance(): UserProvider {
   //   if (!UserProvider.instance) {
@@ -85,7 +85,7 @@ export class UserProvider {
       const users = await usermodel.find(filter)
       
       if(!users || users.length ==0){
-        console.log("User not found")        
+        //console.log("User not found")        
         this.group = 'Unknown'        
         this.roles = [Role.Everyone,Role.Unknown]
         this._id = '';
@@ -253,10 +253,10 @@ export class UserProvider {
     const ssoclient = process.env.OAUTH2_CLIENTID
     const adminRole = process.env.OAUTH2_ADMINROLE    
     if( o[ssoclient] && o[ssoclient]['roles'] && o[ssoclient]['roles'] == adminRole ){
-      console.log("isadmin")
+      //console.log("isadmin")
           return true
     }else{     
-      console.log("not admin")
+      //console.log("not admin")
       return false
     }
     
