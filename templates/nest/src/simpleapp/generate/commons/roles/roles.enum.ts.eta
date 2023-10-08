@@ -1,0 +1,27 @@
+export enum Role {
+    Unknown = 'unknown',
+    Everyone = 'everyone',
+    SuperAdmin = 'superadmin',
+    SuperUser = 'suerpuser',
+    User = 'user',
+    <% for(let i=0;i<it.modules.length; i++){ %>
+        <% const m = it.modules[i] %>
+        <%=m.docname%>_create='<%=m.docname%>:create',
+
+        <%=m.docname%>_update='<%=m.docname%>:update',
+
+        <%=m.docname%>_delete='<%=m.docname%>:delete',
+
+        <%=m.docname%>_search='<%=m.docname%>:search',
+
+        <% if(m.api && m.api.length >0) {%>
+
+            <% for(let j=0;j<m.api.length; j++){ %>
+                <%let api = m.api[j]%>
+        
+        <%=m.docname%>_<%=api.action%>='<%=m.docname%>:<%=api.action%>',
+        
+            <%}%>
+        <%}%>
+    <%}%>
+  }

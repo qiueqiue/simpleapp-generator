@@ -1,0 +1,487 @@
+import { Injectable, Logger,Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+
+import { Model } from 'mongoose';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
+import foreignkeys from './dicts/foreignkeys.json';
+import { WorkflowProviderFactory } from './providers/Workflow';
+import {
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common/exceptions';
+import { UserProvider } from './providers/UserProvider';
+
+export enum IsolationType {
+  'none' = 'none',
+  'org' = 'org',
+  'tenant' = 'tenant',
+  'branch' = 'branch',
+}
+export enum HookType {
+  'init' = 'init',
+  'beforeSearch' = 'beforeSearch',
+  'afterSearch' = 'afterSearch',
+  'beforeValidation' = 'beforeValidation',
+  'afterValidation' = 'afterValidation',
+  'beforeCreate' = 'beforeCreate',
+  'afterCreate' = 'afterCreate',
+  'beforeUpdate' = 'beforeUpdate',
+  'afterUpdate' = 'afterUpdate',
+  'beforeDelete' = 'beforeDelete',
+  'afterDelete' = 'afterDelete',
+  'beforeFetchRecord' = 'beforeFetchRecord',
+  'afterFetchRecord' = 'afterFetchRecord',
+}
+export type MoreProjectionType = {
+  [key: string]: string;
+};
+@Injectable()
+export class SimpleAppService<T extends { _id?: string }> {
+  protected logger = new Logger();
+  protected jsonschema = { type: 'object', properties: {}, required: [] };
+  protected documentIdentityCode = 'code';
+  protected documentIdentityLabel = 'label';
+  protected documentName = '-unknowndocname-';
+  protected documentType = '-unknowndoctype-';
+  protected LIMITPERPAGE = 20;
+  protected moreAutoCompleteField: MoreProjectionType = {};
+  protected isolationtype: IsolationType = IsolationType.org;
+  protected isolationFilter: any = {};
+  protected data: T = { _id: '' } as T;
+  private doc: Model<T>; //set private to prevent developer break data isolation control
+  protected errorlist = [];
+  @Inject('UserProvider')
+  protected userprovider:UserProvider;
+
+  constructor(
+    doctype: string,
+    docname: string,
+    newdoc: Model<T>,
+    isolationtype: IsolationType = IsolationType.org,
+  ) {
+
+    // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
+    this.documentType = doctype;
+    this.documentName = docname;
+    this.doc = newdoc;
+    this.isolationtype = isolationtype;
+    this.hook(HookType.init, this.documentName);
+    // this.tenantdoc = tenantdoc
+  }
+  getRecordId = (): string => this.data._id;
+  setSchema = (newschema) => (this.jsonschema = newschema);
+  getSchema = () => this.doc.schema.obj;
+  getData = () => {
+    //console.log('thisdata', this.data);
+    return this.data;
+  };
+  setData = (newdata: T) => {
+    delete newdata._id;
+    this.data = { ...newdata };
+    return this;
+  };
+  reCalculate() {}
+  getIsolationFilter = () => {
+    let isolationFilter = {};
+    switch (this.isolationtype) {
+      case 'none':
+        isolationFilter = {};
+        break;
+      case 'branch':
+        isolationFilter = this.userprovider.getBranchFilter();
+        break;
+      case 'tenant':
+        isolationFilter = this.userprovider.getTenantFilter();
+        break;
+      case 'org':
+      default:
+        isolationFilter = this.userprovider.getOrgFilter();
+        break;
+    }
+    return isolationFilter;
+  };
+  async list() {
+    try {
+      //console.log("this.isolationFilter",this.getIsolationFilter())
+      const products = await this.doc.find(this.getIsolationFilter());
+      // console.log(products)
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+  addAutoCompleteField = (morefield: MoreProjectionType) => {
+    const props = Object.getOwnPropertyNames(morefield);
+    console.log('addAutoCompleteField', props);
+    for (let i = 0; i < props.length; i++) {
+      const key = props[i];
+      this.moreAutoCompleteField[key] = '$' + morefield[key];
+    }
+    console.log(this.moreAutoCompleteField);
+  };
+  async getAutoComplete(keyword: string) {
+    try {
+      const filter1 = {};
+      const filter2 = {};
+      let filters: any[] = [];
+      if (
+        this.jsonschema.properties[this.documentIdentityCode]['type'] ==
+        'string'
+      ) {
+        filter1[this.documentIdentityCode] = { $regex: keyword, $options: 'i' };
+        filters.push(filter1);
+      }
+
+      filter2[this.documentIdentityLabel] = { $regex: keyword, $options: 'i' };
+      filters.push(filter2);
+      const filterobj = { $or: filters };
+
+      Object.assign(filterobj, this.getIsolationFilter());
+      let projections = {
+        id: `\$_id`,
+        label: `\$${this.documentIdentityLabel}`,
+        code: `\$${this.documentIdentityCode}`,
+      };
+      if (this.moreAutoCompleteField) {
+        Object.assign(projections, this.moreAutoCompleteField);
+      }
+      const products = await this.doc.find(filterobj, projections, {
+        limit: this.LIMITPERPAGE,
+      });
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+  private async searchNoIsolation(filters: Object) {
+    try {
+      await this.hook(HookType.beforeSearch, filters);
+      const products = await this.doc.find(filters);
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      await this.hook(HookType.afterSearch, productlist);
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+    // return this;
+  }
+  async search(filters: Object) {
+    try {
+      // console.log("before _find",filters)
+      Object.assign(filters, this.getIsolationFilter());
+      await this.hook(HookType.beforeSearch, filters);
+      // console.log("before _find",filters)
+      // console.log("this.doc",this.doc)
+      const products = await this.doc.find(filters);
+      // console.log("after search",products)
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      // console.log("after map",productlist)
+      await this.hook(HookType.afterSearch, productlist);
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+    // return this;
+  }
+  async findById(id: string) {
+    await this.hook(HookType.beforeFetchRecord, id);
+    const data = await this.search({ _id: id });
+    await this.hook(HookType.afterFetchRecord, data);
+    if (data.length == 1) {
+      // console.log('data0', data[0]);
+      return data[0];
+    } else {
+      return null;
+    }
+  }
+
+  async create() {
+    let result;
+
+    // try {
+
+    
+    const tempTenantId = this.data['tenantId'];
+    const tempOrgId = this.data['orgId'];
+    const tempBranchId = this.data['branchId'];
+    await this.hook(HookType.beforeCreate, this.data);
+    Object.assign(this.data, this.userprovider.getCreateFilter());
+    
+    if (this.documentType == 'tenant') {
+      // this.data['tenantId'] = tempTenantId;
+    } else if (this.documentType == 'org') {
+      this.data['tenantId'] = tempTenantId;
+      this.data['orgId'] = tempOrgId;
+    } else if (this.documentType == 'branch') {
+      this.data['orgId'] = tempOrgId;
+      this.data['branchId'] = tempBranchId;
+    }
+    delete this.data._id;
+    await this.validateData(this.data);
+    const newdoc = new this.doc(this.data);
+    result = await newdoc.save();
+    await this.hook(HookType.afterCreate, result);
+
+    return result as T;
+  }
+  async update() {
+    const id: string = this.getRecordId();
+    Object.assign(this.data, this.userprovider.getUpdateFilter());
+    await this.findIdThenUpdate(id, this.data);
+  }
+  async delete() {
+    const id: string = this.getRecordId();
+    const dependency = await this.getRelatedRecords(id);
+    if (!dependency) {
+      return await this.findIdThenDelete(id);
+    } else {
+      return dependency;
+    }
+  }
+  hook = async (type: string, data?: any) => {
+    // console.log('Default hook', data);
+    return true;
+  };
+  async validateData(data: T) {
+    const ajv = new Ajv({ allErrors: true, useDefaults: true });
+    addFormats(ajv);
+    addErrors(ajv);
+
+    ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
+    ajv.addFormat('x-text', /.*$/);
+    ajv.addFormat('x-html', /.*$/);
+
+    ajv.addKeyword({ keyword: 'x-document-no', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-label', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-status', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-document-api', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-ignore-autocomplete', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-isolation-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-collection-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-autocomplete-field', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-foreignkey', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-import-lib', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-compute', type: 'array' });
+    const issuccess = await this.hook(HookType.beforeValidation, data);
+    if (!issuccess) {
+      const errormsg: string[] = [];
+      for (let i = 0; i < this.errorlist.length; i++) {
+        errormsg.push(this.errorlist[i].message);
+      }
+      this.logger.log('run hook during validation');
+      throw new BadRequestException(JSON.stringify(errormsg));
+    }
+
+    let validate;
+    try {
+      validate = ajv.compile(this.jsonschema);
+
+      const valid = validate(data);
+      if (!valid) {
+        this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
+        throw new BadRequestException(JSON.stringify(validate.errors));
+      }
+      await this.hook(HookType.afterValidation, data);
+    } catch (err) {
+      this.logger.error('compile error', err);
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  async findIdThenDelete(id: string): Promise<any> {
+    // const data = await this.findById(id);
+    try {
+      await this.hook(HookType.beforeDelete, id);
+      console.log('deletedeletedeletedelete', id);
+      const dependency = await this.getRelatedRecords(id);
+      if (!dependency) {
+        let filter = this.getIsolationFilter();
+        filter['_id'] = id;
+        console.log('filter', filter);
+        const deleteresult = await this.doc.deleteOne(filter);
+        // this.doc.findByIdAndDelete(id)
+        await this.hook(HookType.afterDelete, deleteresult);
+        //this.doc.findByIdAndDelete(id);
+        return deleteresult;
+      } else {
+        return Promise.reject(dependency);
+      }
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  updateOne = async (data: T) => {
+    this.doc.updateOne(data);
+  };
+
+  findIdThenUpdate = async (id: string, data: T) => {
+    const existingdata = await this.findById(id);
+    await this.hook(HookType.beforeUpdate, data);
+    // try {
+    Object.assign(data, this.userprovider.getUpdateFilter());
+    Object.assign(existingdata, data);
+    await this.validateData(data);
+    let filter = this.getIsolationFilter();
+    filter['_id'] = id;
+    const result = await this.doc.findOneAndUpdate(filter, data);
+    await this.hook(HookType.afterUpdate, data);
+    return result;
+    // } catch (err) {
+    //   throw new InternalServerErrorException(err.message);
+    // }
+  };
+
+  //find what foreign key constraint
+  async getRelatedRecords(id: string) {
+    const foreignkeysettings = foreignkeys[this.documentName];
+    //console.log('foreignkeysettings', foreignkeysettings);
+    const propkeys = Object.getOwnPropertyNames(foreignkeysettings);
+
+    if (propkeys.length > 0) {
+      //console.log('Have properties');
+      for (let i = 0; i < propkeys.length; i++) {
+        const collectionname = propkeys[i];
+        //console.log('run ', i, collectionname);
+        const fobjs = foreignkeysettings[propkeys[i]];
+        const collection = this.doc.db.collection(collectionname);
+        //single schema may have multiple foreign key link here, loop all
+        for (let j = 0; j < fobjs.length; j++) {
+          const fkey = fobjs[j] + '._id';
+          const filter = {};
+          filter[fkey] = id;
+          //console.log('getRelatedRecords get filter', collectionname, filter);
+          const result = await collection.findOne(filter);
+          //console.log('getRelatedRecords', result);
+          if (result) {
+            return Promise.reject(result);
+          }
+        }
+      }
+    }
+    return Promise.resolve(null);
+  }
+
+  /**
+   * dummy ping
+   */
+  ping(...data) {
+    return `hello ${JSON.stringify(data)}`;
+  }
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async setDocumentStatus(id: string, docstatus: string) {
+    const partialdata: T = {} as T;
+    partialdata['documentStatus'] = docstatus;
+    return this.findIdThenUpdate(id, partialdata);
+  }
+
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async executeWorkFlow(id: string, bpmnname: string, docstatus: string) {
+    const data = await this.findById(id);
+    return "ok"
+    // Workflow.getInstance().executeWorkFlow(
+    //   id,
+    //   bpmnname,
+    //   docstatus,
+    //   data,
+    // );
+  }
+
+  async getMyUserTask() {
+    return "OK"//Workflow.getInstance().getMyUserTask();
+  }
+
+  async getAllOrganization() {
+    const res: any[] = await this.search({}); //search all organization
+    // const res
+    const allbranches = [];
+    // console.log("resresres",res)
+    for (let i = 0; i < res.length; i++) {
+      // console.log("bbb",res[i].branches)
+      for (let j = 0; j < res[i].branches.length; j++) {
+        const b = res[i].branches[j];
+
+        allbranches.push({
+          branchId: b.branchId,
+          branchCode: b.branchCode,
+          branchName: b.branchName,
+          orgId: res[i].orgId,
+          orgCode: res[i].orgCode,
+          orgName: res[i].orgName,
+        });
+      }
+    }
+    return allbranches;
+  }
+  async getAllMyOrganization() {
+    const u = this.userprovider;
+    const filter = { ssoId: u.getUid(), isactive: true };
+    const res = await this.searchNoIsolation(filter);
+    return res;
+  }
+  //hardcoded tenant service, temporary no place can park since initial project totally empty
+  // async getMyTenants() {
+  //   const ssoId = this.userprovider.getUid()
+  //   const filter = {
+  //     $or: [
+  //       { 'owner.code': ssoId },
+  //       { 'users.user.code': ssoId },
+  //     ],
+  //   };
+  //   console.log(filter);
+  //   let data = await this.search(filter);
+  //   //tenantId
+  //   let res = [];
+  //   let tenantList:number[]=[]
+  //   const { encodeText } = require('@darkwolf/base64url');
+  //   for (let i = 0; i < data.length; i++) {
+  //     const t = data[i];
+  //     const tenantId = t['tenantId']
+
+  //     tenantList.push(tenantId)
+  //     const tmp = {
+  //       tenantId: tenantId,
+  //       tenantCode: t['tenantCode'],
+  //       tenantName: t['tenantName'],
+  //       xOrg: encodeText(`${t['tenantId']}-1-1`),
+  //     };
+  //     res.push(tmp);
+  //   }
+
+  //   const filerUser = {
+  //     'ssoId': ssoId,
+  //     'tenantId': {$in: tenantList}
+  //   };
+
+  //   console.log("filerUser",filerUser)
+  //   return res;
+  // }
+}

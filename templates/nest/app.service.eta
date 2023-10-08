@@ -1,8 +1,0 @@
-import { Injectable } from '@nestjs/common';
-import { Workflow } from './class/Workflow';
-@Injectable()
-export class AppService {
-  async getMyTask() {
-    return await Workflow.getInstance().getMyUserTask()
-  }
-}

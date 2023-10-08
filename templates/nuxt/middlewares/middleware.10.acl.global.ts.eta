@@ -1,0 +1,27 @@
+export default defineNuxtRouteMiddleware((to, from) => {
+    // if (to.params.id === '1') {
+    // if(to.)
+    
+
+    // no permission control needed yet
+    if(!to.params['xorg']){
+      return true  //no permission needed
+    }else{
+      const resourcename = to.fullPath.split('/')[2]
+      
+      if(resourcename===undefined){//home page
+        return true  //no permission needed
+      }else{
+        const {$userstore} = useNuxtApp()
+
+
+        if($userstore().canAccess(resourcename)){
+          console.log("approved")
+          return true
+        }else{
+          return abortNavigation()
+        }
+      }    
+    }
+  
+  })

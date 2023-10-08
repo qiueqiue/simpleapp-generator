@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "x-isolation-type":"none",    
+    "required":["tenantId","tenantName","isactive","owner","uuid"],
+    "properties": {
+      "tenantId": {"type": "integer","x-document-no":true,"minimum":1,"examples": [1]},
+      "tenantName": {"type": "string","x-document-label":true,"examples": ["tenant1"]},
+      "uuid": {"type": "string","minLength":16,"format":"uuid","examples": ["xxxxx-yyyyy-zzzzzz-aaaa"]},
+      "isactive": {"type": "boolean","examples": [true],"default":true},
+      "description": {"type": "string","examples": ["sample desc"]},
+      "owner": {"type": "object","x-foreignkey":"globaluser",        
+        "properties": {
+          "_id": {"type": "string","examples": ["aa"]},
+          "label": {"type": "string","examples": ["aaaa"]}}          
+      }
+      
+    }
+  }

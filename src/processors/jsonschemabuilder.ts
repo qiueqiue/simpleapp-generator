@@ -114,7 +114,6 @@ const processObject =  (doctype: string,
     //ensure some field exists, also override it
     jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
-    jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
     jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
@@ -125,6 +124,9 @@ const processObject =  (doctype: string,
     }
     if(doctype !='org'){
       jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
+    }
+    if(doctype !='branch'){
+      jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
     }
     
     if(jsondata[X_ISOLATION_TYPE] && ['none','tenant','org','branch'].includes(jsondata[X_ISOLATION_TYPE])  ){      

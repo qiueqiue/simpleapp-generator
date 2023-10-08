@@ -49,6 +49,9 @@ if(!options.configFile){
   const bpmnFolder = configs.bpmnFolder
   const backendFolder = configs.backendFolder 
   const frontendFolder = configs.frontendFolder   
+
+
+
 const run = async()=>{
     fw.setConfiguration(configs)
     fw.runCreateNuxt(()=>{
@@ -65,11 +68,17 @@ const run = async()=>{
      })
 }
 
+const reGenBackend = async()=>{
+  generate.run(configs,()=>{
+    fw.prettyNest()                                                
+  })  
+}
 
 const runbackend = async()=>{
   fw.setConfiguration(configs)
       fw.runCreateNest(()=>{
           fw.prepareNest(()=>{
+
                   generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
                       fw.prettyNest()                                                
                   })                    
@@ -91,6 +100,9 @@ const runfrontend = async()=>{
 
 
 switch(options.generateType){
+  case 'updatebackend':
+    reGenBackend()
+  break;
   case 'frontend':
     runfrontend()
   break;

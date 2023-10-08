@@ -13,11 +13,14 @@ todo:
 [ ] frontend search
 [ ] new transaction CRUD ui
 [ ] student UI
+[ ] structure of save into another document
 
 Permission and Authorization
-[ ] hide no permission window
+[x] hide no permission window
 [ ] hide no permission buttons
-[ ] permission user/group (pick hard coded group from enum)
+[x] permission user/group (pick hard coded group from enum)
+[ ] figure how to get enum list from permission list for user schema
+
 1. copy group-to-role to both frontend and backend 
 2. loop backend role code, and define into user role
 3. loop frontend role code, and 

@@ -1,0 +1,67 @@
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { APP_GUARD } from '@nestjs/core';
+import {
+  AuthGuard,
+  KeycloakConnectModule,
+  ResourceGuard,
+  TokenValidation,
+  RoleGuard,
+  PolicyEnforcementMode,
+} from 'nest-keycloak-connect';
+import {RolesGuard} from './simpleapp/generate/commons/roles/roles.guard'
+import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { TenantMiddleware } from './simpleapp/generate/commons/middlewares/TenantMiddleware';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import {GenerateModule} from './simpleapp/simpleapp.module'
+
+
+@Module({
+  //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGODB_URL),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public_html'),
+      exclude: ['/api/(.*)'],
+    }),
+    KeycloakConnectModule.register({
+      authServerUrl: process.env.OAUTH2_BASEURL,
+      realm: process.env.OAUTH2_REALM,
+      clientId: process.env.OAUTH2_CLIENTID,
+      secret: process.env.OAUTH2_CLIENTSECRET,
+      policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
+      tokenValidation: TokenValidation.ONLINE,
+    }),
+    GenerateModule
+      ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ResourceGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, //use simpleapp own roleguard
+    },
+  ],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      // .exclude('/api-yaml')
+      // .exclude('/api-json')
+      // .exclude('/api')
+      .forRoutes('*');
+  }
+}

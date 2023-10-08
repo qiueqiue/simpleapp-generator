@@ -1,0 +1,18 @@
+import { Injectable, Scope ,Inject} from '@nestjs/common';
+import { UserProvider } from '../generate/commons/providers/UserProvider';
+
+
+@Injectable({
+    scope:Scope.REQUEST
+})
+export class ProfileService{
+
+    constructor(@Inject('UserProvider')private readonly userprovider: UserProvider){
+        console.log("init Profile services ",this.userprovider.getEmail())
+    }
+    async getProfile(){
+        return await this.userprovider.getUserInfo()
+    }
+    
+
+}

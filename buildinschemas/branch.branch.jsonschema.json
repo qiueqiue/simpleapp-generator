@@ -1,0 +1,40 @@
+{
+    "type": "object",
+    "x-isolation-type":"tenant",   
+    "properties": {
+      "branchId": {
+        "type": "integer",
+        "minimum":1,
+        "x-autocomplete-field":true
+      },
+      "organization":{
+        "type":"object",
+        "x-foreignkey":"organization",
+        "properties":{
+            "_id":{"type":"string"},
+            "code":{"type":"string"},
+            "label":{"type":"string"},
+            "orgId":{"type":"integer"}
+        }
+      },
+      "branchCode": {
+        "type": "string",
+        "x-document-no":true
+        
+      },
+      "branchName": {
+        "type": "string",
+        "x-document-label":true        
+      },
+      "isactive": {
+        "type": "boolean",
+        "default":true        
+      },
+      "description": {
+        "type": "string",
+        "examples": [
+          ""
+        ]
+      }
+    }
+  }

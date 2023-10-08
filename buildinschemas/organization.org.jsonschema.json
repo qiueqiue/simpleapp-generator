@@ -1,0 +1,48 @@
+{
+    "type": "object",
+    "x-isolation-type":"tenant",   
+    "required":["orgId","orgCode","orgName"],
+    "properties": {
+      "orgId": {
+        "type": "integer",
+        "minimum":1,
+        "x-autocomplete-field":true        
+      },
+      "orgCode": {
+        "type": "string",  
+        "x-document-no":true,
+        "minLength":1,      
+        "examples": [
+          "org1"
+        ]
+      },
+      "orgName": {
+        "type": "string",
+        "x-document-label":true,
+        "examples": [
+          "Organization 1"
+        ]
+      },
+      "isactive": {
+        "type": "boolean",
+        "default":true,
+        "examples": [
+          true
+        ]
+      },
+      "description": {
+        "type": "string",
+        "format":"x-text",
+        "examples": [
+          "desc 1"
+        ]
+      },
+      "timezone": {
+        "type": "string",
+        "examples": [
+          "Asia/Kuala_Lumpur"
+        ]
+      }
+      
+    }
+  }

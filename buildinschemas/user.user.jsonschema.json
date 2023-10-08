@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "x-isolation-type":"tenant",
+  "properties": {
+    "ssoId": {
+      "type": "string",
+      "x-document-no":true,
+      "examples": [
+        "xxxxx-yyyyy-zzzzz-aaa"
+      ]
+    },
+    "fullname": {
+      "type": "string",
+      "examples": [
+        "user 1"
+      ]
+    },
+    "email": {
+      "type": "string",    
+      "x-document-label":true,  
+      "examples": [
+        "myemail@abc.com"
+      ],
+      "format": "email"
+    },
+    "isactive": {"type": "boolean","default":true},    
+    "branches":{
+        "type":"array",
+        "description":"list of accessible branches",
+        "items":{
+          "type":"object",        
+          "properties":{
+            "branch":{"type":"object","properties":{
+              "branchId":{"type":"number"},
+              "branchCode":{"type":"string"},
+              "branchName":{"type":"string"},
+              "orgId":{"type":"number"},
+              "orgCode":{"type":"string"},
+              "orgName":{"type":"string"}
+            }},
+            "isactive":{"type":"boolean","default":true},          
+            "group":{
+              "type":"string",
+              "description":"Access right"              
+            },    
+            "description":{"type":"string"}
+
+          }
+        }
+      
+    }
+  }
+}
