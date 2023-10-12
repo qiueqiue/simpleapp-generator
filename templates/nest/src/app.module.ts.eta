@@ -13,7 +13,7 @@ import {RolesGuard} from './simpleapp/generate/commons/roles/roles.guard'
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { TenantMiddleware } from './simpleapp/generate/commons/middlewares/TenantMiddleware';
+import { TenantMiddleware } from './simpleapp/generate/commons/middlewares/tenant.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import {GenerateModule} from './simpleapp/simpleapp.module'

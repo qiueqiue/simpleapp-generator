@@ -1,0 +1,246 @@
+import { Injectable, Scope,Inject } from '@nestjs/common';
+
+import { Model, model, connect, PipelineStage } from 'mongoose';
+import _ from 'lodash'
+import { Module } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
+import { Role } from './roles/roles.enum';
+import * as rolegroups from './roles/roles.group'
+import { UserService } from './../../services/user.service';
+import { InjectModel } from '@nestjs/mongoose';
+const Base64URL = require('@darkwolf/base64url');
+import { UserMongoSchema } from './../models/user.model';
+import {   User,  }  from './../types/user.type';
+import {ProfileUserBranch , ProfileUserInvites} from '../../profile/profile.types'
+
+@Injectable()
+export class UserProfile {
+    
+  protected uid: string = '';
+  protected _id: string = '';
+  protected uname: string = '';
+  protected email: string = '';
+  protected fullname: string = '';
+  protected xOrg: string = '';
+  protected tenantId: number = 0;
+  protected orgId: number = 0;
+  protected branchId: number = 0;
+  protected ssoACL: any = {};
+  protected token: string = '';
+  protected refreshtoken: string = '';
+  protected group: string = '';
+  protected branches: ProfileUserBranch[] = []
+  protected invites:ProfileUserInvites[] = []
+  protected roles: string[] = [Role.SuperAdmin,Role.SuperUser,Role.User];
+  constructor() {
+    
+  }
+  getId = () => this._id;
+  getUid = () => this.uid;
+  getUname = () => this.uname;
+  getFullname = () => this.fullname;
+  getTenantId = () => this.tenantId;
+  getOrgId = () => this.orgId;
+  getBranchId = () => this.branchId;
+  getEmail = () => this.email;
+  getGroup = () => this.group;
+  getRoles = () => this.roles;
+  getBranches = () => this.branches;
+  getInvites = () => this.invites;
+  setCurrentUserInfo = (tokenstr: string,xorg)=>{
+    this.setUserToken(tokenstr)
+    this.setXorg(xorg);      
+  }
+  setUserToken = async (tokenstr: string) => {    
+    const tokeninfo = jwt.decode(tokenstr);      
+    this.token = tokenstr;
+    this.uid = tokeninfo.sub;
+    this.email = tokeninfo.email;
+    this.uname = tokeninfo.preferred_username;
+    this.fullname = tokeninfo.name;    
+    this.ssoACL = tokeninfo.resource_access;
+    
+    try{
+      
+      await connect(process.env.MONGODB_URL);
+      const usermodel = model<User>('user',UserMongoSchema,'user')
+      const filter:PipelineStage ={ $match:{uid:this.uid }} as PipelineStage
+      const permission:PipelineStage = {$lookup: {
+        from : 'permission',
+        localField : 'uid',
+        foreignField : 'uid',
+        as : 'branches'
+      }}
+      const lookupinvitation: PipelineStage = {
+        $lookup: {
+          from: 'invitation',
+          localField: 'email',
+          foreignField: 'email',
+          as: 'invites',
+          pipeline:[{$match:{ decision:''}}]
+        },
+      };
+      const pipeline:PipelineStage[]=[filter,permission,lookupinvitation]
+      
+      // const users = await usermodel.find(filter)
+      const users = await usermodel.aggregate(pipeline)
+      // console.log(pipeline)
+      if(!users || users.length ==0){
+        // console.log("User not found")        
+        this.group = 'Unknown'        
+        this.roles = [Role.Everyone,Role.Unknown]
+        this._id = '';
+        this.branches =[]
+      }else{
+        const userinfo = users[0]
+        // console.log("userinfo ",userinfo)        
+        const currentbranch=this.branchId
+        const currentorg = this.orgId   
+        this.group = 'manager'
+        this._id = userinfo._id.toString()
+        this.roles = rolegroups[this.group]   
+        const branches:ProfileUserBranch[] = []
+        for(let i=0 ; i< userinfo.branches.length;i++){
+          const b:ProfileUserBranch = userinfo.branches[i]
+          branches.push({
+            _id:b._id.toString(),
+            tenantId:b.tenantId,
+            orgId:b.orgId,
+            branchId:b.branchId,
+            isactive:b.isactive,
+            group:b.group,
+            xOrg: this.generateXorg(b.tenantId,b.orgId,b.branchId)
+            
+          })
+        }
+        this.branches = branches
+
+        const invites:ProfileUserInvites[] = []
+        for(let i=0 ; i< userinfo.invites.length;i++){
+          const inv:ProfileUserInvites = userinfo.invites[i]
+          invites.push({
+            _id: inv._id.toString(),
+            email: inv.email,
+            created: inv.created ,
+            permission: inv.permission
+          })
+        }
+        this.invites = invites
+        if(!this.roles.includes(Role.Everyone)){
+          this.roles.push(Role.Everyone)        
+        }
+        
+      }
+
+      if(this.isRealmAdmin() && !this.roles.includes(Role.SuperAdmin)){
+        this.roles.push(Role.SuperAdmin)
+      }
+      
+        
+    }catch(err){
+      console.log("-------------errors----s----s----s----s-----",err)
+    }  
+  };
+  generateXorg = (tenantId:number,orgId:number,branchId:number):string=>{
+    return Base64URL.encodeText(`${tenantId}-${orgId}-${branchId}`)
+  }
+  getInfo = () => {    
+    return this;
+  };
+  getBranchFilter = () => {
+    return {
+      tenantId: this.tenantId,
+      orgId: this.orgId,
+      branchId: this.branchId,
+    };
+  };
+  getTenantFilter = () => {
+    return { tenantId: this.tenantId };
+  };
+  getOrgFilter = () => {
+    return {
+      tenantId: this.tenantId,
+      orgId: this.orgId,
+    };
+  };
+  getWorkflowTaskFilter() {
+    return {
+      'data.tenantId': this.tenantId,
+      'assignments.assignee': this.getUid(),
+      // 'assignments.assignee': User.getInstance().getUid(),
+    };
+  }
+  getCreateFilter = () => {
+    const u = this;
+    return {
+      tenantId: u.tenantId,
+      orgId: u.orgId,
+      branchId: u.branchId,
+      createdby: u.uid,
+      updatedby: u.uid,
+      created: new Date().getTime().toString(),
+      updated: new Date().getTime().toString(),
+    };
+  };
+  getUpdateFilter = () => {
+    const u = this;
+    return {
+      updatedby: u.uid,
+      updated: new Date().getTime().toString(),
+    };
+  };
+  setXorg = (xorg) => {
+    try {
+      const decodedText: string = Base64URL.decodeText(xorg);
+      const arrXorg = decodedText.split('-');
+
+      if (arrXorg.length == 3) {
+        const u = this;
+        u.tenantId = Number(arrXorg[0]);
+        u.orgId = Number(arrXorg[1]);
+        u.branchId = Number(arrXorg[2]);        
+      } else {
+        throw 'invalid x-org';
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
+
+  async getUserInfo(){
+    const userinfo = {
+      _id: this._id ,
+      tenantId: this.getTenantId(),
+      orgId: this.getOrgId(),
+      branchId: this.getBranchId(),
+      email: this.getEmail(),
+      uid: this.getUid(),
+      fullName: this.getFullname(),
+      group: this.group,
+      roles: this.getRoles(),
+      branches: this.getBranches(),
+      invites: this.getInvites()
+    }
+    
+    
+    
+
+    return userinfo
+  }
+
+
+  isRealmAdmin = ()=>{
+    const o = this.ssoACL    
+    const ssoclient = process.env.OAUTH2_CLIENTID
+    const adminRole = process.env.OAUTH2_ADMINROLE    
+    if( o[ssoclient] && o[ssoclient]['roles'] && o[ssoclient]['roles'] == adminRole ){
+      //console.log("isadmin")
+          return true
+    }else{     
+      //console.log("not admin")
+      return false
+    }
+    
+  }
+}

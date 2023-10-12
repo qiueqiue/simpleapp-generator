@@ -1,9 +1,10 @@
 {
     "type": "object",
-    "x-isolation-type":"tenant",   
+    "x-isolation-type":"tenant",    
     "properties": {
       "branchId": {
         "type": "integer",
+        "default": 1,
         "minimum":1,
         "x-autocomplete-field":true
       },

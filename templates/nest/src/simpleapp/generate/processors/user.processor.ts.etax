@@ -6,7 +6,7 @@
  * Author: Ks Tan
  */
 import {Base64URL} from "@darkwolf/base64url"
-import { UserProvider } from '../commons/providers/UserProvider'
+import { UserProfile } from '../commons/user.profile'
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -16,7 +16,7 @@ import {  UserBranchesBranch,  UserBranches,  User,  }  from '../types/user.type
 
 @Injectable()
 export class UserProcessor extends SimpleAppService<User>  {
-  protected documentIdentityCode='ssoId'
+  protected documentIdentityCode='uid'
   protected documentIdentityLabel='email'
     constructor(mydoc: Model<User>) {
     super('user','user',mydoc,IsolationType.tenant);
@@ -80,7 +80,7 @@ async getUserInfo(){
       orgId:u.getOrgId(),
       branchId:u.getBranchId(),
       email:u.getEmail(),
-      ssoId:u.getUid(),
+      uid:u.getUid(),
       fullName:u.getFullname(),
       group:u.getGroup(),
       roles:u.getRoles(),

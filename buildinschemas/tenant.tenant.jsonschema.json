@@ -1,17 +1,21 @@
 {
     "type": "object",
     "x-isolation-type":"none",    
+    "x-required-role":["SuperAdmin"],
+    "x-page-type":"crud",
     "required":["tenantId","tenantName","isactive","owner","uuid"],
     "properties": {
-      "tenantId": {"type": "integer","x-document-no":true,"minimum":1,"examples": [1]},
+      "tenantId": {"type": "integer","x-document-no":true,"minimum":1,"default": 1,"examples": [1]},
       "tenantName": {"type": "string","x-document-label":true,"examples": ["tenant1"]},
       "uuid": {"type": "string","minLength":16,"format":"uuid","examples": ["xxxxx-yyyyy-zzzzzz-aaaa"]},
       "isactive": {"type": "boolean","examples": [true],"default":true},
       "description": {"type": "string","examples": ["sample desc"]},
-      "owner": {"type": "object","x-foreignkey":"globaluser",        
+      "owner": {"type": "object","x-foreignkey":"user", "required" :["_id","label","uid"],
         "properties": {
           "_id": {"type": "string","examples": ["aa"]},
-          "label": {"type": "string","examples": ["aaaa"]}}          
+          "label": {"type": "string","examples": ["aaaa"]},
+          "uid":{"type":"string","examples":["xxxx-yyyy-wwww-zz"],"minLength":16}
+        }          
       }
       
     }

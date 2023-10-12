@@ -1,0 +1,12 @@
+export const getUserStore = ()=>{
+    const {$userstore} = useNuxtApp()
+    return $userstore
+}
+export const reloadUserStore = () =>{
+    const {$userstore} = useNuxtApp()
+    $userstore.loadRemoteUserInfo()
+}
+
+export const getUserProfile = () =>{
+    return getUserStore().getUserInfo()
+}

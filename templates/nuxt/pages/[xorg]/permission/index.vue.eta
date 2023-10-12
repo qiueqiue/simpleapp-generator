@@ -1,0 +1,163 @@
+<script setup lang="ts">
+import Menu from "primevue/menu";
+import _ from "lodash";
+import Panel from "primevue/panel";
+import { ref } from "vue";
+import { UserListItem, BranchListItem, OrgListItem,InvitationListItem } from "../../../types";
+import SelectButton from "primevue/selectbutton";
+import InputText from "primevue/inputtext";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+const { $PermissionDoc, $OrganizationDoc, $BranchDoc,$InvitationDoc } = useNuxtApp();
+const doc = $PermissionDoc();
+const orgdoc = $OrganizationDoc();
+const branchdoc = $BranchDoc();
+const invitedoc = $InvitationDoc()
+const data = doc.getReactiveData();
+
+const inviteemail = ref("");
+const permlist = ref<UserListItem[]>([]);
+const userlist = ref<UserListItem[]>([]);
+const invitationlist = ref<InvitationListItem[]>([]);
+const orglist = ref<OrgListItem[]>([]);
+const branchlist = ref<BranchListItem[]>([]);
+const selected = ref("");
+const onSelectUser = async (item: any) => {
+  console.log("select user");
+  orglist.value = await orgdoc.list();
+  branchlist.value = await branchdoc.list();
+  selected.value = item.uid;
+};
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
+const refreshList = async () => {
+  const items: any[] = [];
+  permlist.value = await doc.listUser();
+  console.log("permlist", permlist.value);
+  userlist.value = _.uniqBy(permlist.value, "uid");
+
+  console.log(userlist.value);
+};
+
+const refreshInvitation = async () =>{
+  inviteemail.value=''
+  invitationlist.value = await invitedoc.list()
+  
+}
+onMounted(() => {
+  refreshList();
+  refreshInvitation()
+});
+
+const invite= async()=>{
+  const result = await sendInvitation(inviteemail.value)
+  refreshInvitation()
+}
+const deleteInvitation = async (recordId:string)=>{  
+  await cancelInvitation(recordId);
+  refreshInvitation()
+}
+const checkBranchInOrg = (org: OrgListItem, branch: BranchListItem) => {
+  return org.orgId === branch.orgId;
+};
+</script>
+<template>
+  <div class="grid grid-cols-3">
+    <div v-if="userlist">    
+      <TabView>
+        <TabPanel header="Active">
+          <Menu
+            :model="userlist"
+            class="w w-auto border border-solid border-1"
+            :pt="{ root: { class: 'w-auto ' } }"
+          >
+            <template #start>
+              <div class="flex flex-column align">
+                <h1>Users</h1>
+              </div>
+            </template>
+            <template #item="{ item, label, props }">
+              <a
+                class="flex m-2 p-2 flex-col border border-b-2"
+                @click="onSelectUser(item)"
+              >
+                <div class="text text-left text-base text-black">
+                  {{ item.fullName }}
+                </div>
+                <div class="text text-sm text-right">{{ item.email }}</div>
+              </a>
+            </template>
+          </Menu>
+        </TabPanel>
+        <TabPanel header="Suspended">
+          <Menu
+            :model="userlist"
+            class="w w-auto border border-solid border-1"
+            :pt="{ root: { class: 'w-auto ' } }"
+          >
+            <template #start>
+              <div class="flex flex-column align">
+                <h1>Users</h1>
+              </div>
+            </template>
+            <template #item="{ item, label, props }">
+              <a
+                class="flex m-2 p-2 flex-col border border-b-2"
+                @click="onSelectUser(item)"
+              >
+                <div class="text text-left text-base text-black">
+                  {{ item.fullName }}
+                </div>
+                <div class="text text-sm text-right">{{ item.email }}</div>
+              </a>
+            </template>
+          </Menu>
+        </TabPanel>
+        <TabPanel header="Invite">
+          <div class="padding p-2">
+            <div class="p-inputgroup flex-1">
+              <InputText type="email" placeholder="email" v-model="inviteemail" />
+              <Button
+                label="Search"
+                class="btn btn-primary"
+                @click="invite"
+                >Invite</Button
+              >
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <div v-for="(invitation,index) in invitationlist" class="grid grid-cols-4 ">
+                <div class="text text-base m-2">{{ index +1 }}</div>  
+                <div class="col-span-2 text text-base m-2">{{ invitation.email }}</div>
+                <div><button class="btn-danger pi pi-times" @click="deleteInvitation(invitation._id)"></button></div>
+            </div>  
+          </div>
+          
+
+        </TabPanel>
+      </TabView>
+    </div>
+    <div class="col-span-2" v-if="selected">
+      <Panel v-for="o in orglist" :header="o.orgName" class="m-2">
+        <table>
+          <tr>
+            <th>Active</th>
+            <th>Branch Code</th>
+            <th>Branch Name</th>
+            <th>Access Right</th>
+          </tr>
+          <tr v-for="b in branchlist">
+            <td v-if="checkBranchInOrg(o, b)"><input type="checkbox" /></td>
+            <td v-if="checkBranchInOrg(o, b)">{{ b.branchCode }}</td>
+            <td v-if="checkBranchInOrg(o, b)">{{ b.branchName }}</td>
+            <td v-if="checkBranchInOrg(o, b)">
+              <SelectButton></SelectButton>
+            </td>
+          </tr>
+        </table>
+      </Panel>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,30 @@
+export type UserListItem = {
+  _id: string
+  uid:string
+  fullName: string
+  email: string
+  group:string
+  isactive:boolean
+  orgId: number
+  branchId: number
+  tenantId: number
+}
+export type InvitationListItem = {
+  _id: string 
+  email: string
+  created: string  
+}
+export type OrgListItem = {
+  orgId: number
+  _Id: string
+  orgCode: string
+  orgName: string
+}
+export type BranchListItem = {
+  _id:string
+  orgId: number
+  branchId: number
+  branchName: string
+  branchCode: string
+
+}

@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { <%= it.typename %>Processor } from '../generate/processors/<%= it.doctype %>.processor';
 import { <%= it.typename %>} from '../generate/types/<%= it.doctype %>.type';
+export { <%= it.typename %>} from '../generate/types/<%= it.doctype %>.type';
 
 
 @Injectable()
@@ -18,7 +19,7 @@ export class <%= it.typename %>Service extends <%= it.typename %>Processor {
         super(mydoc)
     }
 
-//    hook = async (type: string, data?: any) => {
+//    hook = async (appuser:UserProfile,type: string, data?: any) => {
 //     switch(type){    
 //         case 'init':
 //         break;

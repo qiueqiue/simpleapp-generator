@@ -168,6 +168,7 @@ export const prepareNuxt = (callback:Function)=>{
 }
 
 export const prettyNuxt = ()=>{
+    
     prepareOpenApiClient()
     exec(`cd ${config.frontendFolder};npx prettier --write "./pages/**/*.vue" "./generate/docs/*.ts" `)
                         
@@ -177,5 +178,10 @@ export const prettyNest = ()=>{
 }
 
 export const prepareOpenApiClient = () => {
-    exec(`openapi-generator-cli generate -i  ${config.backendFolder}/openapi.yaml -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`)
+    const executestr = `openapi-generator-cli generate -i  ${config.backendFolder}/openapi.yaml -o ${config.frontendFolder}/generate/openapi -g typescript-axios --skip-validate-spec`
+    log.info("execute generate openapi:")
+    log.info(executestr)
+
+    const child5 = spawn('openapi-generator-cli',['generate','-i',`${config.backendFolder}/openapi.yaml`,'-o',`${config.frontendFolder}/simpleapp/generate/openapi`,'-g','typescript-axios','--skip-validate-spec'],{  stdio: 'inherit',})
+    // exec(executestr)
 }

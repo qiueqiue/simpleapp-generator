@@ -1,12 +1,13 @@
 {
     "type": "object",
     "x-isolation-type":"none",    
+    "x-page-type":"crud",
     "x-document-api":[{
           "action":"genNextNumber",
           "entrypoint":"gennextno/:collection/:field",
           "requiredrole":["User"],
           "method":"get", 
-          "execute":"ping",
+          "execute":"generateNextNo",
           "bpmn":"", 
           "description":"Get next no and trigger increase nextno"
         }],

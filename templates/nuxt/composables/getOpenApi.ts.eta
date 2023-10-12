@@ -1,0 +1,6 @@
+import * as o from "../simpleapp/generate/openapi";
+import axios from 'axios'
+
+export const getApi=()=>{
+    return o
+}

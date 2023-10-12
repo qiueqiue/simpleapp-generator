@@ -3,11 +3,11 @@ import { Injectable, Inject, CanActivate, ExecutionContext, Scope } from '@nestj
 import { Reflector } from '@nestjs/core';
 import { Role } from './roles.enum'
 import { ROLES_KEY } from './roles.decorator'
-import { UserProvider } from '../providers/UserProvider';
+import { UserProfile } from '../user.profile';
 
-@Injectable({scope:Scope.REQUEST})
+@Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector,@Inject('UserProvider') private userprovider:UserProvider) {}
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -15,11 +15,12 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    const sessionuser = context.switchToHttp().getRequest()['sessionuser']
     
     if (!requiredRoles) {
       return true;
     }
-    const roles = this.userprovider.getRoles()
+    const roles = sessionuser.getRoles()
     const result = requiredRoles.some((role) => roles.includes(role));
     return result
     // return true

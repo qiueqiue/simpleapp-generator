@@ -58,7 +58,8 @@ const run = async()=>{
         fw.runCreateNest(()=>{
             fw.prepareNest(()=>{
                 fw.prepareNuxt(()=>{
-                    generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
+                    // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
+                      generate.run(configs,['nest','nuxt'],()=>{
                         fw.prettyNuxt()    
                         fw.prettyNest()                                                
                     })                    
@@ -67,19 +68,26 @@ const run = async()=>{
         })
      })
 }
-
+const reGenFrontend = async()=>{
+  fw.setConfiguration(configs)
+  generate.run(configs,['nuxt'],()=>{
+    fw.prettyNuxt()                                      
+  })  
+}
 const reGenBackend = async()=>{
-  generate.run(configs,()=>{
+  fw.setConfiguration(configs)
+  generate.run(configs,['nest'],()=>{
     fw.prettyNest()                                                
   })  
 }
 
 const runbackend = async()=>{
   fw.setConfiguration(configs)
+  fw.setConfiguration(configs)
       fw.runCreateNest(()=>{
           fw.prepareNest(()=>{
-
-                  generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                  // generate.run(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                    generate.run(configs,['nest'],()=>{
                       fw.prettyNest()                                                
                   })                    
         })                
@@ -91,7 +99,8 @@ const runfrontend = async()=>{
   fw.setConfiguration(configs)
   fw.runCreateNuxt(()=>{
               fw.prepareNuxt(()=>{
-                  generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                  // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                  generate.run(configs,['nuxt'],()=>{
                       fw.prettyNuxt()    
                   })                    
       })
@@ -100,6 +109,9 @@ const runfrontend = async()=>{
 
 
 switch(options.generateType){
+  case 'updatefrontend':
+    reGenFrontend()
+  break;
   case 'updatebackend':
     reGenBackend()
   break;

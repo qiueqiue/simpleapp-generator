@@ -1,0 +1,102 @@
+import { UserService, User } from './../services/user.service';
+import { Injectable, Scope, Inject } from '@nestjs/common';
+import { UserProfile } from '../generate/commons/user.profile';
+import { RegTenant } from './profile.types';
+import { TenantService, Tenant } from '../services/tenant.service';
+import { OrganizationService, Organization } from '../services/org.service';
+import { BranchService, Branch } from '../services/branch.service';
+import { PermissionService, Permission } from './../services/perm.service';
+@Injectable()
+export class ProfileService {
+  constructor(
+    private usersvc: UserService,
+    private tenantsvc: TenantService,
+    private orgsvc: OrganizationService,
+    private branchsvc: BranchService,
+    private permsvc: PermissionService,
+  ) {}
+  async getProfile(appuser: UserProfile) {
+    const userinfo = await appuser.getUserInfo();
+    // console.log("1")
+    if (userinfo._id == '') {
+      // console.log('return getprofile a');
+      let newprofile = this.createUserProfile(appuser);
+      newprofile['time'] = new Date().toTimeString();
+      return newprofile;
+    } else {
+      userinfo['time'] = new Date().toTimeString();
+      // console.log("userinfo",userinfo)
+      return userinfo;
+    }
+  }
+  async createUserProfile(appuser: UserProfile) {
+    console.log('createUserProfile');
+    const data: User = {
+      uid: appuser.getUid(),
+      fullname: appuser.getFullname(),
+      email: appuser.getEmail(),
+      isactive: true,
+      doctype: 'user',
+    } as User;
+
+    const createresult = await this.usersvc.create(appuser, data);
+    const userinfo = await appuser.getUserInfo();
+    userinfo._id = createresult._id;
+    return userinfo;
+  }
+
+  async createTenant(appuser: UserProfile, tenantName: string) {
+    const tenantdata: Tenant = {
+      tenantId: 1,
+      tenantName: tenantName,
+      isactive: true,
+      uuid: '',
+      owner: {
+        _id: appuser.getId(),
+        label: appuser.getFullname(),
+        uid: appuser.getUid(),
+      },
+    };
+
+    const tenantResult = await this.tenantsvc.create(appuser, tenantdata);
+    const tenantId = tenantResult.tenantId;
+    const orgdata: Organization = {
+      tenantId: tenantId,
+      orgName: tenantName,
+      isactive: true,
+      orgCode: 'HQ',
+      orgId: 1,
+    };
+    // console.log("create org:",orgdata)
+    const orgResult = await this.orgsvc.create(appuser, orgdata);
+    const orgRecordId = orgResult._id.toString();
+    // console.log("create org result:",orgResult)
+    const branchdata: Branch = {
+      branchId: 1,
+      branchCode: 'HQ',
+      branchName: tenantName,
+      isactive: true,
+      orgId: orgResult.orgId,
+      tenantId: tenantId,
+      organization: { _id: orgRecordId, label: tenantName },
+    };
+    // console.log("create branch:",branchdata)
+
+    const branchResult = await this.branchsvc.create(appuser, branchdata);
+    const branchRecordId = branchResult._id.toString();
+    // console.log("create branchResult:",branchResult)
+
+    const permdata: Permission = {
+      tenantId: tenantId,
+      orgId: orgResult.orgId,
+      branchId: branchResult.branchId,
+      uid: appuser.getUid(),
+      isactive: true,
+      group: 'admin',
+    };
+    // console.log("create permdata:",permdata)
+    const permResult = await this.permsvc.create(appuser, permdata);
+    // console.log("create permResult:",permResult)
+    return true;
+  }
+}

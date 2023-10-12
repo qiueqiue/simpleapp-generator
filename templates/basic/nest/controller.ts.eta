@@ -16,9 +16,10 @@ import {
   Param,
   Type,
   Res,
+  Req,
   HttpStatus
 } from '@nestjs/common';
-import { SimpleAppController } from '../commons/SimpleAppController';
+import { SimpleAppController } from '../commons/simpleapp.controller';
 import { <%= it.typename %>Service } from '../../services/<%= it.doctype %>.service';
 import * as <%= it.doctype %>type from '../types/<%= it.doctype %>.type';
 import * as <%= it.doctype %>apischema from '../apischemas/<%= it.doctype %>.apischema';
@@ -26,6 +27,8 @@ import { ApiTags, ApiBody, ApiResponse,ApiOperation } from '@nestjs/swagger';
 import {Roles} from '../commons/roles/roles.decorator'
 import {Role} from '../commons/roles/roles.enum'
 import { Response } from 'express';
+import {AppUser} from '../commons/decorators/appuser.decorator'
+import {UserProfile} from '../commons/user.profile'
 
 <% let superadmindoctype = ['tenant','globaluser'] %>
 const doctype = '<%= it.doctype %>'.toUpperCase();
@@ -53,8 +56,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runList', description:"List all data" })
-  async list() {
-    return this._list();
+  async list(@AppUser() appuser: UserProfile) {
+    return this._list(appuser);
   }
   //autocomplete shall above :id
   @Get('/autocomplete')
@@ -70,8 +73,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'autoComplete',description:"retrieve array of {_id, code, name}" })
-  async autoComplete(@Query('keyword') keyword: string) {
-    return this._autocomplete(keyword);
+  async autoComplete(@AppUser() appuser: UserProfile,@Query('keyword') keyword: string) {
+    return this._autocomplete(appuser,keyword);
   }
 
 
@@ -91,8 +94,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({ status: 500, description: 'internal error' })
   @ApiBody({ description: 'Data',type:<%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runCreate' })
-  async create(@Body() data: <%= it.fullApiSchemaName%>) {    
-    return await this._create(data)
+  async create(@AppUser() appuser: UserProfile,@Body() data: <%= it.fullApiSchemaName%>) {    
+    return await this._create(appuser,data)
   }
 
   @Post('/search')
@@ -110,8 +113,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({ status: 500, description: 'internal error' })
   @ApiBody({ description: 'Data', type: Object })
   @ApiOperation({ operationId: 'runSearch' })
-  async search(@Body() data: Object) {
-    return await this._search(data)
+  async search(@AppUser() appuser: UserProfile,@Body() data: Object) {
+    return await this._search(appuser,data)
   }
 
 
@@ -119,7 +122,6 @@ export class <%= it.typename %>Controller extends SimpleAppController<
 
 <% for(let i=0;i<it.apiSettings.length;i++){%>
 <% let api = it.apiSettings[i] %>
-/*<%~ JSON.stringify(api) %>*/
 <%~ `@${capitalizeFirstLetter(api.method)}('${api.entrypoint}')`%>
   <%if(superadmindoctype.includes(it.doctype)){%>
   @Roles(Role.SuperAdmin,Role.<%= `${it.typename}_${api.action}`%>,
@@ -137,8 +139,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   
   @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })
   @ApiResponse({status: 418,description: 'undefine bpmn,setDocumentStatus or bpmn'})
-  @ApiOperation({ operationId: '<%=api.action%>' })
-  async <%=api.action%>(@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
+  @ApiOperation({ operationId: '<%=api.execute ??api.action%>' })
+  async <%=api.execute??api.action %>(@AppUser() appuser: UserProfile,@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
           <%let subpath = api.entrypoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
@@ -149,7 +151,7 @@ export class <%= it.typename %>Controller extends SimpleAppController<
           <%}%>  
         <%}%>){
     <%if(api.execute){%>
-      const result =  await this.service.<%=api.execute%>(<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
+      const result =  await this.service.<%=api.execute%>(appuser,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
           <%let subpath = api.entrypoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
@@ -161,10 +163,10 @@ export class <%= it.typename %>Controller extends SimpleAppController<
         <%}%>)
       res.status(HttpStatus.OK).send(result)
     <%} else if (api.bpmn){ %>
-      const result =  await this.service.executeWorkFlow(id,'<%=api.bpmn%>',''); 
+      const result =  await this.service.executeWorkFlow(appuser,id,'<%=api.bpmn%>',''); 
       res.status(HttpStatus.OK).send(result)
     <%} else if (api.setDocumentStatus){ %>
-      return await this.service.setDocumentStatus(id,'<%=api.setDocumentStatus%>');
+      return await this.service.setDocumentStatus(appuser,id,'<%=api.setDocumentStatus%>');
     <%} else {%>
        res.status(HttpStatus.I_AM_A_TEAPOT).send('execute api"<%=api.action%>", but undefine property bpmn/setDocumentStatus/execute in jsonschema')
     <%}%>
@@ -186,8 +188,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runFindOne' })
-  async findOne(@Param('id') id: string) {    
-    return await this._findOne(id);
+  async findOne(@AppUser() appuser: UserProfile,@Param('id') id: string) {    
+    return await this._findOne(appuser,id);
   }
   
 
@@ -205,8 +207,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiBody({ description: 'Data',type: <%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runUpdate' })
-  async update(@Param('id') id: string, @Body() data: <%= it.fullApiSchemaName%>) {    
-    return await this._update(id, data) ;
+  async update(@AppUser() appuser: UserProfile,@Param('id') id: string, @Body() data: <%= it.fullApiSchemaName%>) {    
+    return await this._update(appuser,id, data) ;
   }
 
   @Delete(':id')
@@ -223,8 +225,8 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runDelete' })
-  async delete(@Param('id') id: string) {
-    return this._delete(id);
+  async delete(@AppUser() appuser: UserProfile,@Param('id') id: string) {
+    return this._delete(appuser,id);
   }
  
 

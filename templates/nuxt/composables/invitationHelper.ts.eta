@@ -1,0 +1,30 @@
+export const sendInvitation = async (email:string) =>{
+    console.log('email',email)
+    const {$InvitationDoc,$emit} = useNuxtApp()
+
+    const invite = $InvitationDoc()
+    const data = invite.getReactiveData()    
+    invite.setNew()
+    data.value.email=email
+    data.value.description="Please join us"
+    
+    const result =  await invite.create()
+    return result
+
+}
+
+export const decideInvitation = async (id:string,decision:string)=>{
+    const {$InvitationDoc,$emit} = useNuxtApp()
+    const invite = $InvitationDoc()  
+    const result = await invite.decideInvitation(id,decision)
+    console.log(result)
+    return result
+} 
+
+export const cancelInvitation = async (id:string)=>{
+    const {$InvitationDoc,$emit} = useNuxtApp()
+    const invite = $InvitationDoc()  
+    const result = await invite.delete(id)
+    console.log(result)
+    return result
+} 

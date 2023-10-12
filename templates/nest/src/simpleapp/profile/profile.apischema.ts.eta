@@ -1,0 +1,11 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+export class RegTenantApiSchema {  
+  @ApiProperty({
+    type: 'string',
+    required: true,
+    examples: ['my company 1'],
+    default: '',
+  })
+  tenantName: string;
+}

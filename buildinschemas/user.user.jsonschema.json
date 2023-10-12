@@ -1,16 +1,19 @@
 {
   "type": "object",
-  "x-isolation-type":"tenant",
+  "x-isolation-type":"none",    
+  "x-required-role":["SuperAdmin"],    
+  "x-page-type":"crud",
   "properties": {
-    "ssoId": {
+    "uid": {
       "type": "string",
-      "x-document-no":true,
+      "x-autocomplete-field":true,
       "examples": [
         "xxxxx-yyyyy-zzzzz-aaa"
       ]
     },
     "fullname": {
       "type": "string",
+      "x-document-no":true,
       "examples": [
         "user 1"
       ]
@@ -23,31 +26,6 @@
       ],
       "format": "email"
     },
-    "isactive": {"type": "boolean","default":true},    
-    "branches":{
-        "type":"array",
-        "description":"list of accessible branches",
-        "items":{
-          "type":"object",        
-          "properties":{
-            "branch":{"type":"object","properties":{
-              "branchId":{"type":"number"},
-              "branchCode":{"type":"string"},
-              "branchName":{"type":"string"},
-              "orgId":{"type":"number"},
-              "orgCode":{"type":"string"},
-              "orgName":{"type":"string"}
-            }},
-            "isactive":{"type":"boolean","default":true},          
-            "group":{
-              "type":"string",
-              "description":"Access right"              
-            },    
-            "description":{"type":"string"}
-
-          }
-        }
-      
-    }
+    "isactive": {"type": "boolean","default":true}   
   }
 }

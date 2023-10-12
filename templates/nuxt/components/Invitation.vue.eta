@@ -1,0 +1,40 @@
+<template>
+    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">            
+        <div v-if="invites">
+            <div v-for="item in invites" class="w w-auto grid grid-cols-3">
+                <div class="col-span-2">{{item}}</div>
+                <div >
+                    <button class="btn-primary" @click="approve(item._id)">Approve</button>
+                    <button class="btn-danger" @click="decline(item._id)">Decline</button>
+                </div>
+            </div>
+        </div>        
+    </Dialog>
+    </template>
+    <script setup lang="ts">
+    import Dialog from 'primevue/dialog';
+    import {onMounted, ref} from 'vue'
+    import ProgressSpinner from 'primevue/progressspinner'
+    const popuptitle = ref('Invitation')
+    const disabled = ref(false)
+    const visible=ref(false)
+    const invites = ref()
+    onMounted(()=>{
+        invites.value =  getUserProfile().invites
+        if(invites.value.length>0){
+            visible.value=true
+        }
+    })
+    
+    const approve = async (id:string) =>{
+       await decideInvitation(id,'accept')
+       reloadUserStore()
+       visible.value=false
+    }
+    const decline = async (id:string) => {
+       await decideInvitation(id,'reject')
+       reloadUserStore()
+       visible.value=false
+    }
+    
+    </script>

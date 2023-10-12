@@ -5,12 +5,12 @@
  * last change 2023-09-23
  * Author: Ks Tan
  */
-import { UserProvider } from '../commons/providers/UserProvider'
+import { UserProfile } from '../commons/user.profile'
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {<%= it.typename%>JsonSchema } from '../jsonschemas/<%= it.doctype %>.jsonschema'
-import { SimpleAppService,IsolationType,HookType } from '../commons/SimpleAppService';
+import { SimpleAppService,IsolationType,HookType } from '../commons/simpleapp.service';
 import { <%Object.keys(it.models).forEach(function(key) { %> <%=key %>, <%})%> }  from '../types/<%= it.doctype %>.type';
 <%if(it.jsonschema['x-import-lib']) {%>
   <%let libs = it.jsonschema['x-import-lib'] %>

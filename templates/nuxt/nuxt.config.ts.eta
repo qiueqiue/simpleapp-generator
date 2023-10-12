@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     public:{
       SIMPLEAPP_BACKEND_URL: process.env.SIMPLEAPP_BACKEND_URL,
       APP_URL: process.env.APP_URL,
+      API_URL: process.env.API_URL,
       DEBUGDATA: process.env.DEBUGDATA,      
     }
   },

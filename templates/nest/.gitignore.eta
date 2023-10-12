@@ -3,7 +3,6 @@
 /node_modules
 /public_html
 /src/simpleapp/generate
-/src/simpleapp/services
 /src/app.module.ts
 /src/app.service.ts
 /src/app.controller.ts

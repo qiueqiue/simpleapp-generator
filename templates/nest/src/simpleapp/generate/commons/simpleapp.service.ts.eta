@@ -1,0 +1,583 @@
+import { Injectable, Logger,Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+
+import { Model,Types,PipelineStage } from 'mongoose';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
+
+//import { WorkflowProviderFactory } from './providers/Workflow';
+import {
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common/exceptions';
+import { UserProfile } from './user.profile';
+
+export enum IsolationType {
+  'none' = 'none',
+  'org' = 'org',
+  'tenant' = 'tenant',
+  'branch' = 'branch',
+}
+export enum HookType {
+  'init' = 'init',
+  'beforeSearch' = 'beforeSearch',
+  'afterSearch' = 'afterSearch',
+  'beforeValidation' = 'beforeValidation',
+  'afterValidation' = 'afterValidation',
+  'beforeCreate' = 'beforeCreate',
+  'afterCreate' = 'afterCreate',
+  'beforeUpdate' = 'beforeUpdate',
+  'afterUpdate' = 'afterUpdate',
+  'beforeDelete' = 'beforeDelete',
+  'afterDelete' = 'afterDelete',
+  'beforeFetchRecord' = 'beforeFetchRecord',
+  'afterFetchRecord' = 'afterFetchRecord',
+}
+export type MoreProjectionType = {
+  [key: string]: string;
+};
+@Injectable()
+export class SimpleAppService<T extends { _id?: string }> {
+  protected logger = new Logger();
+  protected strictIsolation = true
+  protected jsonschema = { type: 'object', properties: {}, required: [] };
+  protected documentIdentityCode = 'code';
+  protected documentIdentityLabel = 'label';
+  protected documentName = '-unknowndocname-';
+  protected documentType = '-unknowndoctype-';
+  protected LIMITPERPAGE = 20;
+  protected moreAutoCompleteField: MoreProjectionType = {};
+  protected isolationtype: IsolationType = IsolationType.org;
+  protected isolationFilter: any = {};
+  protected data: T = { _id: '' } as T;
+  protected doc: Model<T>; //set private to prevent developer break data isolation control
+  protected errorlist = [];
+  
+  // protected userprovider = new UserProfile() ;
+
+  constructor(
+    doctype: string,
+    docname: string,
+    newdoc: Model<T>,
+    isolationtype: IsolationType = IsolationType.org,
+  ) {        
+    // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
+    this.documentType = doctype;
+    this.documentName = docname;
+    this.doc = newdoc;
+    this.isolationtype = isolationtype;
+    this.hook(undefined,HookType.init, undefined);
+    // this.tenantdoc = tenantdoc
+  }
+  getRecordId = (): string => this.data._id;
+  setSchema = (newschema) => (this.jsonschema = newschema);
+  getSchema = () => this.doc.schema.obj;
+  getData = () => {
+    //console.log('thisdata', this.data);
+    return this.data;
+  };
+  setData = (newdata: T) => {
+    delete newdata._id;
+    this.data = { ...newdata };
+    return this;
+  };
+  reCalculate() {}
+  getIsolationFilter = (appuser:UserProfile,) => {
+    let isolationFilter = {};
+    switch (this.isolationtype) {
+      case 'none':
+        isolationFilter = {};
+        break;
+      case 'branch':
+        isolationFilter = appuser.getBranchFilter();
+        break;
+      case 'tenant':
+        isolationFilter = appuser.getTenantFilter();
+        break;
+      case 'org':
+      default:
+        isolationFilter = appuser.getOrgFilter();
+        break;
+    }
+    return isolationFilter;
+  };
+  async list(appuser:UserProfile,) {
+    try {
+      //console.log("this.isolationFilter",this.getIsolationFilter())
+      const products = await this.doc.find(this.getIsolationFilter(appuser));
+      // console.log(products)
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+  addAutoCompleteField = (morefield: MoreProjectionType) => {
+    const props = Object.getOwnPropertyNames(morefield);
+    // console.log('addAutoCompleteField', props);
+    for (let i = 0; i < props.length; i++) {
+      const key = props[i];
+      this.moreAutoCompleteField[key] = '$' + morefield[key];
+    }
+    // console.log(this.moreAutoCompleteField);
+  };
+  async getAutoComplete(appuser:UserProfile, keyword: string) {
+    try {
+      const filter1 = {};
+      const filter2 = {};
+      let filters: any[] = [];
+      if (
+        this.jsonschema.properties[this.documentIdentityCode]['type'] ==
+        'string'
+      ) {
+        filter1[this.documentIdentityCode] = { $regex: keyword, $options: 'i' };
+        filters.push(filter1);
+      }
+
+      filter2[this.documentIdentityLabel] = { $regex: keyword, $options: 'i' };
+      filters.push(filter2);
+      const filterobj = { $or: filters };
+
+      Object.assign(filterobj, this.getIsolationFilter(appuser));
+      let projections = {
+        id: `\$_id`,
+        label: `\$${this.documentIdentityLabel}`,
+        code: `\$${this.documentIdentityCode}`,
+      };
+      if (this.moreAutoCompleteField) {
+        Object.assign(projections, this.moreAutoCompleteField);
+      }
+      const products = await this.doc.find(filterobj, projections, {
+        limit: this.LIMITPERPAGE,
+      });
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  /**
+   * Special search function which can by pass data isolation. reserved and try not use
+   * @param appuser 
+   * @param filters 
+   * @returns 
+   */
+  private async searchNoIsolation(appuser:UserProfile,filters: Object) {
+    try {
+      await this.hook(appuser,HookType.beforeSearch, filters);
+      const products = await this.doc.find(filters);
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      await this.hook(appuser,HookType.afterSearch, productlist);
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+    // return this;
+  }
+  async aggregate(appuser:UserProfile,pipeline:PipelineStage[]){
+    const isolationfilter = this.getIsolationFilter(appuser)
+    if(pipeline[0] && pipeline[0]['$match']){      
+      try{
+        const isolationFilter= {... this.getIsolationFilter(appuser)}
+        // console.log("isolationFilter",isolationFilter,this.isolationtype,"this.strictIsolation",this.strictIsolation)
+        if(this.isolationtype == 'none'){
+          delete isolationFilter['branchId']
+          delete isolationFilter['orgId']
+          delete isolationFilter['tenantId']
+        }
+        else if(this.isolationtype == 'tenant' && !this.strictIsolation){
+          delete isolationFilter['tenantId']
+          delete isolationFilter['branchId']
+          delete isolationFilter['orgId']      
+        }
+
+
+        Object.assign(pipeline[0]['$match'],isolationFilter);
+        console.log("final agg",pipeline)
+        return await this.doc.aggregate(pipeline)
+      }catch(err){
+        throw new InternalServerErrorException(err);  
+      }
+      
+    }else{
+      throw new InternalServerErrorException('first aggregate pipelinestage shall use $match');
+    }
+
+  }
+  async search(appuser:UserProfile,filters: Object) {
+    try {
+      const isolationFilter =  {...this.getIsolationFilter(appuser)}
+      if(this.isolationtype == 'none'){
+        delete isolationFilter['branchId']
+        delete isolationFilter['orgId']
+        delete isolationFilter['tenantId']
+      }
+      else if(this.isolationtype == 'tenant' && !this.strictIsolation){
+        delete isolationFilter['tenantId']
+        delete isolationFilter['branchId']
+        delete isolationFilter['orgId']      
+      }
+
+      Object.assign(filters, isolationFilter);
+      await this.hook(appuser,HookType.beforeSearch, filters);
+      console.log("before _find",filters)
+      // console.log("this.doc",this.doc)
+      const products = await this.doc.find(filters);
+      console.log("after search",products)
+      const productlist = products.map((p: T) => {
+        return p;
+      });
+      // console.log("after map",productlist)
+      await this.hook(appuser,HookType.afterSearch, productlist);
+      //   console.log(products);
+      return productlist;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+    // return this;
+  }
+  async findById(appuser:UserProfile,id: string) {
+    await this.hook(appuser,HookType.beforeFetchRecord, id);
+    const data = await this.search(appuser,{ _id: id });
+    await this.hook(appuser,HookType.afterFetchRecord, data);
+    if (data.length == 1) {
+      // console.log('data0', data[0]);
+      return data[0];
+    } else {
+      return null;
+    }
+  }
+
+  async create(appuser:UserProfile, data:T) {
+    let result;
+    // const tempTenantId = data['tenantId'];
+    // const tempOrgId = data['orgId'];
+    // const tempBranchId = data['branchId'];
+    await this.hook(appuser,HookType.beforeCreate, data);
+    let cloneIsolation:any =  {...appuser.getCreateFilter()}
+    if(this.isolationtype == 'none'){
+      delete cloneIsolation['branchId']
+      delete cloneIsolation['orgId']
+      delete cloneIsolation['tenantId']
+    }
+    if(this.isolationtype == 'tenant' && !this.strictIsolation){
+      delete cloneIsolation['tenantId']
+      delete cloneIsolation['branchId']
+      delete cloneIsolation['orgId']      
+    }
+    // console.log(`Before isolation (${this.strictIsolation})`, this.documentType,": ",cloneIsolation,"---->",data)
+    Object.assign(data, cloneIsolation);
+    
+    delete data._id;
+    await this.validateData(appuser,data);
+    // console.log("Before create ", this.documentType,": ",data)
+    const newdoc = new this.doc(data);
+    result = await newdoc.save();
+    await this.hook(appuser,HookType.afterCreate, result);
+
+    return result as T;
+  }
+  // async update() {
+  //   const id: string = this.getRecordId();
+  //   Object.assign(this.data, this.userprovider.getUpdateFilter());
+  //   await this.findIdThenUpdate(id, this.data);
+  // }
+  // async delete() {
+  //   const id: string = this.getRecordId();
+  //   const dependency = await this.getRelatedRecords(id);
+  //   if (!dependency) {
+  //     return await this.findIdThenDelete(id);
+  //   } else {
+  //     return dependency;
+  //   }
+  // }
+  hook = async (appuser:UserProfile,type: string, data?: any) => {
+    // console.log('Default hook', data);
+    return true;
+  };
+  async validateData(appuser:UserProfile,data: T) {
+    const ajv = new Ajv({ allErrors: true, useDefaults: true });
+    addFormats(ajv);
+    addErrors(ajv);
+
+    ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
+    ajv.addFormat('x-text', /.*$/);
+    ajv.addFormat('x-html', /.*$/);
+
+    ajv.addKeyword({ keyword: 'x-document-no', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-label', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-status', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-document-api', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-page-type', type: 'string' }); // undefine mean no generate page
+    ajv.addKeyword({ keyword: 'x-ignore-autocomplete', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-isolation-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-type', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-collection-name', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-autocomplete-field', type: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-foreignkey', type: 'string' });
+    ajv.addKeyword({ keyword: 'x-import-lib', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-compute', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-required-role', type: 'array' });
+    
+    const issuccess = await this.hook(appuser,HookType.beforeValidation, data);
+    if (!issuccess) {
+      const errormsg: string[] = [];
+      for (let i = 0; i < this.errorlist.length; i++) {
+        errormsg.push(this.errorlist[i].message);
+      }
+      this.logger.log('run hook during validation');
+      throw new BadRequestException(JSON.stringify(errormsg));
+    }
+
+    let validate;
+    try {
+      validate = ajv.compile(this.jsonschema);
+
+      const valid = validate(data);
+      if (!valid) {
+        this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
+        throw new BadRequestException(JSON.stringify(validate.errors));
+      }
+      await this.hook(appuser,HookType.afterValidation, data);
+    } catch (err) {
+      this.logger.error('compile error', err);
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  async findIdThenDelete(appuser:UserProfile,id: string): Promise<any> {
+    // const data = await this.findById(id);    
+    try {
+      await this.hook(appuser,HookType.beforeDelete, id);
+      this.logger.debug('delete record',this.documentName, id);
+      const dependency = await this.getRelatedRecords(id);
+      // console.log('dependency', dependency);
+      if (!dependency) {
+        let filterIsolation = this.getIsolationFilter(appuser);
+        
+        if(this.isolationtype == 'none'){
+          delete filterIsolation['branchId']
+          delete filterIsolation['orgId']
+          delete filterIsolation['tenantId']
+        }
+        if(this.isolationtype == 'tenant' && !this.strictIsolation){
+          delete filterIsolation['tenantId']
+          delete filterIsolation['branchId']
+          delete filterIsolation['orgId']      
+        }
+
+        
+        filterIsolation['_id'] =  new Types.ObjectId(id);
+        this.logger.debug('delete filter', filterIsolation);
+        const deleteresult = await this.doc.deleteOne(filterIsolation);
+        this.logger.debug(this.doc.collection.name, " delete result",deleteresult)
+        // this.doc.findByIdAndDelete(id)
+        await this.hook(appuser,HookType.afterDelete, deleteresult);
+        //this.doc.findByIdAndDelete(id);
+        return deleteresult;
+      } else {
+        return Promise.reject(dependency);
+      }
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  // updateOne = async (appuser:UserProfile,data: T) => {
+  //   this.doc.updateOne(data);
+  // };
+
+  findIdThenUpdate = async (appuser:UserProfile,id: string, data: T) => {
+    const existingdata = await this.findById(appuser,id);
+    await this.hook(appuser,HookType.beforeUpdate, data);
+    // try {
+    Object.assign(data, appuser.getUpdateFilter());
+    Object.assign(existingdata, data);
+    delete existingdata['_id']
+    // existingdata['_id']=''
+    console.log("newdata",data)
+    await this.validateData(appuser,data);
+    
+    const isolationFilter =  {...this.getIsolationFilter(appuser)}
+      if(this.isolationtype == 'none'){
+        delete isolationFilter['branchId']
+        delete isolationFilter['orgId']
+        delete isolationFilter['tenantId']
+      }
+      else if(this.isolationtype == 'tenant' && !this.strictIsolation){
+        delete isolationFilter['tenantId']
+        delete isolationFilter['branchId']
+        delete isolationFilter['orgId']      
+      }
+
+
+
+
+    isolationFilter['_id'] = id;
+    const result = await this.doc.findOneAndUpdate(isolationFilter, data);
+    await this.hook(appuser,HookType.afterUpdate, data);
+    return result;
+    // } catch (err) {
+    //   throw new InternalServerErrorException(err.message);
+    // }
+  };
+
+  //find what foreign key constraint
+  async getRelatedRecords(id: string) {
+    
+    const foreignkeys = require('./dicts/foreignkeys.json')
+    if(foreignkeys === undefined){
+      throw new InternalServerErrorException("foreignkeys object undetected")
+    }
+    console.log(this.documentName," foreignkeys propkeys", foreignkeys)
+    const foreignkeysettings = foreignkeys[this.documentName];
+    if(!foreignkeysettings){
+      return null
+    }
+    const propkeys = Object.getOwnPropertyNames(foreignkeysettings);
+    
+    if (propkeys.length > 0) {
+      //console.log('Have properties');
+      for (let i = 0; i < propkeys.length; i++) {
+        const collectionname = propkeys[i];
+        //console.log('run ', i, collectionname);
+        const fobjs = foreignkeysettings[propkeys[i]];
+        const collection = this.doc.db.collection(collectionname);
+        //single schema may have multiple foreign key link here, loop all
+        for (let j = 0; j < fobjs.length; j++) {
+          const fkey = fobjs[j] + '._id';
+          const filter = {};
+          filter[fkey] = id;
+          //console.log('getRelatedRecords get filter', collectionname, filter);
+          const result = await collection.findOne(filter);
+          //console.log('getRelatedRecords', result);
+          if (result) {
+            return Promise.reject(result);
+          }
+        }
+      }
+    }
+    return Promise.resolve(null);
+  }
+
+  /**
+   * dummy ping
+   */
+  ping(...data) {
+    return `hello ${JSON.stringify(data)}`;
+  }
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async setDocumentStatus(appuser:UserProfile,id: string, docstatus: string) {
+    const partialdata: T = {} as T;
+    partialdata['documentStatus'] = docstatus;
+    return this.findIdThenUpdate(appuser,id, partialdata);
+  }
+
+  /**
+   * change property documentStatus for specific document, no workflow execution
+   * @param id
+   * @param docstatus
+   * @returns Promise
+   */
+  async executeWorkFlow(appuser:UserProfile,id: string, bpmnname: string, docstatus: string) {
+    const data = await this.findById(appuser,id);
+    return "ok"
+    // Workflow.getInstance().executeWorkFlow(
+    //   id,
+    //   bpmnname,
+    //   docstatus,
+    //   data,
+    // );
+  }
+
+  async getMyUserTask() {
+    return "OK"//Workflow.getInstance().getMyUserTask();
+  }
+
+  async getAllOrganization(appuser:UserProfile) {
+    const res: any[] = await this.search(appuser,{}); //search all organization
+    // const res
+    const allbranches = [];
+    // console.log("resresres",res)
+    for (let i = 0; i < res.length; i++) {
+      // console.log("bbb",res[i].branches)
+      for (let j = 0; j < res[i].branches.length; j++) {
+        const b = res[i].branches[j];
+
+        allbranches.push({
+          branchId: b.branchId,
+          branchCode: b.branchCode,
+          branchName: b.branchName,
+          orgId: res[i].orgId,
+          orgCode: res[i].orgCode,
+          orgName: res[i].orgName,
+        });
+      }
+    }
+    return allbranches;
+  }
+  async getAllMyOrganization() {
+    // const u = this.userprovider;
+    // const filter = { ssoId: u.getUid(), isactive: true };
+    // const res = await this.searchNoIsolation(filter);
+    return undefined;
+  }
+  //hardcoded tenant service, temporary no place can park since initial project totally empty
+  // async getMyTenants() {
+  //   const ssoId = this.userprovider.getUid()
+  //   const filter = {
+  //     $or: [
+  //       { 'owner.code': ssoId },
+  //       { 'users.user.code': ssoId },
+  //     ],
+  //   };
+  //   console.log(filter);
+  //   let data = await this.search(filter);
+  //   //tenantId
+  //   let res = [];
+  //   let tenantList:number[]=[]
+  //   const { encodeText } = require('@darkwolf/base64url');
+  //   for (let i = 0; i < data.length; i++) {
+  //     const t = data[i];
+  //     const tenantId = t['tenantId']
+
+  //     tenantList.push(tenantId)
+  //     const tmp = {
+  //       tenantId: tenantId,
+  //       tenantCode: t['tenantCode'],
+  //       tenantName: t['tenantName'],
+  //       xOrg: encodeText(`${t['tenantId']}-1-1`),
+  //     };
+  //     res.push(tmp);
+  //   }
+
+  //   const filerUser = {
+  //     'ssoId': ssoId,
+  //     'tenantId': {$in: tenantList}
+  //   };
+
+  //   console.log("filerUser",filerUser)
+  //   return res;
+  // }
+
+
+
+  /*********************** require data isolation ******************************/
+}

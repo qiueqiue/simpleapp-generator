@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "x-isolation-type":"tenant",    
+  "x-ignore-autocomplete":true,
+  "required":["email","decision"],
+  "x-document-api":[{
+    "action":"decideInvitation",
+    "entrypoint":":id/:decision",
+    "requiredrole":["User"],
+    "type": "boolean",
+    "method":"post", 
+    "execute":"decideInvitation",
+    "bpmn":"", 
+    "description":"decide invitation "
+  }],
+  "properties": {    
+    "email": {"type": "string","examples": ["email1@a.com"],"format": "email"},
+    "description": {"type": "string","examples": ["please join us"]},
+    "comment": {"type": "string","examples": ["OK"]},
+    "decision": {"type": "string","enum":["","accept","reject"]},
+    "permission": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "orgId": {"type": "integer","examples": [1]},
+          "branchId": {"type": "integer","examples": [1]},
+          "group": {"type": "string","examples": ["cashier"]}
+        }
+      }
+    }
+  }
+}

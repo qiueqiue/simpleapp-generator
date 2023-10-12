@@ -14,10 +14,9 @@ import { <%= obj.docname %>Service } from './services/<%= obj.doctype %>.service
 import { <%= obj.docname %>Controller } from './generate/controllers/<%= obj.doctype %>.controller';    
 import { <%= obj.docname %>MongoSchema } from './generate/models/<%= obj.doctype %>.model';
 <%}%>
-import {UserProvider,UserProviderFactory} from  "./generate/commons/providers/UserProvider"
-import {WorkflowProviderFactory,WorkflowProvider} from  "./generate/commons/providers/WorkflowProvider"
-import {ProfileController} from './generate/controllers/profile.controller'
-import {ProfileService} from './services/profile.service'
+//import {WorkflowProviderFactory,WorkflowProvider} from  "./generate/commons/providers/WorkflowProvider"
+import { ProfileController } from './profile/profile.controller';
+import { ProfileService } from './profile/profile.service';
 // import {ServiceModule} from  "../services/service.module"
 //import { <%= it.typename %>Service } from '../../generate/<%= it.doctype %>/<%= it.doctype %>.service';
 
@@ -35,7 +34,7 @@ import {ProfileService} from './services/profile.service'
       ]),
   ],
   controllers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Controller,<%}%> ProfileController],
-  providers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> UserProviderFactory,WorkflowProviderFactory,ProfileService,],
-  exports:[<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> UserProviderFactory,WorkflowProviderFactory,ProfileService,]
+  providers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,],
+  exports:[<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,]
 })
 export class GenerateModule {}

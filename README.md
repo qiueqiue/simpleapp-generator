@@ -6,7 +6,7 @@ todo:
 [ ] create invoice and receipt
 [x] fix error reporting and success reporting at frontend
 [x] define some allow override and some not
-
+[ ] json schema can set generate what page type, no define = no generate page
 [ ] create tenant/org/branch auto increament
 [ ] focus on functions customer, product, invoice and receipt
 [~] repeat same typscript formula at frontend and backend
@@ -18,8 +18,10 @@ todo:
 Permission and Authorization
 [x] hide no permission window
 [ ] hide no permission buttons
-[x] permission user/group (pick hard coded group from enum)
+[x] permission user/group (pick hard coded group from some place)
 [ ] figure how to get enum list from permission list for user schema
+
+
 
 1. copy group-to-role to both frontend and backend 
 2. loop backend role code, and define into user role
@@ -286,3 +288,6 @@ SimpleApp-Vue-Component Fix:
   c. search and functions like filters, pagination, large datas
 1. single/multi select
 4. search at frontend
+
+
+

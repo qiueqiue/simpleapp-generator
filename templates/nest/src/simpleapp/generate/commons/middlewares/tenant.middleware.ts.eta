@@ -1,0 +1,43 @@
+import { Injectable, NestMiddleware, Scope,Inject } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+// import * as jwt from 'nestjs-jwt'
+
+import { UserProfile } from '../user.profile';
+// import {KeycloakConfigService} from "../keycloak/keycloak.service"
+@Injectable()
+export class TenantMiddleware implements NestMiddleware {
+  protected defaultxorg='MS0xLTE'
+
+  async use(req: Request, res: Response, next: NextFunction) {
+    if (req.baseUrl == '/oauth2-redirect.html') {
+      next();
+      return;
+    }
+    // console.log("middle ware")
+    if (!req.headers['authorization']) {
+      // console.log("no bearer token")
+      return res.status(401).send('Undefine bearer token');
+    }
+    if (!req.headers['x-org'] && !['/profile'].includes(req.baseUrl)) {
+      // console.log("no xorg")
+      return res.status(401).send('undefine header string x-org');
+    }
+    const u = new UserProfile()
+
+    try {
+      let tokenstr: string = req.headers['authorization'];
+      tokenstr = tokenstr.replace('Bearer ', '');
+      // console.log("middle ware")
+      const xorg = req.headers['x-org']?? this.defaultxorg
+      await u.setCurrentUserInfo(tokenstr,xorg)
+      // u.setXorg(req.headers['x-org'].toString());      
+      // u.setUserToken(tokenstr);
+      req['sessionuser'] = u
+      
+      next();
+    } catch(err) {
+      // console.log("invalid xorg or user info",err)
+      return res.status(401).send('Invalid x-org or user info');
+    }
+  }
+}

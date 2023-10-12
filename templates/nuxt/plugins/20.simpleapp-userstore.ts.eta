@@ -1,0 +1,114 @@
+import { defineNuxtPlugin } from "#app";
+import {PROFILEApi} from '../simpleapp/generate/openapi'
+import axios, { Axios, AxiosResponse } from 'axios'
+import _ from 'lodash'
+
+export default defineNuxtPlugin( async(nuxtApp) => {
+
+
+    const useUserStore = defineStore('userstore', {
+        state: ()=>({        
+          tenantId:ref(0),
+          orgId:ref(0),
+          branchId:ref(0),
+          uid: ref(''),
+          email: ref(''),
+          fullName: ref(''),
+          roles:ref<string[]>([]),
+          group:ref(''),
+          branches:ref([]),
+          invites : ref([]),
+          time:ref('')
+        }),
+        
+        actions:{    
+          async loadRemoteUserInfo(){
+            console.log('loadRemoteUserInfo')
+            const {$axios} = useNuxtApp()
+            const route = useRoute();
+            let xorg = route.params.xorg
+            let apiurl=''
+            if(xorg===undefined){
+              apiurl = `${useRuntimeConfig().public.APP_URL}/api`
+            }else{
+              apiurl = `${useRuntimeConfig().public.APP_URL}/api/${xorg}`
+            }
+            
+            return await new PROFILEApi(undefined,apiurl,$axios).getProfile().then((res:AxiosResponse)=>{            
+              
+              this.tenantId = res.data.tenantId              
+              this.orgId = res.data.orgId
+              this.branchId = res.data.branchId
+              this.uid = res.data.uid
+              this.email = res.data.email
+              this.fullName = res.data.fullName              
+              this.branches = res.data.branches
+              this.group = res.data.group
+              this.roles = res.data.roles
+              this.time = res.data.time
+              
+              this.invites = res.data.invites
+              
+              return Promise.resolve(true)
+                // return true
+            }).catch((err:any)=>{
+              if(err.response.status==401){
+                console.error("Unauthorise(plugin-userstore)")
+                // logout()
+              }else{
+                console.error("Unknown error,", err.response)
+              }
+            })            
+          },
+          getCurrentXorg(){
+            const currentxorg:string = String(useRoute().params.xorg)
+            return _.find(this.branches,{xorg:currentxorg})
+          },
+          canAccess(resourcename:string){          
+            //super admin always full access right
+            if(this.roles.includes('superadmin')){
+              return true
+            }
+            for(let i=0; i< this.roles.length; i++){
+            const role:string = this.roles[i]
+             if(role.includes(resourcename)){
+                return true
+              }
+            }
+            return false                        
+          },
+          getUserInfo(){
+            return {
+              tenantId : this.tenantId,
+              orgId : this.orgId,
+              branchId : this.branchId,
+              uid : this.uid,
+              email : this.email,
+              fullName : this.fullName,        
+              branches:this.branches??[],
+              invites: this.invites ?? [],
+              roles:this.roles,
+              group:this.group,
+              time:this.time,
+  
+              
+            }
+          }
+        }        
+      })
+
+      const route = useRoute();
+      if(route.path!='/login'){
+        await useUserStore().loadRemoteUserInfo()
+      }
+    
+    return {
+
+        
+        provide: {
+            userstore:useUserStore()
+          // base64url: Base64URL
+        }
+    }
+    
+});

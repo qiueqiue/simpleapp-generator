@@ -1,10 +1,12 @@
 {
     "type": "object",
-    "x-isolation-type":"tenant",   
+    "x-isolation-type":"tenant",  
+    "x-page-type":"crud", 
     "required":["orgId","orgCode","orgName"],
     "properties": {
       "orgId": {
         "type": "integer",
+        "default": 1,
         "minimum":1,
         "x-autocomplete-field":true        
       },
