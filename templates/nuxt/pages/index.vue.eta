@@ -24,8 +24,8 @@ const userprofile = ref();
 const createtitle = ref("Create My Company");
 const orgList = ref();
 
-const loadProfile = async() => {  
-  await reloadUserStore()
+const loadProfile = async () => {
+  await reloadUserStore();
   userprofile.value = getUserProfile();
   console.log("useprofile", userprofile.value);
   data.value = {
@@ -69,7 +69,7 @@ const createTenant = async () => {
 <template>
   <div class="grid grid-cols-2">
     <DebugDocumentData v-model="userprofile" label="User"></DebugDocumentData>
-    <Panel header="Create New Tenant">      
+    <Panel header="Create New Tenant">
       <div>
         <h1>Create new one?</h1>
         <DebugDocumentData
@@ -79,7 +79,7 @@ const createTenant = async () => {
         <button class="btn-primary" @click="visible = true">
           Create My Company
         </button>
-        
+
         <Dialog
           v-model:visible="visible"
           modal
@@ -105,20 +105,22 @@ const createTenant = async () => {
         <h1>reserved fuction</h1>
       </div>
     </Panel>
-    <Panel >
+    <Panel>
       <template #header>
-        <div class="flex flex-row"> 
+        <div class="flex flex-row">
           <div class="font font-bold">Login To</div>
-          <button class="pi pi-refresh ml-4" @click="loadProfile" v-if="useRuntimeConfig().public.DEBUGDATA"></button>
+          <button
+            class="pi pi-refresh ml-4"
+            @click="loadProfile"
+            v-if="useRuntimeConfig().public.DEBUGDATA"
+          ></button>
         </div>
-        
       </template>
       <div class="grid grid-cols-2">
         <Card v-for="org in orgList" class="m-2">
           <template #header>
             <div class="font font-bold ml-4">{{ org.orgName }}</div>
-            
-            </template>
+          </template>
           <template #content>
             <div v-for="item in branches" class="hover-list-primary">
               <NuxtLink

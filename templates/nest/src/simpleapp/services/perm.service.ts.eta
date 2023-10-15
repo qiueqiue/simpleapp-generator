@@ -42,13 +42,13 @@ export class PermissionService extends PermissionProcessor {
       //         case 'beforeDelete':
       //         break;
       //         case 'afterDelete':
-      case 'beforeDeleteMany':
+      // case 'beforeDeleteMany':
         // this.logger.log(data, 'beforeDeleteMany');
         // this.deleteMany(appuser,data)
-        break;
-      case 'afterDeleteMany':
+      //   break;
+      // case 'afterDeleteMany':
         // this.logger.log(data, 'afterDeleteMany', data);
-        break;
+        // break;
 
       //         break;
       //         case 'beforeFetchRecord':

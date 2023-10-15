@@ -32,7 +32,7 @@ export const getMenus =()=>{
     const keyword = allmenus[i]
     // if(m.label)
    
-    if($userstore.canAccess(keyword)){
+    if($userstore.haveAccess(keyword)){
       const m = {label: keyword, to:`/${xorg}/${keyword}`}
       allowmenus.push(m)
     }     

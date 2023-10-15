@@ -1,7 +1,9 @@
 import { UserService, User } from './../services/user.service';
-import { Injectable, Scope, Inject, Logger } from '@nestjs/common';
+import { Injectable, Scope, Inject, Logger, BadRequestException } from '@nestjs/common';
 import { UserProfile } from '../generate/commons/user.profile';
 import { RegTenant } from './profile.types';
+import * as mongoose from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
 import { TenantService, Tenant } from '../services/tenant.service';
 import { OrganizationService, Organization } from '../services/org.service';
 import { BranchService, Branch } from '../services/branch.service';
@@ -16,7 +18,11 @@ export class ProfileService {
     private orgsvc: OrganizationService,
     private branchsvc: BranchService,
     private permsvc: PermissionService,
-  ) {}
+    @InjectConnection() private readonly connection: mongoose.Connection,
+
+  ) {
+    
+  }
 
   /**
    * get user profile for current tenant
@@ -67,6 +73,8 @@ export class ProfileService {
   }
 
   async createTenant(appuser: UserProfile, tenantName: string) {
+    const session = await this.connection.startSession();
+    session.startTransaction();
     const tenantdata: Tenant = {
       tenantId: 1,
       tenantName: tenantName,
@@ -79,7 +87,11 @@ export class ProfileService {
       },
     };
     this.logger.log(tenantdata, 'createTenant data');
-    const tenantResult = await this.tenantsvc.create(appuser, tenantdata);
+    const tenantResult = await this.tenantsvc.create(appuser, tenantdata,session);
+    if(!tenantResult){
+      session.abortTransaction()
+      throw new BadRequestException("Create tenant failed")
+    }
     this.logger.log(tenantResult, 'createTenant result');
     const tenantId = tenantResult.tenantId;
     const orgdata: Organization = {
@@ -91,6 +103,10 @@ export class ProfileService {
     };
     this.logger.log(orgdata, 'createOrg data');
     const orgResult = await this.orgsvc.create(appuser, orgdata);
+    if(!orgResult){
+      session.abortTransaction()
+      throw new BadRequestException("Create Org failed")
+    }
     const orgRecordId = orgResult._id.toString();
     this.logger.log(orgResult, 'createOrg result');
 
@@ -105,6 +121,10 @@ export class ProfileService {
     };
     this.logger.log(branchdata, 'createbranch data');
     const branchResult = await this.branchsvc.create(appuser, branchdata);
+    if(!branchResult){
+      session.abortTransaction()
+      throw new BadRequestException("Create Branch failed")
+    }
     const branchRecordId = branchResult._id.toString();
     this.logger.log(branchResult, 'createbranch result');
 
@@ -119,6 +139,12 @@ export class ProfileService {
     };
     this.logger.log(userdata, 'createtenant user data');
     const userResult = await this.usersvc.create(appuser, userdata);
+    // if(true ){
+      if(!userResult ){
+      session.abortTransaction()
+      throw new BadRequestException("Create User failed")
+    }
+
     this.logger.log(userResult, 'createtenant user result');
     const userRecordId = userResult._id.toString();
 
@@ -131,6 +157,11 @@ export class ProfileService {
     };
     this.logger.log(permdata, 'create Permission data');
     const permResult = await this.permsvc.create(appuser, permdata);
+    if(!permResult){
+      session.abortTransaction()
+      throw new BadRequestException("Create permResult failed")
+    }
+    session.commitTransaction()
     this.logger.log(permResult, 'create Permission result');
 
     const xorg: string = Base64URL.encodeText(

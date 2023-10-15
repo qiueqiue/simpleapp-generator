@@ -1,12 +1,10 @@
 import { Injectable, Logger,Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {foreignkeys} from './dicts/foreignkeys'
-import { Model,Types,PipelineStage } from 'mongoose';
+import { Model,Types,PipelineStage,mongo} from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
-
-//import { WorkflowProviderFactory } from './providers/Workflow';
 import {
   NotFoundException,
   BadRequestException,
@@ -241,7 +239,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
   }
 
-  async create(appuser:UserProfile, data:T) {
+  async create(appuser:UserProfile, data:T,session:mongo.ClientSession=undefined) {
     let result;
     // const tempTenantId = data['tenantId'];
     // const tempOrgId = data['orgId'];
@@ -261,7 +259,11 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.logger.debug("Create record",'SimpleAppService')
     this.logger.debug(data,'SimpleAppService')
     const newdoc = new this.doc(data);
-    result = await newdoc.save();
+    result = await newdoc.save({session:session})
+    // this.doc.create(data)
+    // this.doc
+
+    // result = await newdoc.save()
     await this.hook(appuser,HookType.afterCreate, result);
 
     return result as T;
@@ -362,7 +364,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     return filterIsolation
   }
-  async findIdThenDelete(appuser:UserProfile,id: string): Promise<any> {
+  async findIdThenDelete(appuser:UserProfile,id: string,session:mongo.ClientSession=undefined): Promise<any> {
     const deletedata = await this.findById(appuser,id);    
     try {
       await this.hook(appuser,HookType.beforeDelete, id);
@@ -377,7 +379,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         
         filterIsolation['_id'] =  new Types.ObjectId(id);
         this.logger.debug('delete filter', filterIsolation);
-        const result = await this.doc.deleteOne(filterIsolation);
+        const result = await this.doc.deleteOne(filterIsolation).session(session);
         const deleteresult = {result:result, data: deletedata}
         this.logger.debug(this.doc.collection.name, " delete result",deleteresult)
         // this.doc.findByIdAndDelete(id)
@@ -397,7 +399,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   //   this.doc.updateOne(data);
   // };
 
-  findIdThenUpdate = async (appuser:UserProfile,id: string, data: T) => {
+  findIdThenUpdate = async (appuser:UserProfile,id: string, data: T,session:mongo.ClientSession=undefined) => {
     const existingdata = await this.findById(appuser,id);
     await this.hook(appuser,HookType.beforeUpdate, data);
     // try {
@@ -405,14 +407,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     Object.assign(existingdata, data);
     delete existingdata['_id']
     // existingdata['_id']=''
-    console.log("newdata",data)
+    // console.log("newdata",data)
     await this.validateData(appuser,data);
     
     const isolationFilter =  {...this.getIsolationFilter(appuser)}
     this.polishIsolationFilter(isolationFilter)      
 
     isolationFilter['_id'] = id;
-    const result = await this.doc.findOneAndUpdate(isolationFilter, data);
+    const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(session);
     await this.hook(appuser,HookType.afterUpdate, data);
     return result;
     // } catch (err) {
@@ -494,77 +496,4 @@ export class SimpleAppService<T extends { _id?: string }> {
     // );
   }
 
-  async getMyUserTask() {
-    return "OK"//Workflow.getInstance().getMyUserTask();
-  }
-
-  async getAllOrganization(appuser:UserProfile) {
-    const res: any[] = await this.search(appuser,{}); //search all organization
-    // const res
-    const allbranches = [];
-    // console.log("resresres",res)
-    for (let i = 0; i < res.length; i++) {
-      // console.log("bbb",res[i].branches)
-      for (let j = 0; j < res[i].branches.length; j++) {
-        const b = res[i].branches[j];
-
-        allbranches.push({
-          branchId: b.branchId,
-          branchCode: b.branchCode,
-          branchName: b.branchName,
-          orgId: res[i].orgId,
-          orgCode: res[i].orgCode,
-          orgName: res[i].orgName,
-        });
-      }
-    }
-    return allbranches;
-  }
-  async getAllMyOrganization() {
-    // const u = this.userprovider;
-    // const filter = { ssoId: u.getUid(), isactive: true };
-    // const res = await this.searchNoIsolation(filter);
-    return undefined;
-  }
-  //hardcoded tenant service, temporary no place can park since initial project totally empty
-  // async getMyTenants() {
-  //   const ssoId = this.userprovider.getUid()
-  //   const filter = {
-  //     $or: [
-  //       { 'owner.code': ssoId },
-  //       { 'users.user.code': ssoId },
-  //     ],
-  //   };
-  //   console.log(filter);
-  //   let data = await this.search(filter);
-  //   //tenantId
-  //   let res = [];
-  //   let tenantList:number[]=[]
-  //   const { encodeText } = require('@darkwolf/base64url');
-  //   for (let i = 0; i < data.length; i++) {
-  //     const t = data[i];
-  //     const tenantId = t['tenantId']
-
-  //     tenantList.push(tenantId)
-  //     const tmp = {
-  //       tenantId: tenantId,
-  //       tenantCode: t['tenantCode'],
-  //       tenantName: t['tenantName'],
-  //       xOrg: encodeText(`${t['tenantId']}-1-1`),
-  //     };
-  //     res.push(tmp);
-  //   }
-
-  //   const filerUser = {
-  //     'ssoId': ssoId,
-  //     'tenantId': {$in: tenantList}
-  //   };
-
-  //   console.log("filerUser",filerUser)
-  //   return res;
-  // }
-
-
-
-  /*********************** require data isolation ******************************/
 }

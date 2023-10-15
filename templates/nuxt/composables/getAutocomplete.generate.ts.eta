@@ -7,7 +7,7 @@
  
 import * as o from "../simpleapp/generate/openapi";
 import axios from 'axios'
-const getAutoComplete = (apiname: string): any => {
+export const getAutocomplete = (apiname: string): any => {
   //const { csrf } = useCsrf()    
   //axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
   const route = useRoute();
@@ -30,4 +30,3 @@ const getAutoComplete = (apiname: string): any => {
     return docsOpenapi[apiname];
   }
 };
-export default getAutoComplete;

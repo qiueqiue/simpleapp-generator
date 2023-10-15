@@ -25,7 +25,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
         
       }else{        
         const {$userstore} = useNuxtApp()  
-        if($userstore.canAccess(resourcename)){                    
+        if($userstore.haveAccess(resourcename)){                    
           return true
         }else{
           console.error("access deny, redirect to '/'")

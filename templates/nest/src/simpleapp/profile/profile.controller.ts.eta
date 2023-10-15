@@ -61,6 +61,7 @@ export class ProfileController {
     }
   }
 
+
   @Post('/tenant')
   @Roles(Role.Everyone)
   @ApiBody({ description: 'create tenant name', type: RegTenantApiSchema })

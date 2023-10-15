@@ -2,7 +2,6 @@
     "type": "object",
     "required": ["tenantId","orgId","branchId","group","uid"],
     "x-isolation-type":"tenant",    
-    "x-page-type":"crud",    
     "x-ignore-autocomplete":true,
     "x-document-api":[{
         "action":"listUser",

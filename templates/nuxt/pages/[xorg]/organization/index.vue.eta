@@ -32,7 +32,7 @@ const getBranchList = () => {
       })
 }
 $listen('editRecord',async (editOrgid)=>{
-    console.log('editRecord',editOrgid)
+    //console.log('editRecord',editOrgid)
     debugdata.value=data.value
     if(editOrgid){
       

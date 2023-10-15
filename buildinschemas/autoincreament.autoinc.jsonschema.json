@@ -1,6 +1,5 @@
 {
     "type": "object",
-    "x-isolation-type":"none",    
     "x-page-type":"crud",
     "x-document-api":[{
           "action":"genNextNumber",

@@ -10,3 +10,13 @@ export const reloadUserStore = async () =>{
 export const getUserProfile =  () =>{
     return getUserStore().getUserInfo()
 }
+
+/**
+ * verify current user can perform specific action base on backend RBAC
+ * @param resource:string upper case first letter document name
+ * @param action:string action name, can be create/update/delete...
+ * @return boolean
+ */
+export const canPerform = (resource:string,action:string):boolean =>{
+    return getUserStore().canPerform(resource,action)
+}

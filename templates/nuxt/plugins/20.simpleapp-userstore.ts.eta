@@ -11,6 +11,8 @@ export default defineNuxtPlugin( async(nuxtApp) => {
           tenantId:ref(0),
           orgId:ref(0),
           branchId:ref(0),
+          branchCode:ref(''),
+          branchName:ref(''),
           uid: ref(''),
           email: ref(''),
           fullName: ref(''),
@@ -41,6 +43,8 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               this.tenantId = res.data.tenantId              
               this.orgId = res.data.orgId
               this.branchId = res.data.branchId
+              this.branchCode = res.data.branchCode
+              this.branchName = res.data.branchName
               this.uid = res.data.uid
               this.email = res.data.email
               this.fullName = res.data.fullName              
@@ -79,8 +83,24 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             }
             //().then((res:AxiosResponse)=>{ }
           },
-          canAccess(resourcename:string){          
+          canPerform(resourcename:string,action:string):boolean{
+
+            if(
+              this.roles.includes('superadmin') ||
+              this.roles.includes('tenantowner') ||
+              this.roles.includes('superuser') 
+              ){
+              return true
+            }else{
+              const checkstr= `${resourcename}:${action}`
+              // console.log("verify",checkstr)
+              return this.roles.includes(checkstr)
+            }
+          },
+          haveAccess(resourcename:string){          
             //super admin always full access right
+            resourcename = _.upperFirst(resourcename)
+            // console.log("have access",resourcename)
             if(
               this.roles.includes('superadmin') ||
               this.roles.includes('tenantowner') ||
@@ -103,6 +123,8 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               branchId : this.branchId,
               uid : this.uid,
               email : this.email,
+              branchCode: this.branchCode,
+              branchName: this.branchName,
               fullName : this.fullName,        
               branches:this.branches??[],
               invites: this.invites ?? [],

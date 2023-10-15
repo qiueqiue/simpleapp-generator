@@ -3,11 +3,13 @@ import { AppModule } from './app.module';
 import { SimpleAppExceptionFilter } from './simpleapp/generate/commons/exceptions/SimpleAppExceptionFilter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import {writeFileSync} from 'fs';
+import { LogLevel } from '@nestjs/common';
 const yaml = require('yaml');
 
 async function bootstrap() {
+  const logs:LogLevel[] = String(process.env.LOGS).split(',') as LogLevel[]
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'fatal', 'log', 'debug'],
+    logger: logs,
   });
   // app.enableCors();
   app.useGlobalFilters(new SimpleAppExceptionFilter());
