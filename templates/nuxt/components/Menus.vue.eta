@@ -30,7 +30,7 @@ const visibletenant = ref(false)
         </Dialog>
         
         <div class="flex-1">
-            <NuxtLink to="/"><i class="pi pi-home m-2"></i>Home</NuxtLink>     
+            <NuxtLink to="/" :external="true"><i class="pi pi-home m-2"></i>Home</NuxtLink>     
         </div>
         <div class="flex-1 p-1">
             <button class="text-center border-none  cursor-pointer" v-if="useRoute().params.xorg" @click="visible=true">
@@ -47,7 +47,7 @@ const visibletenant = ref(false)
         </div>
         <div class="flex-1 text-right p-1">
             <button class=" cursor-pointer border-none" @click="logout()">
-                <i class="pi pi-sign-out mr-2"></i>logout
+                <i class="pi pi-sign-out mr-2"></i>logout {{ getUserProfile().fullName }}
             </button>
         </div>
             

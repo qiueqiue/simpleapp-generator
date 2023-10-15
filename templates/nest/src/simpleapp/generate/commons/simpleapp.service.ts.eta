@@ -1,6 +1,6 @@
 import { Injectable, Logger,Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
+import {foreignkeys} from './dicts/foreignkeys'
 import { Model,Types,PipelineStage } from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -62,7 +62,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     docname: string,
     newdoc: Model<T>,
     isolationtype: IsolationType = IsolationType.org,
-  ) {        
+  ) {            
     // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
     this.documentType = doctype;
     this.documentName = docname;
@@ -186,22 +186,12 @@ export class SimpleAppService<T extends { _id?: string }> {
     // return this;
   }
   async aggregate(appuser:UserProfile,pipeline:PipelineStage[]){
-    const isolationfilter = this.getIsolationFilter(appuser)
+    
     if(pipeline[0] && pipeline[0]['$match']){      
       try{
         const isolationFilter= {... this.getIsolationFilter(appuser)}
-        // console.log("isolationFilter",isolationFilter,this.isolationtype,"this.strictIsolation",this.strictIsolation)
-        if(this.isolationtype == 'none'){
-          delete isolationFilter['branchId']
-          delete isolationFilter['orgId']
-          delete isolationFilter['tenantId']
-        }
-        else if(this.isolationtype == 'tenant' && !this.strictIsolation){
-          delete isolationFilter['tenantId']
-          delete isolationFilter['branchId']
-          delete isolationFilter['orgId']      
-        }
-
+        this.polishIsolationFilter(isolationFilter)      
+       
 
         Object.assign(pipeline[0]['$match'],isolationFilter);
         console.log("final agg",pipeline)
@@ -217,24 +207,16 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async search(appuser:UserProfile,filters: Object) {
     try {
-      const isolationFilter =  {...this.getIsolationFilter(appuser)}
-      if(this.isolationtype == 'none'){
-        delete isolationFilter['branchId']
-        delete isolationFilter['orgId']
-        delete isolationFilter['tenantId']
-      }
-      else if(this.isolationtype == 'tenant' && !this.strictIsolation){
-        delete isolationFilter['tenantId']
-        delete isolationFilter['branchId']
-        delete isolationFilter['orgId']      
-      }
-
-      Object.assign(filters, isolationFilter);
-      await this.hook(appuser,HookType.beforeSearch, filters);
-      console.log("before _find",filters)
+      const isolationFilter= {... this.getIsolationFilter(appuser)}
+      this.polishIsolationFilter(isolationFilter)      
+     
+      // console.log("initial search",filters)
+      const newfilters ={...filters,...isolationFilter}
+      await this.hook(appuser,HookType.beforeSearch, newfilters);
+      // console.log("before _find",newfilters)
       // console.log("this.doc",this.doc)
-      const products = await this.doc.find(filters);
-      console.log("after search",products)
+      const products = await this.doc.find(newfilters);
+      // console.log("after search",products)
       const productlist = products.map((p: T) => {
         return p;
       });
@@ -265,23 +247,19 @@ export class SimpleAppService<T extends { _id?: string }> {
     // const tempOrgId = data['orgId'];
     // const tempBranchId = data['branchId'];
     await this.hook(appuser,HookType.beforeCreate, data);
-    let cloneIsolation:any =  {...appuser.getCreateFilter()}
-    if(this.isolationtype == 'none'){
-      delete cloneIsolation['branchId']
-      delete cloneIsolation['orgId']
-      delete cloneIsolation['tenantId']
-    }
-    if(this.isolationtype == 'tenant' && !this.strictIsolation){
-      delete cloneIsolation['tenantId']
-      delete cloneIsolation['branchId']
-      delete cloneIsolation['orgId']      
-    }
-    // console.log(`Before isolation (${this.strictIsolation})`, this.documentType,": ",cloneIsolation,"---->",data)
-    Object.assign(data, cloneIsolation);
+    let isolationFilter:any =  {...appuser.getCreateFilter()}    
+    isolationFilter = this.polishIsolationFilter(isolationFilter,data)      
+    
+    this.logger.debug("isolationFilter",'SimpleAppService')
+    this.logger.debug(isolationFilter,'SimpleAppService')
+    this.logger.debug("Create data before isolation",'SimpleAppService')
+    this.logger.debug(data,'SimpleAppService')
+    Object.assign(data, isolationFilter);
     
     delete data._id;
     await this.validateData(appuser,data);
-    // console.log("Before create ", this.documentType,": ",data)
+    this.logger.debug("Create record",'SimpleAppService')
+    this.logger.debug(data,'SimpleAppService')
     const newdoc = new this.doc(data);
     result = await newdoc.save();
     await this.hook(appuser,HookType.afterCreate, result);
@@ -357,26 +335,44 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
   }
 
+  polishIsolationFilter = (filterIsolation:any,data:any={}) =>{
+    if(this.isolationtype == 'none'){
+      delete filterIsolation['branchId']
+      delete filterIsolation['orgId']
+      delete filterIsolation['tenantId']
+    }
+    if(this.isolationtype == 'tenant' && !this.strictIsolation){
+      // delete filterIsolation['tenantId']
+      if(data['tenantId']){
+        filterIsolation['tenantId']=data['tenantId']
+      }
+      delete filterIsolation['branchId']
+      delete filterIsolation['orgId']      
+    }
+    if(this.isolationtype == 'org' && !this.strictIsolation){
+      // delete filterIsolation['tenantId']      
+      if(data['tenantId']){
+        filterIsolation['tenantId']=data['tenantId']
+      }
+      if(data['orgId']){
+        filterIsolation['orgId']=data['orgId']
+      }
+      // delete filterIsolation['orgId']      
+      delete filterIsolation['branchId']
+    }
+    return filterIsolation
+  }
   async findIdThenDelete(appuser:UserProfile,id: string): Promise<any> {
     // const data = await this.findById(id);    
     try {
       await this.hook(appuser,HookType.beforeDelete, id);
       this.logger.debug('delete record',this.documentName, id);
       const dependency = await this.getRelatedRecords(id);
-      // console.log('dependency', dependency);
+      console.log('dependency', dependency);
       if (!dependency) {
         let filterIsolation = this.getIsolationFilter(appuser);
+        this.polishIsolationFilter(filterIsolation)
         
-        if(this.isolationtype == 'none'){
-          delete filterIsolation['branchId']
-          delete filterIsolation['orgId']
-          delete filterIsolation['tenantId']
-        }
-        if(this.isolationtype == 'tenant' && !this.strictIsolation){
-          delete filterIsolation['tenantId']
-          delete filterIsolation['branchId']
-          delete filterIsolation['orgId']      
-        }
 
         
         filterIsolation['_id'] =  new Types.ObjectId(id);
@@ -411,19 +407,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     await this.validateData(appuser,data);
     
     const isolationFilter =  {...this.getIsolationFilter(appuser)}
-      if(this.isolationtype == 'none'){
-        delete isolationFilter['branchId']
-        delete isolationFilter['orgId']
-        delete isolationFilter['tenantId']
-      }
-      else if(this.isolationtype == 'tenant' && !this.strictIsolation){
-        delete isolationFilter['tenantId']
-        delete isolationFilter['branchId']
-        delete isolationFilter['orgId']      
-      }
-
-
-
+    this.polishIsolationFilter(isolationFilter)      
 
     isolationFilter['_id'] = id;
     const result = await this.doc.findOneAndUpdate(isolationFilter, data);
@@ -436,12 +420,13 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   //find what foreign key constraint
   async getRelatedRecords(id: string) {
+    this.logger.debug("get foreignkey for delete:",id)
     
-    const foreignkeys = require('./dicts/foreignkeys.json')
+    
     if(foreignkeys === undefined){
       throw new InternalServerErrorException("foreignkeys object undetected")
     }
-    console.log(this.documentName," foreignkeys propkeys", foreignkeys)
+    
     const foreignkeysettings = foreignkeys[this.documentName];
     if(!foreignkeysettings){
       return null

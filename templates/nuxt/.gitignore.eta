@@ -1,4 +1,5 @@
 # Nuxt dev/build outputs
+/composables/*.generate.ts
 /simpleapp/generate
 /server/api/[xorg]
 /server/api/auth

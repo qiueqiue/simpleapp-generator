@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "required": ["tenantId","orgId","branchId","group","uid","isactive"],
+    "required": ["tenantId","orgId","branchId","group","uid"],
     "x-isolation-type":"tenant",    
     "x-page-type":"crud",    
     "x-ignore-autocomplete":true,
@@ -19,7 +19,6 @@
       "branchId": {"type": "integer"},
       "group": {"type": "string"},
       "uid": {"type": "string"},
-      "isactive": {"type": "boolean"},
-      "description": {"type": "string"}
+      "user_id" : {"type":"string"}
     }
   }

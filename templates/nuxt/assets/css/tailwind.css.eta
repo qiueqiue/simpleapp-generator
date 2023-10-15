@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities; 
 
+.bg-primary{
+    @apply bg-green-600 text-white
+}
 button {
     @apply p-2  border-2
 }
@@ -10,6 +13,10 @@ button {
 }
 .btn-danger{
     @apply bg-red-600 text-white
+}
+
+.hover-list-primary{
+    @apply bg-white hover:bg-sky-100
 }
 
 .simpleapp-input-container{

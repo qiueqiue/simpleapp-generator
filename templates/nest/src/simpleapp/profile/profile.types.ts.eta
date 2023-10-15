@@ -1,18 +1,18 @@
-  export type RegTenant = {
+export type RegTenant = {
     tenantName: string;
   };
   export type ProfileUserBranch = {
-    _id: string
-    tenantId: number
-    orgId: number
-    branchId: number
-    isactive: boolean
+    _id: string  
+    branch: any  
     group: string
     xOrg: string
-  }
+  };
   export type ProfileUserInvites = {
-    _id: string
-    email: string
-    created: string
-    permission: any[]
-  }
+    _id: string;
+    email: string;
+    fullName: string;
+    tenantId: string;
+    tenantName: string;
+    created: string;
+  };
+  

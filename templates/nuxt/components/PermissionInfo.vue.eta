@@ -1,0 +1,34 @@
+<template>
+  <div>        
+       <SelectButton v-model="selectedgroup" :options="grouplist" option-label="label" option-value="value"></SelectButton>                                          
+       <div v-if="selectedgroup">
+           <div class="permission-block flex flex-col m mt-4" v-for="res in allresources">
+               <div class="m mr-3 ">{{ res }}</div>
+               <div class="gap-4">                
+                    <span v-for="actionname in getActionFromResource(res)" class="m m-1">
+                        <Chip class="bg-primary" v-if="canPerformAction(selectedgroup,res,actionname)" severity="success" :label="actionname" ></Chip>
+                        <Chip v-else :label="actionname" ></Chip>
+                    </span>
+                   
+               </div>
+           </div>
+       </div>
+  </div>
+</template>
+<script setup lang="ts">
+import _ from "lodash";
+import Tag from "primevue/tag"
+import Badge from 'primevue/badge';
+import Chip from 'primevue/chip';
+
+import {ref} from 'vue'
+import ToggleButton from 'primevue/togglebutton';
+import SelectButton from "primevue/selectbutton";
+const selectedgroup = ref('')
+const grouplist = getAllGroups().map((item)=>{return {value:item,label:_.capitalize(item)}})
+const value1 = ref()
+const permissions=ref()
+const allresources = getUniqueResource()
+
+</script>
+

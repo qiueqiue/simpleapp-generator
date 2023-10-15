@@ -2,11 +2,11 @@ export const getUserStore = ()=>{
     const {$userstore} = useNuxtApp()
     return $userstore
 }
-export const reloadUserStore = () =>{
+export const reloadUserStore = async () =>{
     const {$userstore} = useNuxtApp()
-    $userstore.loadRemoteUserInfo()
+    await $userstore.loadRemoteUserInfo()
 }
 
-export const getUserProfile = () =>{
+export const getUserProfile =  () =>{
     return getUserStore().getUserInfo()
 }

@@ -19,8 +19,8 @@ export class PermissionService extends PermissionProcessor {
     super(mydoc);
   }
 
-  //    hook = async (type: string, data?: any) => {
-  //     switch(type){
+    hook = async (appuser:UserProfile,type: string, data?: any) => {
+      switch(type){
   //         case 'init':
   //         break;
   //         case 'beforeSearch':
@@ -42,6 +42,14 @@ export class PermissionService extends PermissionProcessor {
   //         case 'beforeDelete':
   //         break;
   //         case 'afterDelete':
+        case 'beforeDeleteMany':         
+          this.logger.log(data,"beforeDeleteMany") 
+          // this.deleteMany(appuser,data)              
+        break;
+        case 'afterDeleteMany':
+          this.logger.log(data,"afterDeleteMany",data) 
+        break;
+
   //         break;
   //         case 'beforeFetchRecord':
   //         break;
@@ -49,9 +57,9 @@ export class PermissionService extends PermissionProcessor {
   //         break;
   //         default:
   //         break;
-  //         }
-  //     return true;
-  //   };
+          }
+      return true;
+    };
 
   async listUser(appuser: UserProfile) {
     const getallrecords: PipelineStage = { $match: {} };
@@ -65,25 +73,24 @@ export class PermissionService extends PermissionProcessor {
     };
     const pipeline: PipelineStage[] = [getallrecords, lookupuser];
     const result = await this.aggregate(appuser, pipeline);
-    const finalresult:any[] = []
-    for(let i=0 ; i< result.length;i++){
-      const r = result[i]
-      
-      const u = r.user[0] ?? {email:'unknownemail',fullName:'unknown'}
+    const finalresult: any[] = [];
+    for (let i = 0; i < result.length; i++) {
+      const r = result[i];
+
+      const u = r.user[0] ?? { email: 'unknownemail', fullName: 'unknown' };
       finalresult.push({
         _id: r._id,
         tenantId: r.tenantId,
         orgId: r.orgId,
         branchId: r.branchId,
-        isactive: r.isactive,
         uid: r.uid,
         group: r.group,
-        fullName : u.fullname,
-        email: u.email
-      })
+        fullName: u.fullname,
+        email: u.email,
+      });
     }
     // result['user'] = result['users'][0]
     // delete result['users'][0]
-    return finalresult
+    return finalresult;
   }
 }

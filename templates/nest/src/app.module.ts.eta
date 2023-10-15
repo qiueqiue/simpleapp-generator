@@ -17,7 +17,8 @@ import { TenantMiddleware } from './simpleapp/generate/commons/middlewares/tenan
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import {GenerateModule} from './simpleapp/simpleapp.module'
-
+import { UserMongoSchema } from './simpleapp/generate/models/user.model';
+import { PermissionMongoSchema } from './simpleapp/generate/models/perm.model';
 
 @Module({
   //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
@@ -36,7 +37,11 @@ import {GenerateModule} from './simpleapp/simpleapp.module'
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
       tokenValidation: TokenValidation.ONLINE,
     }),
-    GenerateModule
+    GenerateModule,
+    MongooseModule.forFeature([
+      { name: 'User', schema: UserMongoSchema },
+      { name: 'Permission', schema: PermissionMongoSchema },
+    ])
       ],
   controllers: [AppController],
   providers: [

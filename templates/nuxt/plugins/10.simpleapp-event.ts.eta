@@ -28,8 +28,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
         console.error("axios 401 session expired, redirect to logout page1")
         // const { signOut } = useAuth();
         // signOut({redirect:false});
-        navigateTo('/login')
-        
+        // navigateTo('/login')
         // logout()
       }else{
         return Promise.reject(error)

@@ -1,0 +1,418 @@
+<script setup lang="ts">
+/**
+ * invite user into current tenant (put user into user catalogue)
+ * 1. user accept then have uid
+ * 2. no uid user will put at invite place
+ *
+ */
+import Menu from "primevue/menu";
+import Dialog from "primevue/dialog";
+import _ from "lodash";
+import Panel from "primevue/panel";
+import { ref } from "vue";
+import {
+  UserListItem,
+  BranchListItem,
+  OrgListItem,
+  PermissionListItem,
+} from "../../../types";
+import SelectButton from "primevue/selectbutton";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Card from "primevue/card";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import { Permission, User } from "../../../simpleapp/generate/openapi/api";
+//initialize api
+const {
+  $PermissionDoc,
+  $OrganizationDoc,
+  $BranchDoc,
+  $UserDoc,
+  // $InvitationDoc,
+} = useNuxtApp();
+const permdoc = $PermissionDoc();
+const orgdoc = $OrganizationDoc();
+const branchdoc = $BranchDoc();
+// const invitedoc = $InvitationDoc();
+const userdoc = $UserDoc();
+const userdata = userdoc.getReactiveData();
+//initialize require list in UI
+const permlist = ref<PermissionListItem[]>([]);
+const userlist = ref<UserListItem[]>([]);
+
+const orglist = ref<OrgListItem[]>([]);
+const branchlist = ref<BranchListItem[]>([]);
+const currentpermissions = ref<Permission[]>([]);
+const grouplist = getAllGroups().map((item) => {
+  return { value: item, label: _.capitalize(item) };
+});
+
+//initialize some runtime variable
+const inviteemail = ref("");
+const selected = ref("");
+const activeuser = ref("");
+const showpermissioninfo = ref(false);
+const permissionselected = ref();
+const permissiontitle = "Permission Information";
+
+/**
+ * 1. get all users from this tenant
+ * @param resetpage after reload, will it reset user interface or remain as current
+ */
+const refreshList = async (resetpage: boolean = true) => {
+  const items: any[] = [];
+  userlist.value = await userdoc.list();
+  //listUser();
+  // userlist.value = _.uniqBy(permlist.value, "uid");
+  if (resetpage) {
+    selected.value = "";
+    activeuser.value = "";
+  }
+  console.log("userlist", userlist.value);
+};
+
+/**
+ * 2. select specific user
+ *    - get list of
+ *        a. orglist
+ *        b. branch list
+ *        c. permission for that user
+ *    - render organization and branch ui
+ * @param user
+ */
+const onSelectUser = async (menuitem: any) => {
+  const user: UserListItem = { ...menuitem };
+  orglist.value = await orgdoc.list();
+  branchlist.value = await branchdoc.list();
+  permlist.value = await permdoc.search({
+    $or: [{ uid: user.uid }, { user_id: user._id }],
+  });
+  userdoc.getById(menuitem._id);
+  console.log("orglist.value", orglist.value);
+  console.log("branchlist.value", branchlist.value);
+  console.log("permlist.value", permlist.value);
+  selected.value = String(user._id);
+
+  activeuser.value = user.fullName
+  //sso id from keycloak
+  const uid = String(user.uid)
+  //_id from mongodb
+  const user_id = String(user._id)
+  currentpermissions.value = [];
+
+  for (let i = 0; i < branchlist.value.length; i++) {
+    const b = branchlist.value[i];
+    const permdata = getPermssionData(uid, b.branchId);
+    const tmp: Permission = {
+      _id: permdata?._id,
+      uid: uid,
+      user_id: user_id,
+      tenantId: b.tenantId,
+      orgId: b.orgId,
+      branchId: b.branchId,
+      group: permdata.group,
+    };
+    currentpermissions.value.push(tmp);
+  }
+  console.log("currentpermissions", currentpermissions.value);
+};
+
+/**
+ * prepare dataobj (existing or empty dummy data) for each branch permission
+ * @param uid
+ * @param branchId
+ */
+const getPermssionData = (uid: string, branchId: number) => {
+  const result = permlist.value.find(
+    (el) => el.uid == uid && el.branchId == branchId,
+  );
+  let pm: Permission = {
+    _id: result?._id ?? "",
+    orgId: result?.orgId ?? 0,
+    tenantId: result?.tenantId ?? 0,
+    branchId: branchId,
+    uid: uid,
+    group: result?.group ?? "",
+  };
+
+  return pm;
+};
+
+/**
+ * identity branch object under org
+ * @param org object of org
+ * @param branch object of branch
+ */
+const checkBranchInOrg = (org: OrgListItem, branch: BranchListItem) => {
+  return org.orgId === branch.orgId;
+};
+
+/**
+ * generate dialog for view each user group have what permission
+ */
+const previewPermission = () => {
+  showpermissioninfo.value = true;
+};
+
+/***** send or remove invitation  ******/
+const saveUser = async () => {
+  await userdoc.update();
+  refreshList(false);
+};
+const invite = async () => {
+  // const invitedata:User = {}
+  const currentuser = getUserProfile();
+  const inviteuserdoc = $UserDoc();
+  inviteuserdoc.setNew();
+  const newuserdata = inviteuserdoc.getReactiveData();
+  newuserdata.value.email = inviteemail.value;
+  newuserdata.value.fullname = inviteemail.value.split("@")[0];
+  newuserdata.value.isactive = true;
+  newuserdata.value.tenantId = currentuser.tenantId;
+  newuserdata.value.orgId = currentuser.orgId;
+  newuserdata.value.branchId = currentuser.branchId;
+
+  await inviteuserdoc.create();
+  inviteemail.value = "";
+  refreshList();
+};
+const deleteUser = async (user: User) => {  
+  await userdoc.delete(String(user._id));
+  refreshList();
+};
+
+/**********applPermission ******/
+/**
+ * apply permission:
+ * _id:'', group:'' => skip
+ * _id: '', group:'something' => create
+ * _id:'something', 'group':'something' => update
+ * _id:'something', group:'' => remove
+ */
+const applPermission = async (d: Permission) => {
+  let result;
+
+  d._id = String(d._id ?? "");
+  d.group = String(d.group ?? "");
+  const data = permdoc.getReactiveData();
+  data.value = d;
+  console.log("apply permission", data.value);
+  if (!d._id && !d.group) {
+    //no changes
+  } else if (!d._id && d.group) {
+    result = await permdoc.create();
+  } else if (d._id && d.group) {
+    data.value = d;
+    result = await permdoc.update();
+  } else if (d._id && !d.group) {
+    d.group = "";
+    data.value = d;
+    result = await permdoc.delete(d._id);
+  } else {
+    console.warn("unknown apply permission", result);
+  }
+  refreshList(false);
+};
+//init ui
+onMounted(() => {
+  refreshList();
+});
+</script>
+<template>
+  <button @click="refreshList()" class="pi pi-refresh"></button>
+  <Dialog
+    v-model:visible="showpermissioninfo"
+    modal
+    :header="permissiontitle"
+    :autoZIndex="false"
+    :style="{ zIndex: 100, width: '80vw' }"
+  >
+    <PermissionInfo></PermissionInfo>
+  </Dialog>
+
+  <div class="grid grid-cols-4">
+    <div v-if="userlist">
+      <TabView>
+        <TabPanel header="Active">
+          <Menu
+            :model="userlist"
+            class="w w-auto border border-solid border-1"
+            :pt="{ root: { class: 'w-auto ' } }"
+          >
+            <template #start>
+              <div class="flex flex-column align">
+                <h1>Users</h1>
+              </div>
+            </template>
+            <template #item="{ item, label, props }">
+              <a
+                v-if="item.uid && item.isactive"
+                class="flex m-2 p-2 flex-col border border-b-2 cursor cursor-pointer"
+                @click="onSelectUser(item)"
+              >
+                <div class="text text-left text-base text-black">
+                  {{ item.fullname }}
+                </div>
+                <div class="text text-sm text-right">{{ item.email }}</div>
+              </a>
+            </template>
+          </Menu>
+        </TabPanel>
+        <TabPanel header="Inactive">
+          <Menu
+            :model="userlist"
+            class="w w-auto border border-solid border-1"
+            :pt="{ root: { class: 'w-auto ' } }"
+          >
+            <template #start>
+              <div class="flex flex-column align">
+                <h1>Users</h1>
+              </div>
+            </template>
+            <template #item="{ item, label, props }">
+              <a
+                v-if="item.uid && !item.isactive"
+                class="flex m-2 p-2 flex-row border border-b-2 cursor cursor-pointer"
+                @click="onSelectUser(item)"
+              >
+                <div class="flex-col basis-5/6">
+                  <div class="text text-left text-base text-black ">
+                    {{ item.fullname }}
+                  </div>
+                  <div class="text text-sm text-right">{{ item.email }}</div>
+                </div>
+                <div class="basis-1/6 m-2">
+                  <!-- <button class="pi pi-times btn-danger" @click="deleteUser(item)"></button> -->
+                </div>
+                
+              </a>
+            </template>
+          </Menu>
+        </TabPanel>
+        <TabPanel header="Invite">
+          <div class="padding p-2">
+            <form @submit.prevent="true" class="w-full">
+              <div class="p-inputgroup flex-1">
+                <InputText
+                  type="email"
+                  placeholder="email"
+                  v-model="inviteemail"
+                />
+                <button label="Search" class="btn btn-primary" @click="invite">
+                  Invite
+                </button>
+              </div>
+            </form>
+          </div>
+          <Menu
+            :model="userlist"
+            class="w w-auto border border-solid border-1"
+            :pt="{ root: { class: 'w-auto ' } }"
+          >
+            <template #start>
+              <div class="flex flex-column align">
+                <h1>Users</h1>
+              </div>
+            </template>
+            <template #item="{ item, label, props }">
+              <a
+                v-if="item.uid == ''"
+                class="flex m-2 p-2 flex-row border border-b-2 cursor cursor-pointer"
+                @click="onSelectUser(item)"
+              >
+              <div class="flex-col basis-5/6">
+                  <div class="text text-left text-base text-black ">
+                    {{ item.fullname }}
+                  </div>
+                  <div class="text text-sm text-right">{{ item.email }}</div>
+                </div>
+                <div class="basis-1/6 m-2">
+                  <button class="pi pi-times btn-danger" @click="deleteUser(item)"></button>
+                </div>
+              </a>
+            </template>
+          </Menu>
+         
+        </TabPanel>
+      </TabView>
+    </div>
+    <div class="col-span-3" v-if="selected">
+      <Panel :pt="{ content: { class: 'bg-sky-50' } }" class="m-2">
+        <SimpleAppForm :document="userdoc" #default="o">
+          <div class="grid grid-cols-4 gap-4 p">
+            <SimpleAppText
+              autofocus
+              :setting="o.getField('#/properties/fullname')"
+              v-model="userdata.fullname"
+            />
+
+            <SimpleAppText
+              autofocus
+              type="string"
+              :setting="o.getField('#/properties/email')"
+              v-model="userdata.email"
+            />
+
+            <SimpleAppCheckbox
+              autofocus
+              :setting="o.getField('#/properties/isactive')"
+              v-model="userdata.isactive"
+            />
+            <div>
+              <Button @click="saveUser" class="btn-primary pi pi-save"></Button>
+            </div>
+          </div>
+        </SimpleAppForm>
+      </Panel>
+
+      <Panel :pt="{ content: { class: 'bg-sky-50' } }" class="m-2">
+        <div class="text-right m mr-2">
+          <button
+            class="btn-primary pi pi-question"
+            @click="previewPermission"
+          ></button>
+        </div>
+        <div class="grid grid-cols-2">
+          <Card v-for="o in orglist" class="m-2">
+            <template #title>{{ o.orgName }}</template>
+            <template #content>
+              <table class="w w-full">
+                <thead class="">
+                  <tr>
+                    <th>Branch Code</th>
+                    <th>Access Right</th>
+                  </tr>
+                </thead>
+                <tr v-for="(b, index) in branchlist">
+                  <td v-if="checkBranchInOrg(o, b)">{{ b.branchCode }}</td>
+                  <td v-if="checkBranchInOrg(o, b)" clas="flex flex-row">
+                    <div>
+                      <SelectButton
+                        :pt="{
+                          button: {
+                            class: 'text-xs border border-1 bg-sky-primary',
+                          },
+                        }"
+                        v-model="currentpermissions[index].group"
+                        :options="grouplist"
+                        option-label="label"
+                        option-value="value"
+                        @change="applPermission(currentpermissions[index])"
+                      ></SelectButton>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </template>
+          </Card>
+        </div>
+      </Panel>
+    </div>
+  </div>
+</template>
+<style scoped>
+td {
+  text-align: center;
+}
+</style>

@@ -126,7 +126,6 @@ export class InvitationService extends InvitationProcessor {
         data.comment='done'    
         const permdata:Permission = {
           uid: userinfo.uid,
-          isactive:true,
           orgId:1,
           branchId:1,
           tenantId:2,

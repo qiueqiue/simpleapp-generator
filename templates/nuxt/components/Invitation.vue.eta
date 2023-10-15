@@ -1,8 +1,12 @@
 <template>
-    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">            
+    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100 }">            
         <div v-if="invites">
-            <div v-for="item in invites" class="w w-auto grid grid-cols-3">
-                <div class="col-span-2">{{item}}</div>
+            
+            <div v-for="item in invites" class="w w-auto p p-2 grid grid-cols-3 hover-list-primary border">
+                <div class="flex flex-col col-span-2">
+                    <div class="font font-bold">{{item.tenantName}}</div>
+                    <div class="text text-xs text-gray-500 italic">{{ item.created }}</div>
+                </div>
                 <div >
                     <button class="btn-primary" @click="approve(item._id)">Approve</button>
                     <button class="btn-danger" @click="decline(item._id)">Decline</button>
@@ -15,10 +19,12 @@
     import Dialog from 'primevue/dialog';
     import {onMounted, ref} from 'vue'
     import ProgressSpinner from 'primevue/progressspinner'
-    const popuptitle = ref('Invitation')
+    const {$userstore}= useNuxtApp()
     const disabled = ref(false)
     const visible=ref(false)
     const invites = ref()
+    const invitationmsg = "There is some invitation to join their organization:"
+    const popuptitle = ref(invitationmsg)
     onMounted(()=>{
         invites.value =  getUserProfile().invites
         if(invites.value.length>0){
@@ -27,13 +33,13 @@
     })
     
     const approve = async (id:string) =>{
-       await decideInvitation(id,'accept')
-       reloadUserStore()
+       await $userstore.decideInvitation(id,'accept')
+       await reloadUserStore()
        visible.value=false
     }
     const decline = async (id:string) => {
-       await decideInvitation(id,'reject')
-       reloadUserStore()
+       await $userstore.decideInvitation(id,'reject')
+       await reloadUserStore()
        visible.value=false
     }
     

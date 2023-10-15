@@ -14,6 +14,7 @@ type crudType = {
   runUpdate: Function;
   runList: Function;
   runDelete: Function;
+  runSearch: Function;
 };
 export class SimpleAppClient<
   TData extends { _id?: string },
@@ -155,7 +156,22 @@ export class SimpleAppClient<
         return Promise.reject(errors);
       });
   }
-  find() {}
+  async search(filter:any) {
+    return await this.docapi
+      .runSearch(filter,{ timeout: this.defaultTimeOut })
+      .then((res: AxiosResponse) => {
+        if (this.event) {
+          this.event("info:searchready", res.data);
+        }
+        return res.data;
+      })
+      .catch((errors: any) => {
+        if (this.event) {
+          this.event("error:list", errors.response.data.data);
+        }
+        return Promise.reject(errors);
+      });
+  }
   hook(type: string, data: TData) {
     console.log("internal save hook");
     return true;

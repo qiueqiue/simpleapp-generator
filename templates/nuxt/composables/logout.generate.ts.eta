@@ -1,0 +1,13 @@
+export const logout = async () => {
+    const { signOut } = useAuth();    
+    const { data } = await <any>useFetch('/api/auth/logout');    
+    const signoutres = await signOut({redirect:false});
+
+    const logoutkeycloak = await <any>useFetch(data.path); 
+    console.log('logout data',data.value)
+    console.log("signout data", signoutres)
+    console.log('logoutkeycloak',logoutkeycloak)
+    // const addPath = encodeURIComponent("/login");
+    //
+  
+};

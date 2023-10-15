@@ -1,6 +1,12 @@
-import { Injectable, Scope,Inject } from '@nestjs/common';
+/**
+ * todo
+ * 1.base on xorg get current role and group
+ * 2. get profile want to obtain branchlist and invitation list
+ * 3. xorglist to user shall display appropriate tenant/org/branch name
+ */
 
-import { Model, model, connect, PipelineStage } from 'mongoose';
+import { Injectable, Scope,Inject,Logger } from '@nestjs/common';
+import { Model, model, connect, Types,PipelineStage } from 'mongoose';
 import _ from 'lodash'
 import { Module } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -11,11 +17,12 @@ import { InjectModel } from '@nestjs/mongoose';
 const Base64URL = require('@darkwolf/base64url');
 import { UserMongoSchema } from './../models/user.model';
 import {   User,  }  from './../types/user.type';
+import {   Permission,  }  from './../types/perm.type';
 import {ProfileUserBranch , ProfileUserInvites} from '../../profile/profile.types'
 
 @Injectable()
 export class UserProfile {
-    
+  protected logger = new Logger()
   protected uid: string = '';
   protected _id: string = '';
   protected uname: string = '';
@@ -29,10 +36,13 @@ export class UserProfile {
   protected token: string = '';
   protected refreshtoken: string = '';
   protected group: string = '';
-  protected branches: ProfileUserBranch[] = []
-  protected invites:ProfileUserInvites[] = []
-  protected roles: string[] = [Role.SuperAdmin,Role.SuperUser,Role.User];
-  constructor() {
+  protected branches: any[] = []
+  protected invites: any[] = []  //User + field tenant:Tenant[]
+  protected roles: string[] = [];
+  constructor(
+    private readonly usermodel:Model<User>,
+    private readonly permmodel:Model<Permission>
+    ) {
     
   }
   getId = () => this._id;
@@ -45,102 +55,147 @@ export class UserProfile {
   getEmail = () => this.email;
   getGroup = () => this.group;
   getRoles = () => this.roles;
-  getBranches = () => this.branches;
-  getInvites = () => this.invites;
-  setCurrentUserInfo = (tokenstr: string,xorg)=>{
-    this.setUserToken(tokenstr)
+  getBranches = ():ProfileUserBranch[] => {
+    this.branches;
+    const data:ProfileUserBranch[] = []
+
+    if(this.branches){
+      for(let i=0;i<this.branches.length; i++){
+        const b= this.branches[i]
+        data.push({
+          _id: b._id,          
+          branch: b.branch[0],
+          group: b.group,
+          xOrg: this.generateXorg(b.tenantId,b.orgId,b.branchId)
+
+        })
+      }
+    }
+    return data
+    
+  }
+  getInvites = ():ProfileUserInvites[] =>{
+    
+    // const usermodel = model<User>('user',UserMongoSchema,'user')    
+    
+    const data:ProfileUserInvites[] = []
+    if( this.invites){
+      // console.log("getInvites",res)
+      for(let i=0;i< this.invites.length; i++){
+        const r =  this.invites[0]
+        
+        data.push({
+          _id: r._id,
+          email: r.email,
+          tenantId: r.tenantId,
+          fullName: '',
+          tenantName: r.tenant[0].tenantName,
+          created: r.created,
+        })
+      }
+    }
+    return data    
+    
+    };
+  setCurrentUserInfo = async (tokenstr: string,xorg)=>{
     this.setXorg(xorg);      
+    await this.setUserToken(tokenstr)
+    
+  }
+
+  /**
+   * obtain user profile filter by uid,tenantId,orgId,branchId
+   * @returns Promise<User|undefined>
+   */
+  obtainProfileFromDb = async () : Promise<User|undefined>=>{
+    const filter = this.tenantId==0 ?  
+          { $match:{uid:this.uid,tenantId:this.tenantId} } : 
+          { $match:{uid:this.uid,tenantId:this.tenantId,orgId:this.orgId,branchId:this.branchId} }
+      
+
+    const joinpermission:PipelineStage = {$lookup: {
+      from : 'permission',
+      localField : 'uid',
+      foreignField : 'uid',
+      as : 'permissions',
+      pipeline:[filter]
+    }}
+
+    const pipeline:PipelineStage[]=[
+      filter,
+      // joinpermission,
+      //lookupinvitation
+    ]
+
+    if(this.tenantId>0){
+      pipeline.push(joinpermission)
+    }
+    // console.log("obtainProfileFromDbobtainProfileFromDb ",pipeline)
+    // const users = await usermodel.find(filter)
+    const users = await this.usermodel.aggregate(pipeline)
+    this.logger.verbose(`aggregate user profile from database`,'obtainProfileFromDb' )   
+    this.logger.verbose(pipeline,'obtainProfileFromDb' )   
+    this.logger.verbose(users,'obtainProfileFromDb' )   
+    // console.log("obtainProfileFromDbobtainProfileFromDb ",users)
+    if(users && users.length>0){
+      const userinfo = users[0]
+      // console.log("userinfouserinfouserinfouserinfouserinfouserinfo ",userinfo)
+
+      if(this.tenantId>0){
+        const myperm=userinfo.permissions[0]
+        if(myperm && myperm.group){
+          userinfo.group = myperm.group                    
+          userinfo.roles = rolegroups[userinfo.group]   
+          // console.log("rolegroups","role======",userinfo.group,'all group',userinfo.roles)
+        }    
+      }else{        
+        userinfo.group = '' 
+      }
+      
+      return userinfo  
+    }else{
+      return undefined
+    }
+    
   }
   setUserToken = async (tokenstr: string) => {    
+
+    //define token info
     const tokeninfo = jwt.decode(tokenstr);      
     this.token = tokenstr;
     this.uid = tokeninfo.sub;
     this.email = tokeninfo.email;
     this.uname = tokeninfo.preferred_username;
     this.fullname = tokeninfo.name;    
-    this.ssoACL = tokeninfo.resource_access;
-    
-    try{
-      
-      await connect(process.env.MONGODB_URL);
-      const usermodel = model<User>('user',UserMongoSchema,'user')
-      const filter:PipelineStage ={ $match:{uid:this.uid }} as PipelineStage
-      const permission:PipelineStage = {$lookup: {
-        from : 'permission',
-        localField : 'uid',
-        foreignField : 'uid',
-        as : 'branches'
-      }}
-      const lookupinvitation: PipelineStage = {
-        $lookup: {
-          from: 'invitation',
-          localField: 'email',
-          foreignField: 'email',
-          as: 'invites',
-          pipeline:[{$match:{ decision:''}}]
-        },
-      };
-      const pipeline:PipelineStage[]=[filter,permission,lookupinvitation]
-      
-      // const users = await usermodel.find(filter)
-      const users = await usermodel.aggregate(pipeline)
-      // console.log(pipeline)
-      if(!users || users.length ==0){
-        // console.log("User not found")        
-        this.group = 'Unknown'        
-        this.roles = [Role.Everyone,Role.Unknown]
-        this._id = '';
-        this.branches =[]
-      }else{
-        const userinfo = users[0]
-        // console.log("userinfo ",userinfo)        
-        const currentbranch=this.branchId
-        const currentorg = this.orgId   
-        this.group = 'manager'
-        this._id = userinfo._id.toString()
-        this.roles = rolegroups[this.group]   
-        const branches:ProfileUserBranch[] = []
-        for(let i=0 ; i< userinfo.branches.length;i++){
-          const b:ProfileUserBranch = userinfo.branches[i]
-          branches.push({
-            _id:b._id.toString(),
-            tenantId:b.tenantId,
-            orgId:b.orgId,
-            branchId:b.branchId,
-            isactive:b.isactive,
-            group:b.group,
-            xOrg: this.generateXorg(b.tenantId,b.orgId,b.branchId)
-            
-          })
-        }
-        this.branches = branches
+    this.ssoACL = tokeninfo.resource_access;    
+    this.logger.verbose(`set token ${this.uid}`)   
+    //read current user from db
+    // console.log("await this.obtainProfileFromDb()")
+    const userinfo = await this.obtainProfileFromDb()      
+    this.logger.verbose(userinfo,'obtainProfileFromDb result')    
+    if(userinfo){
+      this.logger.log(`${this.uid} user exists in tenant (${this.tenantId})`,'setUserToken' )   
 
-        const invites:ProfileUserInvites[] = []
-        for(let i=0 ; i< userinfo.invites.length;i++){
-          const inv:ProfileUserInvites = userinfo.invites[i]
-          invites.push({
-            _id: inv._id.toString(),
-            email: inv.email,
-            created: inv.created ,
-            permission: inv.permission
-          })
-        }
-        this.invites = invites
-        if(!this.roles.includes(Role.Everyone)){
-          this.roles.push(Role.Everyone)        
-        }
-        
-      }
+      this._id = userinfo._id.toString()
+      this.group = userinfo['group'] ?? ''
+      this.roles = userinfo['roles'] ?? [Role.Everyone,Role.User]
+    }else{
+      this.logger.log(`Set unknown id of current user`,'setUserToken' )   
+      // this.group = ''
+      // this.tenantId=0
+      // this.orgId=0
+      // this.branchId=0
+      this.roles = [Role.Everyone,Role.Unknown]
+    }
+    this.logger.log(`${this.uid} have _id (${this.getId()}), group (${this.group}) and role (${this.getRoles()})` )   
 
-      if(this.isRealmAdmin() && !this.roles.includes(Role.SuperAdmin)){
-        this.roles.push(Role.SuperAdmin)
-      }
-      
-        
-    }catch(err){
-      console.log("-------------errors----s----s----s----s-----",err)
-    }  
+    if(this.isRealmAdmin() && !this.roles.includes(Role.SuperAdmin)){
+      this.roles.push(Role.SuperAdmin)
+    }
+    this.logger.verbose(this)   
   };
+
+
   generateXorg = (tenantId:number,orgId:number,branchId:number):string=>{
     return Base64URL.encodeText(`${tenantId}-${orgId}-${branchId}`)
   }
@@ -178,17 +233,17 @@ export class UserProfile {
       branchId: u.branchId,
       createdby: u.uid,
       updatedby: u.uid,
-      created: new Date().getTime().toString(),
-      updated: new Date().getTime().toString(),
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
     };
   };
   getUpdateFilter = () => {
     const u = this;
     return {
       updatedby: u.uid,
-      updated: new Date().getTime().toString(),
+      updated: new Date().toISOString()
     };
-  };
+  };  
   setXorg = (xorg) => {
     try {
       const decodedText: string = Base64URL.decodeText(xorg);
@@ -198,7 +253,8 @@ export class UserProfile {
         const u = this;
         u.tenantId = Number(arrXorg[0]);
         u.orgId = Number(arrXorg[1]);
-        u.branchId = Number(arrXorg[2]);        
+        u.branchId = Number(arrXorg[2]);     
+        
       } else {
         throw 'invalid x-org';
       }
@@ -209,8 +265,10 @@ export class UserProfile {
 
 
   async getUserInfo(){
+     
+    // obtain basic user info
     const userinfo = {
-      _id: this._id ,
+      _id: this.getId() ,
       tenantId: this.getTenantId(),
       orgId: this.getOrgId(),
       branchId: this.getBranchId(),
@@ -220,15 +278,88 @@ export class UserProfile {
       group: this.group,
       roles: this.getRoles(),
       branches: this.getBranches(),
-      invites: this.getInvites()
+      invites: await this.getInvites()
     }
+    this.logger.debug(userinfo,"init getUserInfo()")
+
+    if(this.getId()!=''){
+      this.logger.debug(userinfo,"obtain permissions and invitations")
+      const filter:PipelineStage ={ $match:{uid:this.uid }} as PipelineStage
+      const permission:PipelineStage = {$lookup: {
+      from : 'permission',
+      localField : 'uid',
+      foreignField : 'uid',
+      as : 'permissions',
+      pipeline:[
+        {$match:{uid: this.uid,},},
+        {$lookup:{from : 'branch',localField : 'branchId',foreignField : 'branchId',as : 'branch',}},
+      ]
+    }}
+    const lookupinvitation:PipelineStage = {$lookup: {
+      from : 'user',
+      localField : 'email',
+      foreignField : 'email',
+      as : 'invites',
+      pipeline:[
+        {$match:{uid: ''}},
+        {$lookup:{from : 'tenant',localField : 'tenantId',foreignField : 'tenantId',as : 'tenant',}},
+      ]
+    }}
+
+    const pipeline:PipelineStage[]=[
+      filter,
+      permission,
+      lookupinvitation
+    ]
+    this.logger.debug(pipeline,"getUserInfo")
+    // // // const users = await usermodel.find(filter)
+    const users = await this.usermodel.aggregate(pipeline)
+
     
+    this.invites = users[0].invites
+    this.branches = users[0].permissions
+    this.logger.verbose(users,"getUserInfo")
+    userinfo.branches=this.getBranches()
+    userinfo.invites=this.getInvites()
+    // this.logger.debug(`getUserInfo result ${userinfo}`)
     
+    }else{
+      this.logger.log(`${this.getUid()} does not exists in current tenant (${this.tenantId})`)
+    }
     
 
     return userinfo
   }
+  async decideInvitation (id:string, decision:string) {
+    
+    // const usermodel = model<User>('user',UserMongoSchema,'user')
+    const res = await this.usermodel.findById(id)
+    // console.log("find invitation:",res)
+    if(!res.uid){
+      res.uid = this.getUid()
+      res.fullname = this.fullname
+      res.isactive = true
+      
+      if(decision=='accept'){
+        const result = await res.save()
+        this.logger.log(result,"accept invitation 1")
+        //set permission of all user under this.user_id
+        const updateresult = await this.permmodel.updateMany(
+          {$or:[{ uid:''},{user_id:res._id}]},
+          {uid:this.getUid()}
+          )
+          this.logger.log(updateresult,"update all permission")
+        return result
+      }else{
+        return await res.deleteOne({_id: new Types.ObjectId(id)});
+      }
+      
+      
+    }else{
+      return true
+    }    
 
+  }
 
   isRealmAdmin = ()=>{
     const o = this.ssoACL    

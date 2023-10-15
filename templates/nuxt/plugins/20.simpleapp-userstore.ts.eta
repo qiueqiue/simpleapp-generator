@@ -35,7 +35,9 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             }
             
             return await new PROFILEApi(undefined,apiurl,$axios).getProfile().then((res:AxiosResponse)=>{            
-              
+              if(!res){
+                return
+              }
               this.tenantId = res.data.tenantId              
               this.orgId = res.data.orgId
               this.branchId = res.data.branchId
@@ -64,9 +66,26 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             const currentxorg:string = String(useRoute().params.xorg)
             return _.find(this.branches,{xorg:currentxorg})
           },
+          async decideInvitation(id:string,decision:string){
+            const apiurl = `${useRuntimeConfig().public.APP_URL}/api`
+            const {$axios} = useNuxtApp()
+            console.log("decideInvitation",id,decision)
+            const result = await new PROFILEApi(undefined,apiurl,$axios).decideInvitation(id,decision)
+            
+            if(result){
+              console.log(result)
+            }else{
+              console.log(result)
+            }
+            //().then((res:AxiosResponse)=>{ }
+          },
           canAccess(resourcename:string){          
             //super admin always full access right
-            if(this.roles.includes('superadmin')){
+            if(
+              this.roles.includes('superadmin') ||
+              this.roles.includes('tenantowner') ||
+              this.roles.includes('superuser') 
+              ){
               return true
             }
             for(let i=0; i< this.roles.length; i++){

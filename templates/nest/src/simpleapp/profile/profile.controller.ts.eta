@@ -3,6 +3,7 @@ import {
   Get,
   Put,
   Post,
+  Patch,
   Delete,
   Body,
   Query,
@@ -16,6 +17,7 @@ import {
   Req,
   HttpException,
   Request,
+  Logger,
 } from '@nestjs/common';
 import { Roles } from '../generate/commons/roles/roles.decorator';
 import { Role } from '../generate/commons/roles/roles.enum';
@@ -24,24 +26,34 @@ import { UserProfile } from '../generate/commons/user.profile';
 import { ProfileService } from './profile.service';
 import { AppUser } from '../generate/commons/decorators/appuser.decorator';
 import { RegTenant } from './profile.types';
-import { RegTenantApiSchema } from './profile.apischema';
+import { RegTenantApiSchema, MyProfileApiSchema } from './profile.apischema';
 @ApiTags('PROFILE')
 @Controller('/profile')
 export class ProfileController {
+  protected logger = new Logger();
   constructor(private profileservice: ProfileService) {
     //console.log("init Profile Controller ")
   }
 
   @Get()
-  @Roles(Role.Everyone)
+  @Roles(Role.Everyone, Role.User)
   @ApiOperation({
     operationId: 'getProfile',
     description: 'Get current user profile',
   })
-  @ApiResponse({ status: 200, type: Object, description: 'Success' })
+  @ApiResponse({
+    status: 200,
+    type: () => MyProfileApiSchema,
+    description: 'Success',
+  })
   @ApiResponse({ status: 401, type: Object, description: 'Undefine profile' })
   async getProfile(@AppUser() appuser: UserProfile) {
+    this.logger.debug(
+      `access getProfile API by ${appuser.getUid()},(${appuser.getId()})`,
+    );
     const result = await this.profileservice.getProfile(appuser);
+    this.logger.debug('getProfile result is:');
+    this.logger.debug(result);
     if (result) {
       return result;
     } else {
@@ -49,7 +61,7 @@ export class ProfileController {
     }
   }
 
-  @Post()
+  @Post('/tenant')
   @Roles(Role.Everyone)
   @ApiBody({ description: 'create tenant name', type: RegTenantApiSchema })
   @ApiOperation({
@@ -65,6 +77,32 @@ export class ProfileController {
     if (result) {
       return result;
     } else {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  @Post('/invitation/:id/:decision')
+  @Roles(Role.Everyone)
+  @ApiOperation({
+    operationId: 'decideInvitation',
+    description: 'accept or reject invitation to tenant',
+  })
+  @ApiResponse({ status: 201, type: Object, description: 'Success' })
+  async decideInvitation(
+    @AppUser() appuser: UserProfile,
+    @Param('id') id: string,
+    @Param('decision') decision: string,
+  ) {
+    const result = await this.profileservice.decideInvitation(
+      appuser,
+      id,
+      decision,
+    );
+    if (result) {
+      console.log('result', result);
+      return result;
+    } else {
+      console.log('throw error');
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
   }

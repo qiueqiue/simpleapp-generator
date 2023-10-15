@@ -13,10 +13,12 @@ import {ref} from 'vue'
 const modelValue = defineModel()
 const isdebug = ref(useRuntimeConfig().public.DEBUGDATA)
 const visible = ref(false)
+const props = defineProps<{label?:string}>()
+const label = ref(props.label??'Debug')
 </script>
 <template>
     <div class="floatright" v-if="isdebug=='1'">
-        <button @click="visible=true">Debug</button>
+        <button @click="visible=true">{{ label }}</button>
         <Dialog v-model:visible="visible" modal header="Debug data" :style="{ width: '80vw' }">
             <pre>{{ modelValue }}</pre>
         </Dialog>                

@@ -1,6 +1,6 @@
 export type UserListItem = {
   _id: string
-  uid:string
+  uid?:string
   fullName: string
   email: string
   group:string
@@ -8,11 +8,6 @@ export type UserListItem = {
   orgId: number
   branchId: number
   tenantId: number
-}
-export type InvitationListItem = {
-  _id: string 
-  email: string
-  created: string  
 }
 export type OrgListItem = {
   orgId: number
@@ -22,9 +17,25 @@ export type OrgListItem = {
 }
 export type BranchListItem = {
   _id:string
+  tenantId:number
   orgId: number
   branchId: number
   branchName: string
   branchCode: string
+  group:string
+  isactive:boolean
+}
 
+
+export type PermissionListItem = {
+  branchId: number  
+  email:string
+  fullName:string
+  group:string
+  isactive:boolean
+  orgId: number
+  tenantId:number
+  uid:string
+  _id:string
+  
 }

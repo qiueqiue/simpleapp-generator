@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "x-isolation-type":"none",    
+  "x-isolation-type":"tenant",    
   "x-required-role":["SuperAdmin"],    
   "x-page-type":"crud",
   "properties": {
@@ -13,14 +13,14 @@
     },
     "fullname": {
       "type": "string",
-      "x-document-no":true,
+      "x-document-label":true,  
       "examples": [
         "user 1"
       ]
     },
     "email": {
       "type": "string",    
-      "x-document-label":true,  
+      "x-document-no":true,      
       "examples": [
         "myemail@abc.com"
       ],
