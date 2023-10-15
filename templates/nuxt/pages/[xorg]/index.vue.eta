@@ -5,10 +5,10 @@
  * last change 2023-09-20
  * author: Ks Tan
  */
-const userprofile = ref()
-onMounted(()=>{
-  userprofile.value = getUserProfile()
-})
+const userprofile = ref();
+onMounted(() => {
+  userprofile.value = getUserProfile();
+});
 const menus = getMenus();
 </script>
 <template>

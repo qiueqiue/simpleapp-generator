@@ -18,8 +18,9 @@
     <script setup lang="ts">
     import Dialog from 'primevue/dialog';
     import {onMounted, ref} from 'vue'
+    import {SimpleAppEventType} from '../simpleapp/generate/commons/events'
     import ProgressSpinner from 'primevue/progressspinner'
-    const {$userstore}= useNuxtApp()
+    const {$userstore,$event}= useNuxtApp()
     const disabled = ref(false)
     const visible=ref(false)
     const invites = ref()
@@ -33,13 +34,16 @@
     })
     
     const approve = async (id:string) =>{
+       
+    //    await reloadUserStore()
        await $userstore.decideInvitation(id,'accept')
-       await reloadUserStore()
+       $event(SimpleAppEventType.InvitationAccepted,id)
        visible.value=false
     }
     const decline = async (id:string) => {
+    //    await reloadUserStore()
        await $userstore.decideInvitation(id,'reject')
-       await reloadUserStore()
+       $event(SimpleAppEventType.InvitationRejected,id)
        visible.value=false
     }
     

@@ -5,54 +5,63 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import _ from 'lodash'
+import _ from "lodash";
 import InputText from "primevue/inputtext";
 import Dialog from "primevue/dialog";
 import { ref, Ref } from "vue";
+import { SimpleAppEventType } from "../simpleapp/generate/commons/events";
 import { TenantDoc } from "../simpleapp/docs/TenantDoc";
 // import OrderList from 'primevue/orderlist';
 import Panel from "primevue/panel";
-import Card from 'primevue/card'
-import { AxiosResponse } from 'axios';
+import Card from "primevue/card";
+import { AxiosResponse } from "axios";
 const { $event, $listen, $userstore } = useNuxtApp();
 
 const branches = ref([]);
 const data = ref();
 const visible = ref(false);
-const userprofile = ref()
+const userprofile = ref();
 const createtitle = ref("Create My Company");
-const orgList = ref()
-onMounted(() => {
-  // console.log("res", res);
+const orgList = ref();
+
+const loadProfile = async() => {  
+  await reloadUserStore()
   userprofile.value = getUserProfile();
-  console.log('useprofile', userprofile.value)
+  console.log("useprofile", userprofile.value);
   data.value = {
     tenantName: "",
   };
-  
+
   branches.value = userprofile.value.branches;
-  
-  orgList.value = _.uniqBy(branches.value,'branch.orgId').map((item)=>({orgId:item.branch.orgId, orgName: item.branch.organization.label}))
+
+  orgList.value = _.uniqBy(branches.value, "branch.orgId").map((item) => ({
+    orgId: item.branch.orgId,
+    orgName: item.branch.organization.label,
+  }));
   //.map((item)=>{return {orgId: item.organization.orgId,orgName:item.organization.Name}})
   console.log("user info.value", branches.value);
   console.log("org list .value", orgList.value);
-  // const firstxorg = userinfo.value.xOrgList[0].xorg;
-  // if (firstxorg) {
-  //   navigateTo(`/${firstxorg}`);
-  // }
+};
+
+$listen(SimpleAppEventType.InvitationAccepted, async () => {
+  loadProfile();
+});
+
+onMounted(() => {
+  loadProfile();
 });
 
 const createTenant = async () => {
-  const { $axios } = useNuxtApp();
+  const { $axios, $listen } = useNuxtApp();
 
   const openapi = getApi();
   const apipath = `${useRuntimeConfig().public.API_URL}`;
   let profileapi = new openapi.PROFILEApi(undefined, apipath, $axios);
-  const res:AxiosResponse<any> = await profileapi.createTenant(data.value);
-  if(res && res.status && res.status==201){
-    if(res.data && res.data['xOrg']){
-      const xorg = res.data['xOrg']
-      navigateTo('/'+xorg,{external:true})
+  const res: AxiosResponse<any> = await profileapi.createTenant(data.value);
+  if (res && res.status && res.status == 201) {
+    if (res.data && res.data["xOrg"]) {
+      const xorg = res.data["xOrg"];
+      navigateTo("/" + xorg, { external: true });
     }
   }
 };
@@ -60,70 +69,92 @@ const createTenant = async () => {
 <template>
   <div class="grid grid-cols-2">
     <DebugDocumentData v-model="userprofile" label="User"></DebugDocumentData>
-    <Panel header="Create New Tenant">
+    <Panel header="Create New Tenant">      
       <div>
-          <h1>Create new one?</h1>
-          <DebugDocumentData v-model="data" label="CreateTenant"></DebugDocumentData>
-          <button class="btn-primary" @click="visible = true">
-            Create My Company
-          </button>
-          <Dialog
-            v-model:visible="visible"
-            modal
-            :header="createtitle"
-            class="crudsimple-dialog"
-          >
-            <form @submit.prevent="true">
-              <InputText
-                type="text" autofocus="true"
-                v-model:model-value="data.tenantName"
-                placeholder="Organization Name"
-              />
-              <button class="btn-primary" type="submit" @click="createTenant">Create</button>
-            </form>
-          </Dialog>
-        </div>
+        <h1>Create new one?</h1>
+        <DebugDocumentData
+          v-model="data"
+          label="CreateTenant"
+        ></DebugDocumentData>
+        <button class="btn-primary" @click="visible = true">
+          Create My Company
+        </button>
+        
+        <Dialog
+          v-model:visible="visible"
+          modal
+          :header="createtitle"
+          class="crudsimple-dialog"
+        >
+          <form @submit.prevent="true">
+            <InputText
+              type="text"
+              autofocus="true"
+              v-model:model-value="data.tenantName"
+              placeholder="Organization Name"
+            />
+            <button class="btn-primary" type="submit" @click="createTenant">
+              Create
+            </button>
+          </form>
+        </Dialog>
+      </div>
     </Panel>
     <Panel header="Reserved">
       <div>
-          <h1>reserved fuction</h1>
-          
-          
-        </div>
+        <h1>reserved fuction</h1>
+      </div>
     </Panel>
-    <Panel header="Login To">
-     
-    
+    <Panel >
+      <template #header>
+        <div class="flex flex-row"> 
+          <div class="font font-bold">Login To</div>
+          <button class="pi pi-refresh ml-4" @click="loadProfile" v-if="useRuntimeConfig().public.DEBUGDATA"></button>
+        </div>
         
-        <div class="grid grid-cols-2">
-          <Card v-for="org in orgList" class="m-2">
-            <template #header><div class="font font-bold ml-4">{{ org.orgName }}</div></template>
-            <template #content>
-              <div v-for="item in branches" class="hover-list-primary" >
-                <NuxtLink              
-                  v-if="org.orgId==item.branch.orgId"
-                  :external="true"
-                  :to="item.xOrg"
-                  class="tenant-link"
-                >
-                  <div class="grid grid-cols-2 p-2 align-items-center gap-0 w-full">
-                    <div class="">
-                      <p ><span class="font font-semibold">{{ item.branch.branchName }}</span><span class="ml-2 text text-gray-500"> {{ item.group }}</span></p>
-                      <span class="text-xs italic">{{useRuntimeConfig().public.APP_URL}}/{{ item.xOrg }}</span>                      
-                    </div>
-                    <div class="font-bold text-900">{{ item.branch.branchCode }}</div>
-                  </div>
-                </NuxtLink>
-              </div>
-            </template>
+      </template>
+      <div class="grid grid-cols-2">
+        <Card v-for="org in orgList" class="m-2">
+          <template #header>
+            <div class="font font-bold ml-4">{{ org.orgName }}</div>
             
-          </Card>
-          
-        </div>
-        
-    
+            </template>
+          <template #content>
+            <div v-for="item in branches" class="hover-list-primary">
+              <NuxtLink
+                v-if="org.orgId == item.branch.orgId"
+                :external="true"
+                :to="item.xOrg"
+                class="tenant-link"
+              >
+                <div
+                  class="grid grid-cols-2 p-2 align-items-center gap-0 w-full"
+                >
+                  <div class="">
+                    <p>
+                      <span class="font font-semibold">{{
+                        item.branch.branchName
+                      }}</span
+                      ><span class="ml-2 text text-gray-500">
+                        {{ item.group }}</span
+                      >
+                    </p>
+                    <span class="text-xs italic"
+                      >{{ useRuntimeConfig().public.APP_URL }}/{{
+                        item.xOrg
+                      }}</span
+                    >
+                  </div>
+                  <div class="font-bold text-900">
+                    {{ item.branch.branchCode }}
+                  </div>
+                </div>
+              </NuxtLink>
+            </div>
+          </template>
+        </Card>
+      </div>
     </Panel>
-   
   </div>
 </template>
 

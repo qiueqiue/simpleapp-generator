@@ -345,13 +345,15 @@ export class UserProfile {
         this.logger.log(result,"accept invitation 1")
         //set permission of all user under this.user_id
         const updateresult = await this.permmodel.updateMany(
-          {$or:[{ uid:''},{user_id:res._id}]},
+          { uid:'',user_id:res._id},
           {uid:this.getUid()}
           )
           this.logger.log(updateresult,"update all permission")
         return result
       }else{
-        return await res.deleteOne({_id: new Types.ObjectId(id)});
+        const deleteresult =  await res.deleteOne({_id: new Types.ObjectId(id)});
+        await this.permmodel.deleteMany({ uid:'',user_id:res._id})
+        return deleteresult
       }
       
       

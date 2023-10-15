@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import { UserProfile } from '../generate/commons/user.profile';
 import { Injectable } from '@nestjs/common';
 import { UserProcessor } from '../generate/processors/user.processor';
-import {Permission} from '../generate/types/perm.type'
+import { Permission } from '../generate/types/perm.type';
 import { User } from '../generate/types/user.type';
 export { User } from '../generate/types/user.type';
 
@@ -18,46 +18,46 @@ export class UserService extends UserProcessor {
   protected strictIsolation = false;
   constructor(
     @InjectModel('User') mydoc: Model<User>,
-    @InjectModel('Permission') private permdoc: Model<Permission>
-    ) {
+    @InjectModel('Permission') private permdoc: Model<Permission>,
+  ) {
     super(mydoc);
   }
 
-     hook = async (appuser:UserProfile,type: string, data?: any) => {
-      switch(type){
-  //         case 'init':
-  //         break;
-  //         case 'beforeSearch':
-  //         break;
-  //         case 'afterSearch':
-  //         break;
-  //         case 'beforeValidation':
-  //         break;
-  //         case 'afterValidation':
-  //         break;
-  //         case 'beforeCreate':
-  //         break;
-  //         case 'afterCreate':
-  //         break;
-  //         case 'beforeUpdate':
-  //         break;
-  //         case 'afterUpdate':
-  //         break;
-  //         case 'beforeDelete':
-  //         break;
-          case 'afterDelete':
-            const result = await this.permdoc.deleteMany({
-              user_id: data    //delete hook data = _id
-            })
-            this.logger.log(result,"user deleteHook")
-          break;
-  //         case 'beforeFetchRecord':
-  //         break;
-  //         case 'afterFetchRecord':
-  //         break;
-  //         default:
-  //         break;
-          }
-      return true;
-    };
+  hook = async (appuser: UserProfile, type: string, data?: any) => {
+    switch (type) {
+      //         case 'init':
+      //         break;
+      //         case 'beforeSearch':
+      //         break;
+      //         case 'afterSearch':
+      //         break;
+      //         case 'beforeValidation':
+      //         break;
+      //         case 'afterValidation':
+      //         break;
+      //         case 'beforeCreate':
+      //         break;
+      //         case 'afterCreate':
+      //         break;
+      //         case 'beforeUpdate':
+      //         break;
+      //         case 'afterUpdate':
+      //         break;
+      //         case 'beforeDelete':
+      //         break;
+      case 'afterDelete':
+        const result = await this.permdoc.deleteMany({
+          user_id: data['data']['_id'], //delete hook data = _id
+        });
+        this.logger.log(result, 'user deleteHook');
+        break;
+      //         case 'beforeFetchRecord':
+      //         break;
+      //         case 'afterFetchRecord':
+      //         break;
+      //         default:
+      //         break;
+    }
+    return true;
+  };
 }

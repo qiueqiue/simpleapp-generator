@@ -19,47 +19,47 @@ export class PermissionService extends PermissionProcessor {
     super(mydoc);
   }
 
-    hook = async (appuser:UserProfile,type: string, data?: any) => {
-      switch(type){
-  //         case 'init':
-  //         break;
-  //         case 'beforeSearch':
-  //         break;
-  //         case 'afterSearch':
-  //         break;
-  //         case 'beforeValidation':
-  //         break;
-  //         case 'afterValidation':
-  //         break;
-  //         case 'beforeCreate':
-  //         break;
-  //         case 'afterCreate':
-  //         break;
-  //         case 'beforeUpdate':
-  //         break;
-  //         case 'afterUpdate':
-  //         break;
-  //         case 'beforeDelete':
-  //         break;
-  //         case 'afterDelete':
-        case 'beforeDeleteMany':         
-          this.logger.log(data,"beforeDeleteMany") 
-          // this.deleteMany(appuser,data)              
+  hook = async (appuser: UserProfile, type: string, data?: any) => {
+    switch (type) {
+      //         case 'init':
+      //         break;
+      //         case 'beforeSearch':
+      //         break;
+      //         case 'afterSearch':
+      //         break;
+      //         case 'beforeValidation':
+      //         break;
+      //         case 'afterValidation':
+      //         break;
+      //         case 'beforeCreate':
+      //         break;
+      //         case 'afterCreate':
+      //         break;
+      //         case 'beforeUpdate':
+      //         break;
+      //         case 'afterUpdate':
+      //         break;
+      //         case 'beforeDelete':
+      //         break;
+      //         case 'afterDelete':
+      case 'beforeDeleteMany':
+        // this.logger.log(data, 'beforeDeleteMany');
+        // this.deleteMany(appuser,data)
         break;
-        case 'afterDeleteMany':
-          this.logger.log(data,"afterDeleteMany",data) 
+      case 'afterDeleteMany':
+        // this.logger.log(data, 'afterDeleteMany', data);
         break;
 
-  //         break;
-  //         case 'beforeFetchRecord':
-  //         break;
-  //         case 'afterFetchRecord':
-  //         break;
-  //         default:
-  //         break;
-          }
-      return true;
-    };
+      //         break;
+      //         case 'beforeFetchRecord':
+      //         break;
+      //         case 'afterFetchRecord':
+      //         break;
+      //         default:
+      //         break;
+    }
+    return true;
+  };
 
   async listUser(appuser: UserProfile) {
     const getallrecords: PipelineStage = { $match: {} };
