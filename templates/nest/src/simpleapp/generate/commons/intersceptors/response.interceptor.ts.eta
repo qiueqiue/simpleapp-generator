@@ -2,34 +2,36 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { MongoTransaction } from '../db/transaction.common';
-import { Model,Connection } from 'mongoose';
+import { Model,Connection, ClientSession } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
+import { UserProfile } from '../commons/user.profile';
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   
     constructor(@InjectConnection() private readonly connection: Connection,){
-     console.log("implement ResponseInterceptor constructor")   
      
       
     }
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('Before...');
     const req = context.switchToHttp().getRequest()
-    const transcontroller = new MongoTransaction(this.connection)
-    transcontroller.startTransaction()
-    if(req['sessionuser']){
-      req['sessionuser'].setTransController(transcontroller)
+    
+    const usersession:UserProfile = req['sessionuser']??undefined
+    const session:ClientSession =   usersession.getDBSession()
+    session.startTransaction()
       // console.log("sessionuser exists!!")
-    }
+    
     const now = Date.now();
     return next
       .handle()
       .pipe(
         tap(() => {
-          transcontroller.abortTransaction()
-          // transcontroller.commitTransaction()
           
+          if(process.env.DRYRUN=='true'){
+            console.warn("--------dryrun! roll back everything-----------")
+            session.abortTransaction()
+          }else{
+            session.commitTransaction()
+          }                            
         }),
       );
   }

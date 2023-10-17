@@ -262,7 +262,9 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.logger.debug("Create record",'SimpleAppService')
     this.logger.debug(data,'SimpleAppService')
     const newdoc = new this.doc(data);
-    result = await newdoc.save({session:appuser.getTransController().getSession()})
+    
+    result = await newdoc.save({session:appuser.getDBSession()})
+    
     // this.doc.create(data)
     // this.doc
 
@@ -370,7 +372,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         
         filterIsolation['_id'] =  new Types.ObjectId(id);
         this.logger.debug('delete filter', filterIsolation);
-        const result = await this.doc.deleteOne(filterIsolation).session(appuser.getTransController().getSession());
+        const result = await this.doc.deleteOne(filterIsolation).session(appuser.getDBSession());
         const deleteresult = {result:result, data: deletedata}
         this.logger.debug(this.doc.collection.name, " delete result",deleteresult)
         // this.doc.findByIdAndDelete(id)
@@ -405,7 +407,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.polishIsolationFilter(isolationFilter)      
 
     isolationFilter['_id'] = id;
-    const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(appuser.getTransController().getSession());
+    
+    const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(appuser.getDBSession());
     await this.hook(appuser,HookType.afterUpdate, data);
     return result;
     // } catch (err) {
