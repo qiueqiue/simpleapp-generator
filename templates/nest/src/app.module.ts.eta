@@ -1,6 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD,APP_INTERCEPTOR } from '@nestjs/core';
+import {ResponseInterceptor} from './simpleapp/generate/interceptors/response.interceptor'
 import {
   AuthGuard,
   KeycloakConnectModule,
@@ -57,6 +58,10 @@ import { PermissionMongoSchema } from './simpleapp/generate/models/perm.model';
     {
       provide: APP_GUARD,
       useClass: RolesGuard, //use simpleapp own roleguard
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
   ],
 })

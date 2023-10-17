@@ -7,7 +7,7 @@ import { LogLevel } from '@nestjs/common';
 const yaml = require('yaml');
 
 async function bootstrap() {
-  const logs:LogLevel[] = String(process.env.LOGS).split(',') as LogLevel[]
+  const logs:LogLevel[] = String(process.env.LOGGER).split(',') as LogLevel[]
   const app = await NestFactory.create(AppModule, {
     logger: logs,
   });

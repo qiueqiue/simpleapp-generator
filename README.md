@@ -152,10 +152,9 @@ Special Field Level property
 all format recognize by ajv plus below:
 
 1. tel: only digit, auto generate input tel
-2. x-document-no : required string, document unique key by organization, will pass to autocomplete too. force by pass using property `x-ignore-autocomplete`
-3. x-document-label: required string, document label use by autocomplete, force by pass using `x-ignore-autocomplete`
-4. x-autocomplete-field: define this field appear in autocomplete or not
-5. x-text: do nothing, will auto generate textarea
+2. documentno : will use documentno generator for auto generate document no 
+3. text: do nothing, will auto generate textarea
+4. html editor: do nothing, will auto generate html editor
 
 
 
@@ -279,6 +278,25 @@ x6. fill in data for tenant/org/branch created,updated,createdby,updatedby
 ## Bug fix
 1. Openapi some schema like primarykey/more not generated, cause error in ide
 
+
+Document Numbering System
+1. generate prepare list of document no for generate. 
+  x-document-no + document-format
+2. if x-document-no, will auto add docformat={}
+3. button can pick document-no format
+4. have add new function
+5. if type manually wont create new
+6. preview next no api
+7. generate next no api
+8. if _id = '', will auto preview next no
+9. after change default format, will preview another next no
+10. have list to pick format
+11. support transactions
+12. only list current branch document no options
+11. master data
+  a. add list for document type
+  b. click doctype then can available document settings
+  c. document will set by branch
 
 
 SimpleApp-Vue-Component Fix:

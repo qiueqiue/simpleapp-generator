@@ -56,12 +56,14 @@
         <% } else if(obj.type=='object'  && typeof obj['x-foreignkey']!='undefined'){ %>              
             <SimpleAppAutocomplete :setting="o.getField('#/properties/<%= key %>')"
                     v-model="data.<%= key %>" optionLabel="label" :remote-src="getAutocomplete('<%=obj['x-foreignkey']%>')"/>
-        <% } else if(obj.type=='string'){ %>            
-                <% if(obj.format=='date'){ %>
+        <% } else if(obj.type=='string'){ %>                 
+                <% if(obj.format=='documentno'){ %>
+                        <SimpleAppDocumentNo autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>" v-model:docNoFormat="data.docNoFormat" />   
+                <% }else if(obj.format=='date'){ %>
                     <SimpleAppText type="<%=obj.format%>"  autofocus :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
-                <% } else if(obj.format=='x-text'){ %>
+                <% } else if(obj.format=='text'){ %>
                     <SimpleAppTextarea :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
-                <% } else if(obj.format=='x-html'){ %>
+                <% } else if(obj.format=='html'){ %>
                     <SimpleAppEditor editorStyle="height: 320px" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
                 <% } else if(obj.format=='email'){ %>
                     <SimpleAppText  autofocus type="<%=obj.type%>" :setting="o.getField('#/properties/<%= key %>')" v-model="data.<%= key %>"/>  
@@ -103,9 +105,9 @@
                 <% } else if(sobj.type=='string'){ %>            
                          <% if(sobj.format=='date'){ %>
                             <SimpleAppText type="<%=sobj.format%>" instancePath="<%=instancePath%>" autofocus :setting="<%~fieldpath%>" v-model="<%= vmodel %>"/>  
-                        <% } else if(sobj.format=='x-text'){ %>
+                        <% } else if(sobj.format=='text'){ %>
                             <SimpleAppTextarea :setting="<%~fieldpath%>'" instancePath="<%=instancePath%>" v-model="<%= vmodel %>"/>  
-                        <% } else if(sobj.format=='x-html'){ %>
+                        <% } else if(sobj.format=='html'){ %>
                             <SimpleAppEditor editorStyle="height: 320px" instancePath="<%=instancePath%>" :setting="<%=fieldpath%>" v-model="<%= vmodel %>"/>  
                         <% } else if(sobj.format=='email'){ %>
                             <SimpleAppText  autofocus type="<%=~obj.type%>" instancePath="<%=instancePath%>" :setting="<%=fieldpath%>" v-model="<%= vmodel %>"/>  

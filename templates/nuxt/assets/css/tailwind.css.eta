@@ -30,6 +30,6 @@ button {
     @apply text-left
 }
 
-.error-text{
+.text-error, .error-text{
     @apply text-red-600;
 }

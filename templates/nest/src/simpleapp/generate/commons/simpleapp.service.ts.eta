@@ -203,7 +203,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
 
   }
-  async search(appuser:UserProfile,filters: Object) {
+  async search(appuser:UserProfile,filters: Object,sort:any=undefined) {
     try {
       const isolationFilter= {... this.getIsolationFilter(appuser)}
       this.polishIsolationFilter(isolationFilter)      
@@ -213,7 +213,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       await this.hook(appuser,HookType.beforeSearch, newfilters);
       // console.log("before _find",newfilters)
       // console.log("this.doc",this.doc)
-      const products = await this.doc.find(newfilters);
+      const products = await this.doc.find(newfilters).sort(sort);
       // console.log("after search",products)
       const productlist = products.map((p: T) => {
         return p;
@@ -239,12 +239,15 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
   }
 
-  async create(appuser:UserProfile, data:T,session:mongo.ClientSession=undefined) {
+
+  async create(appuser:UserProfile, data:T) {
     let result;
     // const tempTenantId = data['tenantId'];
     // const tempOrgId = data['orgId'];
     // const tempBranchId = data['branchId'];
+    
     await this.hook(appuser,HookType.beforeCreate, data);
+    
     let isolationFilter:any =  {...appuser.getCreateFilter()}    
     isolationFilter = this.polishIsolationFilter(isolationFilter,data)      
     
@@ -259,7 +262,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.logger.debug("Create record",'SimpleAppService')
     this.logger.debug(data,'SimpleAppService')
     const newdoc = new this.doc(data);
-    result = await newdoc.save({session:session})
+    result = await newdoc.save({session:appuser.getTransController().getSession()})
     // this.doc.create(data)
     // this.doc
 
@@ -268,22 +271,8 @@ export class SimpleAppService<T extends { _id?: string }> {
 
     return result as T;
   }
-  // async update() {
-  //   const id: string = this.getRecordId();
-  //   Object.assign(this.data, this.userprovider.getUpdateFilter());
-  //   await this.findIdThenUpdate(id, this.data);
-  // }
-  // async delete() {
-  //   const id: string = this.getRecordId();
-  //   const dependency = await this.getRelatedRecords(id);
-  //   if (!dependency) {
-  //     return await this.findIdThenDelete(id);
-  //   } else {
-  //     return dependency;
-  //   }
-  // }
+  
   hook = async (appuser:UserProfile,type: string, data?: any) => {
-    // console.log('Default hook', data);
     return true;
   };
   async validateData(appuser:UserProfile,data: T) {
@@ -292,8 +281,10 @@ export class SimpleAppService<T extends { _id?: string }> {
     addErrors(ajv);
 
     ajv.addFormat('tel', /^$|^\d{7,15}$/gm);
-    ajv.addFormat('x-text', /.*$/);
-    ajv.addFormat('x-html', /.*$/);
+    ajv.addFormat('text', /.*$/);
+    ajv.addFormat('html', /.*$/);
+    ajv.addFormat('documentno', /.*$/);
+    
 
     ajv.addKeyword({ keyword: 'x-document-no', type: 'boolean' });
     ajv.addKeyword({ keyword: 'x-document-label', type: 'boolean' });
@@ -364,7 +355,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     return filterIsolation
   }
-  async findIdThenDelete(appuser:UserProfile,id: string,session:mongo.ClientSession=undefined): Promise<any> {
+  async findIdThenDelete(appuser:UserProfile,id: string): Promise<any> {
     const deletedata = await this.findById(appuser,id);    
     try {
       await this.hook(appuser,HookType.beforeDelete, id);
@@ -379,7 +370,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         
         filterIsolation['_id'] =  new Types.ObjectId(id);
         this.logger.debug('delete filter', filterIsolation);
-        const result = await this.doc.deleteOne(filterIsolation).session(session);
+        const result = await this.doc.deleteOne(filterIsolation).session(appuser.getTransController().getSession());
         const deleteresult = {result:result, data: deletedata}
         this.logger.debug(this.doc.collection.name, " delete result",deleteresult)
         // this.doc.findByIdAndDelete(id)
@@ -414,7 +405,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.polishIsolationFilter(isolationFilter)      
 
     isolationFilter['_id'] = id;
-    const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(session);
+    const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(appuser.getTransController().getSession());
     await this.hook(appuser,HookType.afterUpdate, data);
     return result;
     // } catch (err) {

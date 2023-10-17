@@ -1,9 +1,11 @@
 import { Injectable, NestMiddleware, Logger,Scope,Inject } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model,Connection } from 'mongoose';
+// import * as mongoose from 'mongoose';
 import {   User,  }  from '../../types/user.type';
 import {   Permission,  }  from '../../types/perm.type';
+import { InjectConnection } from '@nestjs/mongoose';
 
 const Base64URL = require('@darkwolf/base64url');
 // import * as jwt from 'nestjs-jwt'
@@ -15,13 +17,13 @@ export class TenantMiddleware implements NestMiddleware {
   protected defaultxorg=Base64URL.encodeText('0-0-0')
   protected excludeXorgs = ['/profile', '/profile/tenant']
   protected logger = new Logger()
-  constructor( 
-    
+  protected transController
+  constructor(     
     @InjectModel('User') private readonly usermodel:Model<User>,
-    @InjectModel('Permission') private readonly permmodel:Model<Permission>
-    ){
-    
-  }
+    @InjectModel('Permission') private readonly permmodel:Model<Permission>,
+    @InjectConnection() private readonly connection: Connection,
+    ){}
+  
   requireXorg(baseurl:string):boolean{
     // console.log('requireXorg')
     for(let i =0; i < this.excludeXorgs.length;i++){
@@ -47,27 +49,27 @@ export class TenantMiddleware implements NestMiddleware {
       this.logger.log("undefine x-org and require that at "+req.baseUrl,"TenantMiddleware")
       return res.status(401).send('undefine header string x-org');
     }
-    const u = new UserProfile(this.usermodel,this.permmodel)
+    const session = await this.connection.startSession()
+    const u = new UserProfile(this.usermodel,this.permmodel,session)
     // console.log("line 43")
     try {
       let tokenstr: string = req.headers['authorization'];
       tokenstr = tokenstr.replace('Bearer ', '');
       
       const xorg = req.headers['x-org']?? this.defaultxorg
-      this.logger.verbose("reading jwt token")
 
       await u.setCurrentUserInfo(tokenstr,xorg)      
       if(u.getId()=='' && this.requireXorg(req.baseUrl)){        
-        this.logger.warn("access deny of no user:", req.baseUrl)
+        this.logger.log("access deny of no user:", req.baseUrl)
         return res.status(401).send('access deny');  
       }else{
         if(u.getId()==''){
-          this.logger.debug(`grant new user (${u.getUid()}) access ${req.baseUrl}`)
+          this.logger.verbose(`grant new user (${u.getUid()}) access ${req.baseUrl}`)
         }else{
-          this.logger.debug(`grant user (${u.getId()}) access ${req.baseUrl}`)
+          this.logger.verbose(`grant user (${u.getId()}) access ${req.baseUrl}`)
         }
         req['sessionuser'] = u
-        this.logger.debug(u.getRoles())
+        this.logger.verbose(u.getRoles())
 
         next();
       }

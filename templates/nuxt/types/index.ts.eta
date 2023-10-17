@@ -39,3 +39,12 @@ export type PermissionListItem = {
   _id:string
   
 }
+
+export type DocNoFormat ={
+  docNoFormatName: string
+  docNoFormatNo:string
+  docNoPattern:string
+  isMonthly: boolean
+  isactive: boolean
+  sample:string
+  }

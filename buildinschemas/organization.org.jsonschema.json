@@ -34,7 +34,7 @@
       },
       "description": {
         "type": "string",
-        "format":"x-text",
+        "format":"text",
         "examples": [
           "desc 1"
         ]

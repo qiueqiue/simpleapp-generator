@@ -23,7 +23,7 @@ const modelValue = defineModel()
     <SimpleAppNumber v-else-if="f.type=='number' || f.type=='integer'" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppNumber>
     <SimpleAppSelect v-else-if="f.enum" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppSelect>
     <SimpleAppChip v-else-if="f.type=='array' && f.items && f.items.type=='string'" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppChip>
-    <SimpleAppTextarea v-else-if="f.type=='string' && f.format=='x-text'" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppTextarea>
+    <SimpleAppTextarea v-else-if="f.type=='string' && f.format=='text'" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppTextarea>
     <SimpleAppText v-else-if="f.type=='string' && f.format" :type="f.format" v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppText>
     <SimpleAppText v-else v-model="modelValue" :setting="props.setting"  :hidelabel="hidelabel"></SimpleAppText>
 </template>

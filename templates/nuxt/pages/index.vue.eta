@@ -16,7 +16,7 @@ import Panel from "primevue/panel";
 import Card from "primevue/card";
 import { AxiosResponse } from "axios";
 const { $event, $listen, $userstore } = useNuxtApp();
-
+const errCreateTenant=ref()
 const branches = ref([]);
 const data = ref();
 const visible = ref(false);
@@ -57,13 +57,19 @@ const createTenant = async () => {
   const openapi = getApi();
   const apipath = `${useRuntimeConfig().public.API_URL}`;
   let profileapi = new openapi.PROFILEApi(undefined, apipath, $axios);
-  const res: AxiosResponse<any> = await profileapi.createTenant(data.value);
-  if (res && res.status && res.status == 201) {
-    if (res.data && res.data["xOrg"]) {
-      const xorg = res.data["xOrg"];
-      navigateTo("/" + xorg, { external: true });
-    }
-  }
+  
+    profileapi.createTenant(data.value).then((res)=>{
+      if (res && res.status && res.status == 201) {
+        if (res.data && res.data["xOrg"]) {
+          const xorg = res.data["xOrg"];
+          navigateTo("/" + xorg, { external: true });
+        }
+      }
+    }).catch(err=>{
+      errCreateTenant.value=err['message']
+      console.error('errCreateTenant',err)
+    })
+  
 };
 </script>
 <template>
@@ -87,12 +93,14 @@ const createTenant = async () => {
           class="crudsimple-dialog"
         >
           <form @submit.prevent="true">
+            <div v-if="errCreateTenant" class="text-error">{{errCreateTenant}}</div>
             <InputText
               type="text"
               autofocus="true"
               v-model:model-value="data.tenantName"
               placeholder="Organization Name"
             />
+            
             <button class="btn-primary" type="submit" @click="createTenant">
               Create
             </button>

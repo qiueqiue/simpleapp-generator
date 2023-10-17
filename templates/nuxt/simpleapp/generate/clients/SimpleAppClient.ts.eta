@@ -182,8 +182,9 @@ export class SimpleAppClient<
     addErrors(ajv);
 
     ajv.addFormat("tel", /^$|^\d{7,15}$/gm);
-    ajv.addFormat("x-text", /.*$/);
-    ajv.addFormat("x-html", /.*$/);
+    ajv.addFormat("text", /.*$/);
+    ajv.addFormat("html", /.*$/);
+    ajv.addFormat('documentno', /.*$/);
 
     ajv.addKeyword({ keyword: "x-document-no", type: "boolean" });
     ajv.addKeyword({ keyword: "x-document-label", type: "boolean" });

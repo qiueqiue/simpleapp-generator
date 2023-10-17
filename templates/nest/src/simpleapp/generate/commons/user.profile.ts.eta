@@ -5,7 +5,7 @@
  * 3. xorglist to user shall display appropriate tenant/org/branch name
  */
 
-import { Injectable, Scope,Inject,Logger } from '@nestjs/common';
+import { Injectable, Scope,Inject,Logger, BadRequestException } from '@nestjs/common';
 import { Model, model, connect, Types,PipelineStage } from 'mongoose';
 import _ from 'lodash'
 import { Module } from '@nestjs/common';
@@ -20,6 +20,7 @@ import {   User,  }  from './../types/user.type';
 import {   Permission,  }  from './../types/perm.type';
 import {ProfileUserBranch , ProfileUserInvites} from '../../profile/profile.types'
 
+import {ClientSession}  from 'mongoose'
 @Injectable()
 export class UserProfile {
   protected logger = new Logger()
@@ -41,12 +42,17 @@ export class UserProfile {
   protected branches: any[] = []
   protected invites: any[] = []  //User + field tenant:Tenant[]
   protected roles: string[] = [];
+  
+
   constructor(
     private readonly usermodel:Model<User>,
-    private readonly permmodel:Model<Permission>
+    private readonly permmodel:Model<Permission>,
+    private dbsession:ClientSession
     ) {
     
   }
+  getDBSession = ():ClientSession => this.dbsession
+
   getId = () => this._id;
   getUid = () => this.uid;
   getUname = () => this.uname;
@@ -341,7 +347,7 @@ export class UserProfile {
 
     return userinfo
   }
-  async decideInvitation (id:string, decision:string) {
+  async decideInvitation (id:string, decision:string):Promise<boolean> {
     
     // const usermodel = model<User>('user',UserMongoSchema,'user')
     const res = await this.usermodel.findById(id)
@@ -352,24 +358,19 @@ export class UserProfile {
       res.isactive = true
       
       if(decision=='accept'){
-        const result = await res.save()
+        const result = await res.save({session:this.dbsession})
         this.logger.log(result,"accept invitation 1")
         //set permission of all user under this.user_id
-        const updateresult = await this.permmodel.updateMany(
-          { uid:'',user_id:res._id},
-          {uid:this.getUid()}
-          )
-          this.logger.log(updateresult,"update all permission")
-        return result
+        const updateresult = await this.permmodel.updateMany({ uid:'',user_id:res._id},{uid:this.getUid()}).session(this.dbsession)
+        this.logger.log(updateresult,"update all permission")
+        return true
       }else{
-        const deleteresult =  await res.deleteOne({_id: new Types.ObjectId(id)});
-        await this.permmodel.deleteMany({ uid:'',user_id:res._id})
-        return deleteresult
-      }
-      
-      
+        const deleteresult = await this.usermodel.deleteOne({_id: new Types.ObjectId(id)}).session(this.dbsession)         
+        await this.permmodel.deleteMany({ uid:'',user_id:res._id}).session(this.dbsession)
+        return true
+      }          
     }else{
-      return true
+      throw new BadRequestException(`${id} not found.`)
     }    
 
   }

@@ -1,0 +1,87 @@
+
+<template>
+    <FieldContainer :hidelabel="hidelabel" v-model="modelValue" :label="label" :description="description"  :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">
+        <div class="p-inputgroup flex-1 ">
+            <InputText class="simpleapp-inputfield" 
+                :inputId="slotprops.uuid"
+                v-model="modelValue"    
+                :placeholder="placeholder"
+                :path="setting.instancepath"
+                :pt="{input:{class:'text-right w-full'}}"                          
+            />
+            <span class="p-inputgroup-addon p p-0">
+                <button class="pi pi-angle-down"  @click="toggle"></button>
+
+                <OverlayPanel ref="op">                    
+                    <ul>                      
+                        <li v-for="docno in docFormatlist" class="hover-list-primary " >
+                            <a class="flex-row p-2 mt-4" @click="chooseFormat(docno)">
+                                <span class="pi pi-hashtag mr-2"></span>
+                                <span class="">{{docno.docNoFormatName}}</span>
+                                <span class="ml-2 text text-green-600">{{docno.sample}}</span>
+                            </a>
+                        </li>                    
+                    </ul>
+                </OverlayPanel>
+            </span>
+            <!-- {{ Object.getOwnPropertyNames(setting) }} -->
+        </div>
+    </FieldContainer>
+</template>
+<script lang="ts" setup>
+import OverlayPanel from 'primevue/overlaypanel';
+import {computed,watch,ref} from 'vue'
+import InputText from 'primevue/inputtext';
+import FieldContainer from './SimpleFieldContainer.vue'
+import {DocNoFormat} from "~/types"
+const selectedformat = ref()
+const op = ref();
+const placeholder = ref('')
+const docFormatlist = ref()
+const modelValue = defineModel<string>()
+const docNoFormat = defineModel<Object>('docNoFormat')
+// const emit = defineEmits(['update:docNoFormat'])
+
+const props = withDefaults(defineProps<{
+    // docNoFormat:object,
+    // docFormatlist?:DocNoFormat[]
+    label?:string,
+    description?:string,
+    setting:any
+    error?:string,
+    instancepath?:string,
+    hidelabel?:boolean, 
+    
+}>(),{
+    hidelabel:false
+})
+const documenttype = props.setting.document.doctype
+
+
+const toggle = async (event:any) => {
+    op.value.toggle(event);
+    
+        
+}
+
+const chooseFormat =  (item:any) =>{
+    placeholder.value = item.sample    
+    op.value.toggle();
+}
+
+const loadDocFormats = async () =>{
+    docFormatlist.value= await getDocFormats(documenttype)
+    console.log("load default format docFormatlist",docFormatlist.value)
+    if(docFormatlist.value.length>0){
+        docNoFormat.value=docFormatlist.value[0]
+        placeholder.value = docFormatlist.value[0].sample
+        console.log("placeholder.value",placeholder.value,docFormatlist.value[0])
+    }
+}
+
+
+onMounted(()=>{
+    loadDocFormats()
+
+})
+</script>
