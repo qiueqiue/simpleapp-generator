@@ -292,10 +292,10 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
       const childprops = objectitem?.properties
       if(!childprops['created']){
-        childprops['created']={type:'string',format:'datetime'}
+        childprops['created']={type:'string',description:'iso8601 dataempty mean new record'}
       }
       if(!childprops['updated']){
-        childprops['updated']={type:'string',format:'datetime'}
+        childprops['updated']={type:'string',description:'iso8601 or empty'}
       }
       if(!childprops['createdby']){
         childprops['createdby']={type:'string'}
@@ -304,7 +304,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
         childprops['updatedby']={type:'string'}
       }
       if(!childprops['_id']){
-        childprops['_id']={type:'string',format:'uuid'}
+        childprops['_id']={type:'string'}
       }
 
       genSchema(newName, obj.type, objectitem?.properties, obj.items['required']);

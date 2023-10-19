@@ -6,7 +6,7 @@
  */
 
 import { Injectable, Scope,Inject,Logger, BadRequestException } from '@nestjs/common';
-import { Model, model, connect, Types,PipelineStage } from 'mongoose';
+import { Model, model, connect, PipelineStage } from 'mongoose';
 import _ from 'lodash'
 import { Module } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -22,7 +22,7 @@ import {ProfileUserBranch , ProfileUserInvites} from '../../profile/profile.type
 
 import {ClientSession}  from 'mongoose'
 @Injectable()
-export class UserProfile {
+export class UserContext {
   protected logger = new Logger()
   protected uid: string = '';
   protected _id: string = '';
@@ -365,7 +365,7 @@ export class UserProfile {
         this.logger.log(updateresult,"update all permission")
         return true
       }else{
-        const deleteresult = await this.usermodel.deleteOne({_id: new Types.ObjectId(id)}).session(this.dbsession)         
+        const deleteresult = await this.usermodel.deleteOne({_id: id}).session(this.dbsession)         
         await this.permmodel.deleteMany({ uid:'',user_id:res._id}).session(this.dbsession)
         return true
       }          

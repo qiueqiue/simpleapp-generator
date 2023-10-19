@@ -1,5 +1,5 @@
 import { BPMNClient } from "bpmn-client";
-import { UserProfile } from './user.profile';
+import { UserContext } from './user.context';
 import { Injectable,Scope } from '@nestjs/common';
 
 export const WorkflowProviderFactory = {

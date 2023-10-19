@@ -10,7 +10,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 const Base64URL = require('@darkwolf/base64url');
 // import * as jwt from 'nestjs-jwt'
 
-import { UserProfile } from '../user.profile';
+import { UserContext } from '../user.context';
 // import {KeycloakConfigService} from "../keycloak/keycloak.service"
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
@@ -50,7 +50,7 @@ export class TenantMiddleware implements NestMiddleware {
       return res.status(401).send('undefine header string x-org');
     }
     const session = await this.connection.startSession()
-    const u = new UserProfile(this.usermodel,this.permmodel,session)
+    const u = new UserContext(this.usermodel,this.permmodel,session)
     // console.log("line 43")
     try {
       let tokenstr: string = req.headers['authorization'];

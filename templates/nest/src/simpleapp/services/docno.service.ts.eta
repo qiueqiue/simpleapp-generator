@@ -10,7 +10,7 @@ import { Model } from 'mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DocnoformatProcessor } from '../generate/processors/docno.processor';
 import { Docnoformat } from '../generate/types/docno.type';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 import * as moment from 'moment';
 import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 export { Docnoformat } from '../generate/types/docno.type';
@@ -64,7 +64,7 @@ export class DocnoformatService extends DocnoformatProcessor {
    * @param doctype
    * @returns
    */
-  async listDocFormats(appuser: UserProfile, doctype: string) {
+  async listDocFormats(appuser: UserContext, doctype: string) {
     doctype = doctype.toUpperCase();
     const searchresult = await this.search(
       appuser,

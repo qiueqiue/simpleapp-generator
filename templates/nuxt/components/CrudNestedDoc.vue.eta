@@ -42,7 +42,7 @@ if(['none'].includes(currentjsonschema['x-isolation-type'])){
 }
 watch(visible,(newvalue )=>{
   if(newvalue == false){
-    if(data.value._id!=''){
+    if(data.value.created!=''){
       newData()
     }    
   }
@@ -144,9 +144,9 @@ onNuxtReady(()=>{
         <SimpleAppForm :document="obj"  #default="o">     
             <div class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
               <button class="btn-default" :disabled="disabled" @click="newData" type="button" v-if="canPerform(resourcename,'create')">New</button>
-              <button class="btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(resourcename,'update') && data._id==''">Create</button>
-              <button class="btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(resourcename,'update') && data._id!=''">Update</button>
-              <button class="btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(resourcename,'delete') && data._id!=''">Delete</button>
+              <button class="btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(resourcename,'update') && data.created==''">Create</button>
+              <button class="btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(resourcename,'update') && data.created!=''">Update</button>
+              <button class="btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(resourcename,'delete') && data.created!=''">Delete</button>
               <ProgressSpinner v-if="disabled==true" style="width: 2rem; height: 2rem" ></ProgressSpinner>
               <ConfirmPopup></ConfirmPopup>
               

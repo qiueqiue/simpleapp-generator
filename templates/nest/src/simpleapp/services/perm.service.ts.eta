@@ -9,7 +9,7 @@ import { Model, PipelineStage } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { PermissionProcessor } from '../generate/processors/perm.processor';
 import { Permission } from '../generate/types/perm.type';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 export { Permission } from '../generate/types/perm.type';
 
@@ -23,7 +23,7 @@ export class PermissionService extends PermissionProcessor {
     super(mydoc,docnogenerator);
   }
 
-  hook = async (appuser: UserProfile, type: string, data?: any) => {
+  hook = async (appuser: UserContext, type: string, data?: any) => {
     switch (
       type
       //         case 'init':
@@ -67,7 +67,7 @@ export class PermissionService extends PermissionProcessor {
     return true;
   };
 
-  async listUser(appuser: UserProfile) {
+  async listUser(appuser: UserContext) {
     const getallrecords: PipelineStage = { $match: {} };
     const lookupuser: PipelineStage = {
       $lookup: {

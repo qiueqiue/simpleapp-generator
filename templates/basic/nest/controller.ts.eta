@@ -28,7 +28,7 @@ import {Roles} from '../commons/roles/roles.decorator'
 import {Role} from '../commons/roles/roles.enum'
 import { Response } from 'express';
 import {AppUser} from '../commons/decorators/appuser.decorator'
-import {UserProfile} from '../commons/user.profile'
+import {UserContext} from '../commons/user.context'
 
 <% let superadmindoctype = ['tenant','globaluser'] %>
 const doctype = '<%= it.doctype %>'.toUpperCase();
@@ -56,7 +56,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runList', description:"List all data" })
-  async list(@AppUser() appuser: UserProfile) {
+  async list(@AppUser() appuser: UserContext) {
     return this._list(appuser);
   }
   //autocomplete shall above :id
@@ -73,7 +73,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'autoComplete',description:"retrieve array of {_id, code, name}" })
-  async autoComplete(@AppUser() appuser: UserProfile,@Query('keyword') keyword: string) {
+  async autoComplete(@AppUser() appuser: UserContext,@Query('keyword') keyword: string) {
     return this._autocomplete(appuser,keyword);
   }
 
@@ -94,7 +94,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 500, description: 'internal error' })
   @ApiBody({ description: 'Data',type:<%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runCreate' })
-  async create(@AppUser() appuser: UserProfile,@Body() data: <%= it.fullApiSchemaName%>) {    
+  async create(@AppUser() appuser: UserContext,@Body() data: <%= it.fullApiSchemaName%>) {    
     return await this._create(appuser,data)
   }
 
@@ -113,7 +113,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 500, description: 'internal error' })
   @ApiBody({ description: 'Data', type: Object })
   @ApiOperation({ operationId: 'runSearch' })
-  async search(@AppUser() appuser: UserProfile,@Body() data: Object) {
+  async search(@AppUser() appuser: UserContext,@Body() data: Object) {
     return await this._search(appuser,data)
   }
 
@@ -145,7 +145,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
         @ApiQuery({name: "<%=api['querypara'][q]%>",required: false,type: String})
       <%}%>
   <%}%>  
-  async <%=api.execute??api.action %>(@AppUser() appuser: UserProfile,@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
+  async <%=api.execute??api.action %>(@AppUser() appuser: UserContext,@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
           <%let subpath = api.entrypoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
@@ -206,7 +206,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runFindOne' })
-  async findOne(@AppUser() appuser: UserProfile,@Param('id') id: string) {    
+  async findOne(@AppUser() appuser: UserContext,@Param('id') id: string) {    
     return await this._findOne(appuser,id);
   }
   
@@ -225,7 +225,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiBody({ description: 'Data',type: <%= it.fullApiSchemaName%> })
   @ApiOperation({ operationId: 'runUpdate' })
-  async update(@AppUser() appuser: UserProfile,@Param('id') id: string, @Body() data: <%= it.fullApiSchemaName%>) {    
+  async update(@AppUser() appuser: UserContext,@Param('id') id: string, @Body() data: <%= it.fullApiSchemaName%>) {    
     return await this._update(appuser,id, data) ;
   }
 
@@ -243,7 +243,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runDelete' })
-  async delete(@AppUser() appuser: UserProfile,@Param('id') id: string) {
+  async delete(@AppUser() appuser: UserContext,@Param('id') id: string) {
     return this._delete(appuser,id);
   }
  

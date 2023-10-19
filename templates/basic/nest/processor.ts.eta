@@ -5,7 +5,7 @@
  * last change 2023-09-23
  * Author: Ks Tan
  */
-import { UserProfile } from '../commons/user.profile'
+import { UserContext } from '../commons/user.context'
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -45,7 +45,7 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
   }
 
   <% if(it.hasdocformat){ %>
-  async genNewDocNo(appuser:UserProfile,data:<%= it.typename%>){
+  async genNewDocNo(appuser:UserContext,data:<%= it.typename%>){
     const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)
     data[this.documentIdentityCode]=result    
   }

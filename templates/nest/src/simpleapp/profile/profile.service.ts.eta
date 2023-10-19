@@ -7,7 +7,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 import { RegTenant } from './profile.types';
 import * as mongoose from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
@@ -35,7 +35,7 @@ export class ProfileService {
    * @param appuser
    * @returns
    */
-  async getProfile(appuser: UserProfile) {
+  async getProfile(appuser: UserContext) {
     const accessTenantId = appuser.getTenantId();
     this.logger.verbose(
       `get userprofile for ${appuser.getUid()} for tenantId ${accessTenantId}`,
@@ -60,7 +60,7 @@ export class ProfileService {
     }
   }
 
-  async createUserProfile(appuser: UserProfile) {
+  async createUserProfile(appuser: UserContext) {
 
     
     const data: User = {
@@ -77,7 +77,7 @@ export class ProfileService {
     return userinfo;
   }
 
-  async createTenant(appuser: UserProfile, tenantName: string) {
+  async createTenant(appuser: UserContext, tenantName: string) {
     // try{
     appuser.getDBSession().startTransaction()    
     const tenantdata: Tenant = {
@@ -189,7 +189,7 @@ export class ProfileService {
    * @param id
    * @param decision
    */
-  async decideInvitation(appuser: UserProfile, id: string, decision: string) {
+  async decideInvitation(appuser: UserContext, id: string, decision: string) {
     return await appuser.decideInvitation(id, decision);
   }
 }

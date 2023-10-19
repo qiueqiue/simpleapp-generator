@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Model,Connection, ClientSession } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
-import { UserProfile } from '../user.profile';
+import { UserContext } from '../user.context';
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   
@@ -15,7 +15,7 @@ export class ResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest()
     
-    const usersession:UserProfile = req['sessionuser']
+    const usersession:UserContext = req['sessionuser']
     const session:ClientSession =   usersession.getDBSession()
     // session.startTransaction()
       // console.log("sessionuser exists!!")

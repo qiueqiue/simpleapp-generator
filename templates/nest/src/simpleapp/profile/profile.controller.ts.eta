@@ -22,7 +22,7 @@ import {
 import { Roles } from '../generate/commons/roles/roles.decorator';
 import { Role } from '../generate/commons/roles/roles.enum';
 import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 import { ProfileService } from './profile.service';
 import { AppUser } from '../generate/commons/decorators/appuser.decorator';
 import { RegTenant } from './profile.types';
@@ -47,7 +47,7 @@ export class ProfileController {
     description: 'Success',
   })
   @ApiResponse({ status: 401, type: Object, description: 'Undefine profile' })
-  async getProfile(@AppUser() appuser: UserProfile) {
+  async getProfile(@AppUser() appuser: UserContext) {
     this.logger.debug(
       `access getProfile API by ${appuser.getUid()},(${appuser.getId()})`,
     );
@@ -71,7 +71,7 @@ export class ProfileController {
   })
   @ApiResponse({ status: 201, type: Object, description: 'Success' })
   async createTenant(
-    @AppUser() appuser: UserProfile,
+    @AppUser() appuser: UserContext,
     @Body('tenantName') tenantName: string,
   ) {
     const result = await this.profileservice.createTenant(appuser, tenantName);
@@ -90,7 +90,7 @@ export class ProfileController {
   })
   @ApiResponse({ status: 201, type: Object, description: 'Success' })
   async decideInvitation(
-    @AppUser() appuser: UserProfile,
+    @AppUser() appuser: UserContext,
     @Param('id') id: string,
     @Param('decision') decision: string,
   ) {

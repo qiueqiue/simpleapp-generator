@@ -12,7 +12,7 @@ import { Organization } from '../generate/types/org.type';
 export { Organization } from '../generate/types/org.type';
 import { AutoincreamentService } from './autoinc.service';
 import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 
 @Injectable()
 export class OrganizationService extends OrganizationProcessor {
@@ -25,7 +25,7 @@ export class OrganizationService extends OrganizationProcessor {
     super(mydoc,docnogenerator);
   }
 
-  hook = async (appuser: UserProfile, type: string, data?: any) => {
+  hook = async (appuser: UserContext, type: string, data?: any) => {
     switch (type) {
       //         case 'init':
       //         break;

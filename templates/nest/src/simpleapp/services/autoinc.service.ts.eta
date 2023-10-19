@@ -10,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { AutoincreamentProcessor } from '../generate/processors/autoinc.processor';
 import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 import { Autoincreament } from '../generate/types/autoinc.type';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 export { Autoincreament } from '../generate/types/autoinc.type';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class AutoincreamentService extends AutoincreamentProcessor {
     super(mydoc,docnogenerator);
   }
 
-  //    hook = async (appuser:UserProfile,type: string, data?: any) => {
+  //    hook = async (appuser:UserContext,type: string, data?: any) => {
   //     switch(type){
   //         case 'init':
   //         break;
@@ -57,7 +57,7 @@ export class AutoincreamentService extends AutoincreamentProcessor {
   //   };
 
   async generateNextNo(
-    appuser: UserProfile,
+    appuser: UserContext,
     collection: string,
     field: string,
   ) {

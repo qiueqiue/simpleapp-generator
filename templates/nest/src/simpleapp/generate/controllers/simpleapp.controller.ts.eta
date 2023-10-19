@@ -9,7 +9,7 @@ import {
   Type,
 } from '@nestjs/common';
 // import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import {UserProfile} from '../commons/user.profile'
+import {UserContext} from '../commons/user.context'
 const doctype = 'person'.toUpperCase();
 type ServiceType = {
   list: Function;
@@ -35,35 +35,35 @@ export class SimpleAppAbstractController<TService extends ServiceType, TApiSchem
     this.service = service;
   }
 
-  async _list(appuser:UserProfile) {
+  async _list(appuser:UserContext) {
     return this.service.list(appuser,);
   }
-  async _search(appuser:UserProfile,searchObject:Object) {
+  async _search(appuser:UserContext,searchObject:Object) {
     return this.service.search(appuser,searchObject);
   }
-  async _autocomplete(appuser:UserProfile,keyword: string) {
+  async _autocomplete(appuser:UserContext,keyword: string) {
     return this.service.getAutoComplete(appuser,keyword);
   }
-  async _findOne(appuser:UserProfile,id: string) {
+  async _findOne(appuser:UserContext,id: string) {
     const result = (await this.service.findById(appuser,id)) as TApiSchema;
 
     return result as Type<TApiSchema>;
   }
 
-  async _create(appuser:UserProfile,data: TApiSchema) {
+  async _create(appuser:UserContext,data: TApiSchema) {
     //const newdata: persontype.Person = { ...data };
     const newdata: T = {} as T; //= { ...data };
     Object.assign(newdata, data); //
     return this.service.create(appuser,newdata) as TApiSchema;
   }
 
-  async _update(appuser:UserProfile,id: string, data: TApiSchema) {
+  async _update(appuser:UserContext,id: string, data: TApiSchema) {
     const newdata: T = {} as T; //= { ...data };
     Object.assign(newdata, data); //
     return this.service.findIdThenUpdate(appuser,id, newdata) as TApiSchema;
   }
 
-  async _delete(appuser:UserProfile,id: string) {
+  async _delete(appuser:UserContext,id: string) {
     return this.service.findIdThenDelete(appuser,id);
   }
 }

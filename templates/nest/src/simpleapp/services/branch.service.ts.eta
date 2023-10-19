@@ -11,7 +11,7 @@ import { BranchProcessor } from '../generate/processors/branch.processor';
 import { Branch } from '../generate/types/branch.type';
 export { Branch } from '../generate/types/branch.type';
 import { AutoincreamentService } from './autoinc.service';
-import { UserProfile } from '../generate/commons/user.profile';
+import { UserContext } from '../generate/commons/user.context';
 import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 @Injectable()
 export class BranchService extends BranchProcessor {
@@ -24,7 +24,7 @@ export class BranchService extends BranchProcessor {
     super(mydoc,docnogenerator);
   }
 
-  hook = async (appuser: UserProfile, type: string, data?: any) => {
+  hook = async (appuser: UserContext, type: string, data?: any) => {
     switch (type) {
       //         case 'init':
       //         break;
