@@ -1,0 +1,11 @@
+type grouptype = {[key:string]:roletype[]}            
+export const allgroups:grouptype = {
+<% Object.getOwnPropertyNames(it.allroles).forEach((key)=>{ %>
+<%=key%>:[
+    <%for(let i=0; i <it.allroles[key].length; i++){%>
+    <% const arr = it.allroles[key][i].split('_') %>
+    {resource:'<%=arr[0]%>',action:'<%=arr[1]%>'},
+    <%}%>
+],
+<%})%>
+}

@@ -5,7 +5,11 @@
  * last change 2023-09-23
  * Author: Ks Tan
  */
+ import _ from 'lodash'
 import { SimpleAppClient } from "./SimpleAppClient";
+import {
+  <%Object.keys(it.models).forEach(function(modelname) { %>  Default<%=modelname%>,  <%})%>
+} from '../defaults/<%= it.typename%>.default'
 import {AxiosResponse} from 'axios'
 <%if(it.jsonschema['x-import-lib']) {%>
   <%let libs = it.jsonschema['x-import-lib'] %>
@@ -71,32 +75,9 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
 
   }
   setNew = ()=>{
-        const { $userstore } = useNuxtApp();
-        const defaultTenantId = $userstore ? $userstore.tenantId :1
+       
         
-    const newdata =  {
-        
-        <%Object.keys(it.schema).forEach(function(key){%>      
-          <%let field=it.schema[key]%>                
-          <%if(key=='tenantId'){ %>
-            tenantId : defaultTenantId,
-          <% } else if(typeof field.default !='undefined' && field.type=='string'){%> 
-            <%=key%> : '<%= field.default  %>',
-          <%} else if(typeof field.default !='undefined'){%> 
-            <%=key%> : <%= field.default  %>,
-          <%} else if(field.type=='boolean' ){%> 
-              <%=key%> :false ,
-          <%} else if(typeof field=='string'){%>
-            <%=key%> : <<%= field  %>>{},          
-          <%} else if(field.type=='string'){%>
-              <%=key%> : '<%= field.default  %>',
-            <%} else if(Array.isArray(field)) {%>
-              <%=key%> : <<%=field[0]%>[]>[],  //typeof field == array     <%~JSON.stringify(field)%>    
-            <%} else {%>
-              <%=key%> : <%=field.default%>,  //else <%= typeof field %>
-          <%}%>
-        <%})%>
-            }
+    const newdata = Default<%= it.typename%>()
             this.setData(newdata)
     }
 
@@ -106,25 +87,8 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
     <% if(obj.type=='array' && obj.items.type=='object' && obj.items['properties']){ %>
         <%let tablefields = Object.keys(obj.items.properties) %>
        public add<%=key%> = () => {
-        const tmp:<%=it.typename%><%=capitalizeFirstLetter(key)%> = {
-          <% for(let a=0;a<tablefields.length;a++){%>
-              <% const skey =  tablefields[a] %>
-              <% const sobj =  obj.items.properties[skey] %>
-              <%if(sobj.type=='object'  && typeof sobj['x-foreignkey']!='undefined'){%>
-                <%=skey%>: <%~ sobj.default?JSON.stringify(sobj.default): '{_id:"",label:""} as any'%>,
-              <%}else if(sobj.type=='boolean'){%>
-                  <%=skey%>: <%=sobj.default??false%>,
-              <%}else if(sobj.type=='number'){%>
-                <%=skey%>: <%=sobj.default??0.00%>,
-              <%}else if(sobj.type=='integer'){%>
-                <%=skey%>: <%=sobj.default??0%>,
-              <%}else if(sobj.type=='string'){%>
-                <%=skey%>: '<%=sobj.default??""%>',
-              <%}%>
-
-          <%}%>
-          }
-        this.getReactiveData().value.<%= key %>.push(tmp)
+        
+        this.getReactiveData().value.<%= key %>.push(Default<%= it.typename%><%=capitalizeFirstLetter(key)%>())
        }
         
           

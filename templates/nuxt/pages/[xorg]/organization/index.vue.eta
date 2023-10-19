@@ -94,8 +94,8 @@ const saveBranch= async()=>{
         />
 
         <SimpleAppCheckbox
-          :setting="o.getField('#/properties/isactive')"
-          v-model="data.isactive"
+          :setting="o.getField('#/properties/active')"
+          v-model="data.active"
         />
 
         <SimpleAppTextarea
@@ -117,7 +117,7 @@ const saveBranch= async()=>{
       <div class="grid grid-cols-4 gap-4 w-full">
         <div class="col-span-2">
           
-          <SimpleAppDatatable v-model="branchlist" :columns="['branchId','branchCode','branchName','isactive']">
+          <SimpleAppDatatable v-model="branchlist" :columns="['branchId','branchCode','branchName','active']">
             <template #header>
               <button class="btn-primary" @click="editBranch('')" type="button" ><span class="pi pi-plus "> </span></button>
             </template>            
@@ -133,7 +133,7 @@ const saveBranch= async()=>{
           <SimpleAppForm :document="branchdoc" #default="o" v-if="showbranchfrom">
               <SimpleAppText v-model="branchdata.branchCode" :setting="o.getField('#/properties/branchCode')"/>
               <SimpleAppText v-model="branchdata.branchName" :setting="o.getField('#/properties/branchName')"/>
-              <SimpleAppCheckbox v-model="branchdata.isactive" :setting="o.getField('#/properties/isactive')"/>
+              <SimpleAppCheckbox v-model="branchdata.active" :setting="o.getField('#/properties/active')"/>
               <SimpleAppTextarea v-model="branchdata.description" :setting="o.getField('#/properties/description')"/>
               <!-- <SimpleAppNumber :readonly="true" v-model="branchdata.orgId" :setting="o.getField('#/properties/orgId')"/> -->
               <button class="btn-primary" type="button" @click="saveBranch">Save</button>

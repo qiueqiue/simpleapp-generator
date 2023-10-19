@@ -15,7 +15,7 @@ const schemasetting = {
   <%Object.keys(it.schema).forEach(function(key) { %>    
     
     <% if(key == '_id'){%>
-      //<%= key %>: {type:'string', required:false}  //force _id not inside
+      <%= key %>: {type:'string', required:true},  //force _id as string
     <% } else if(typeof schema[key] == 'string') {%>
       <%= key %>: {type: <<%=schema[key]%>>{}, required:false},   //object
     <% }else if( Array.isArray( schema[key])){%>

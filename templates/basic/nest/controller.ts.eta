@@ -19,11 +19,11 @@ import {
   Req,
   HttpStatus
 } from '@nestjs/common';
-import { SimpleAppController } from '../commons/simpleapp.controller';
+import { SimpleAppAbstractController } from './simpleapp.controller';
 import { <%= it.typename %>Service } from '../../services/<%= it.doctype %>.service';
 import * as <%= it.doctype %>type from '../types/<%= it.doctype %>.type';
 import * as <%= it.doctype %>apischema from '../apischemas/<%= it.doctype %>.apischema';
-import { ApiTags, ApiBody, ApiResponse,ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiResponse,ApiOperation,ApiQuery } from '@nestjs/swagger';
 import {Roles} from '../commons/roles/roles.decorator'
 import {Role} from '../commons/roles/roles.enum'
 import { Response } from 'express';
@@ -34,7 +34,7 @@ import {UserProfile} from '../commons/user.profile'
 const doctype = '<%= it.doctype %>'.toUpperCase();
 @ApiTags(doctype)
 @Controller(doctype.toLowerCase())
-export class <%= it.typename %>Controller extends SimpleAppController<
+export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   <%= it.typename %>Service,
   <%= it.doctype %>apischema.<%= it.typename %>,
   <%= it.doctype %>type.<%= it.typename %>
@@ -140,6 +140,11 @@ export class <%= it.typename %>Controller extends SimpleAppController<
   @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })
   @ApiResponse({status: 418,description: 'undefine bpmn,setDocumentStatus or bpmn'})
   @ApiOperation({ operationId: '<%=api.execute ??api.action%>' })
+  <% if(api.querypara && api.querypara.length>0) {%>
+      <%for(let q=0;q<api.querypara.length; q++){%>
+        @ApiQuery({name: "<%=api['querypara'][q]%>",required: false,type: String})
+      <%}%>
+  <%}%>  
   async <%=api.execute??api.action %>(@AppUser() appuser: UserProfile,@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
           <%let subpath = api.entrypoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
@@ -149,7 +154,14 @@ export class <%= it.typename %>Controller extends SimpleAppController<
               @Param('<%=paraname%>') <%=paraname%>: string,
             <%}%>    
           <%}%>  
-        <%}%>){
+        <%}%>
+        <% if(api.querypara && api.querypara.length>0) {%>
+            <%for(let q=0;q<api.querypara.length; q++){%>
+              <% const qp = api['querypara'][q] %>
+              @Query('<%=qp%>') <%=qp%>: string,
+            <%}%>
+        <%}%>
+         ){
     <%if(api.execute){%>
       const result =  await this.service.<%=api.execute%>(appuser,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
           <%let subpath = api.entrypoint.split('/')%>
@@ -160,7 +172,13 @@ export class <%= it.typename %>Controller extends SimpleAppController<
               <%=paraname%>,
             <%}%>    
           <%}%>  
-        <%}%>)
+        <%}%>
+        <% if(api.querypara && api.querypara.length>0) {%>
+            <%for(let q=0;q<api.querypara.length; q++){%>
+              <%= api['querypara'][q] %>,              
+            <%}%>
+        <%}%>
+        )
       res.status(HttpStatus.OK).send(result)
     <%} else if (api.bpmn){ %>
       const result =  await this.service.executeWorkFlow(appuser,id,'<%=api.bpmn%>',''); 

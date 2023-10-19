@@ -1,7 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD,APP_INTERCEPTOR } from '@nestjs/core';
-import {ResponseInterceptor} from './simpleapp/generate/interceptors/response.interceptor'
+import { MongooseModule,MongooseModuleOptions } from '@nestjs/mongoose';
+import { APP_GUARD,APP_INTERCEPTOR,APP_FILTER } from '@nestjs/core';
+import { ResponseInterceptor } from './simpleapp/generate/commons/interceptors/response.interceptor'
 import {
   AuthGuard,
   KeycloakConnectModule,
@@ -25,7 +25,7 @@ import { PermissionMongoSchema } from './simpleapp/generate/models/perm.model';
   //define environment variables: MONGODB_URL='mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT'
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGODB_URL),
+    MongooseModule.forRoot(process.env.MONGODB_URL,{}),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public_html'),
       exclude: ['/api/(.*)'],
@@ -69,9 +69,9 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
-      // .exclude('/api-yaml')
-      // .exclude('/api-json')
-      // .exclude('/api')
+      .exclude('/api-yaml')
+      .exclude('/api-json')
+      .exclude('/api')
       .forRoutes('*');
   }
 }

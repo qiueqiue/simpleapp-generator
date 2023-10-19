@@ -9,7 +9,8 @@
       "execute":"listDocFormats",
       "bpmn":"", 
       "description":"get list of document format for 1 doctype"
-    }],
+    }    
+  ],
     "properties": {
       "docNoFormatNo": {"type": "string","x-document-no":true,"examples": ["INV"]},
       "docNoFormatName": { "type": "string", "x-document-label":true, "examples": ["Invoice Default Format"]},
@@ -22,78 +23,18 @@
       "monthlySetting": {
         "type": "object",
         "properties": {
-          "jan": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "feb": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "mar": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "apr": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "may": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "jun": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "jul": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "aug": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "sep": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "oct": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "nov": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          },
-          "dec": {
-            "type": "integer",
-            "examples": [
-              1
-            ]
-          }
+          "jan": {"type": "integer","default":1},
+          "feb": {"type": "integer","default":1},
+          "mar": {"type": "integer","default":1},
+          "apr": {"type": "integer","default":1},
+          "may": {"type": "integer","default":1},
+          "jun": {"type": "integer","default":1},
+          "jul": {"type": "integer","default":1},
+          "aug": {"type": "integer","default":1},
+          "sep": {"type": "integer","default":1},
+          "oct": {"type": "integer","default":1},
+          "nov": {"type": "integer","default":1},
+          "dec": {"type": "integer","default":1}
         }
       }
     }

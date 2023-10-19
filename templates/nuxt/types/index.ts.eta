@@ -4,7 +4,7 @@ export type UserListItem = {
   fullName: string
   email: string
   group:string
-  isactive:boolean
+  active:boolean
   orgId: number
   branchId: number
   tenantId: number
@@ -23,7 +23,7 @@ export type BranchListItem = {
   branchName: string
   branchCode: string
   group:string
-  isactive:boolean
+  active:boolean
 }
 
 
@@ -32,7 +32,7 @@ export type PermissionListItem = {
   email:string
   fullName:string
   group:string
-  isactive:boolean
+  active:boolean
   orgId: number
   tenantId:number
   uid:string
@@ -45,6 +45,11 @@ export type DocNoFormat ={
   docNoFormatNo:string
   docNoPattern:string
   isMonthly: boolean
-  isactive: boolean
+  active: boolean
   sample:string
   }
+
+export type ForeignKey = {
+  _id : string
+  label: string
+}

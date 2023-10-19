@@ -174,7 +174,7 @@ const invite = async () => {
   const newuserdata = inviteuserdoc.getReactiveData();
   newuserdata.value.email = inviteemail.value;
   newuserdata.value.fullname = inviteemail.value.split("@")[0];
-  newuserdata.value.isactive = true;
+  newuserdata.value.active = true;
   newuserdata.value.tenantId = currentuser.tenantId;
   newuserdata.value.orgId = currentuser.orgId;
   newuserdata.value.branchId = currentuser.branchId;
@@ -264,7 +264,7 @@ onMounted(() => {
             </template>
             <template #item="{ item, label, props }">
               <a
-                v-if="item.uid && item.isactive"
+                v-if="item.uid && item.active"
                 class="flex m-2 p-2 flex-row border border-b-2 cursor cursor-pointer"
                 @click="onSelectUser(item)"
               >
@@ -299,7 +299,7 @@ onMounted(() => {
             </template>
             <template #item="{ item, label, props }">
               <a
-                v-if="item.uid && !item.isactive"
+                v-if="item.uid && !item.active"
                 class="flex m-2 p-2 flex-row border border-b-2 cursor cursor-pointer"
                 @click="onSelectUser(item)"
               >
@@ -393,8 +393,8 @@ onMounted(() => {
 
             <SimpleAppCheckbox
               autofocus
-              :setting="o.getField('#/properties/isactive')"
-              v-model="userdata.isactive"
+              :setting="o.getField('#/properties/active')"
+              v-model="userdata.active"
             />
             <div>
               <Button @click="saveUser" class="btn-primary pi pi-save"></Button>

@@ -10,17 +10,22 @@ import { Injectable } from '@nestjs/common';
 import { PermissionProcessor } from '../generate/processors/perm.processor';
 import { Permission } from '../generate/types/perm.type';
 import { UserProfile } from '../generate/commons/user.profile';
+import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 export { Permission } from '../generate/types/perm.type';
 
 @Injectable()
 export class PermissionService extends PermissionProcessor {
   protected strictIsolation = false;
-  constructor(@InjectModel('Permission') mydoc: Model<Permission>) {
-    super(mydoc);
+  constructor(
+    @InjectModel('Permission') mydoc: Model<Permission>,
+    docnogenerator: DocNumberFormatGenerator,
+    ) {
+    super(mydoc,docnogenerator);
   }
 
   hook = async (appuser: UserProfile, type: string, data?: any) => {
-    switch (type) {
+    switch (
+      type
       //         case 'init':
       //         break;
       //         case 'beforeSearch':
@@ -43,12 +48,12 @@ export class PermissionService extends PermissionProcessor {
       //         break;
       //         case 'afterDelete':
       // case 'beforeDeleteMany':
-        // this.logger.log(data, 'beforeDeleteMany');
-        // this.deleteMany(appuser,data)
+      // this.logger.log(data, 'beforeDeleteMany');
+      // this.deleteMany(appuser,data)
       //   break;
       // case 'afterDeleteMany':
-        // this.logger.log(data, 'afterDeleteMany', data);
-        // break;
+      // this.logger.log(data, 'afterDeleteMany', data);
+      // break;
 
       //         break;
       //         case 'beforeFetchRecord':
@@ -57,6 +62,7 @@ export class PermissionService extends PermissionProcessor {
       //         break;
       //         default:
       //         break;
+    ) {
     }
     return true;
   };

@@ -21,9 +21,9 @@
 import SimpleAppValue from './SimpleAppValue.vue'
 import {camelCaseToWords} from './helper'
 import {computed,setBlockTracking,watch} from 'vue'
-import {v4 as uuidv4} from 'uuid';
+
 import {ref} from 'vue'
-const uuid =  uuidv4();
+const uuid =  crypto.randomUUID();
 const fieldlabel = ref('')
 const fielddesc = ref('')
 const defaultcssclass='simpleapp-input-container'

@@ -26,6 +26,6 @@
       ],
       "format": "email"
     },
-    "isactive": {"type": "boolean","default":true}   
+    "active": {"type": "boolean","default":true}   
   }
 }

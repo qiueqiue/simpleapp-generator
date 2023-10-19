@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Model,Connection, ClientSession } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
-import { UserProfile } from '../commons/user.profile';
+import { UserProfile } from '../user.profile';
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
   
@@ -15,9 +15,9 @@ export class ResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest()
     
-    const usersession:UserProfile = req['sessionuser']??undefined
+    const usersession:UserProfile = req['sessionuser']
     const session:ClientSession =   usersession.getDBSession()
-    session.startTransaction()
+    // session.startTransaction()
       // console.log("sessionuser exists!!")
     
     const now = Date.now();
@@ -28,9 +28,9 @@ export class ResponseInterceptor implements NestInterceptor {
           
           if(process.env.DRYRUN=='true'){
             console.warn("--------dryrun! roll back everything-----------")
-            session.abortTransaction()
+            if(session.inTransaction())session.abortTransaction()
           }else{
-            session.commitTransaction()
+            if(session.inTransaction())session.commitTransaction()
           }                            
         }),
       );

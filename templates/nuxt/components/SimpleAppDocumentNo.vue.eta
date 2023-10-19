@@ -10,7 +10,7 @@
                 :pt="{input:{class:'text-right w-full'}}"                          
             />
             <span class="p-inputgroup-addon p p-0">
-                <button class="pi pi-angle-down"  @click="toggle"></button>
+                <button class="pi pi-angle-down"  type="button" @click="toggle"></button>
 
                 <OverlayPanel ref="op">                    
                     <ul>                      
@@ -29,6 +29,7 @@
     </FieldContainer>
 </template>
 <script lang="ts" setup>
+import {ForeignKey} from '~/types'
 import OverlayPanel from 'primevue/overlaypanel';
 import {computed,watch,ref} from 'vue'
 import InputText from 'primevue/inputtext';
@@ -39,7 +40,7 @@ const op = ref();
 const placeholder = ref('')
 const docFormatlist = ref()
 const modelValue = defineModel<string>()
-const docNoFormat = defineModel<Object>('docNoFormat')
+const docNoFormat = defineModel<ForeignKey>('docNoFormat')
 // const emit = defineEmits(['update:docNoFormat'])
 
 const props = withDefaults(defineProps<{
@@ -66,16 +67,18 @@ const toggle = async (event:any) => {
 
 const chooseFormat =  (item:any) =>{
     placeholder.value = item.sample    
+    const f = item
+    docNoFormat.value = { _id : f._id, label : f.docNoFormatName}
     op.value.toggle();
 }
 
 const loadDocFormats = async () =>{
-    docFormatlist.value= await getDocFormats(documenttype)
-    console.log("load default format docFormatlist",docFormatlist.value)
+    docFormatlist.value= await getDocFormats(documenttype)    
     if(docFormatlist.value.length>0){
-        docNoFormat.value=docFormatlist.value[0]
+        const f = docFormatlist.value[0]
+        docNoFormat.value = { _id : f._id, label : f.docNoFormatName}
         placeholder.value = docFormatlist.value[0].sample
-        console.log("placeholder.value",placeholder.value,docFormatlist.value[0])
+        
     }
 }
 

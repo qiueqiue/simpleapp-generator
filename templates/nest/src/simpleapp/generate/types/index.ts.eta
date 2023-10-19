@@ -1,0 +1,9 @@
+export type ForeignKey = {
+    _id: string
+    label: string
+}
+export type DocNumberFormatResult = {
+    formatId: string
+    formatName: string 
+    result: string
+}

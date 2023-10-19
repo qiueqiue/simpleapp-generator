@@ -26,7 +26,7 @@ type ServiceType = {
 
 // @ApiTags(doctype)
 // @Controller(doctype.toLowerCase())
-export class SimpleAppController<TService extends ServiceType, TApiSchema, T> {
+export class SimpleAppAbstractController<TService extends ServiceType, TApiSchema, T> {
   protected service: TService;
   protected tryno: number;
   //   protected apiSchemaClass=

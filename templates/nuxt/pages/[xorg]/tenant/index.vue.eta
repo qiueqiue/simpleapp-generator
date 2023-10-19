@@ -16,9 +16,9 @@ const { $TenantDoc } = useNuxtApp();
 const doc = $TenantDoc();
 const data = doc.getReactiveData();
 const columns = [
+    '_id',
   'tenantId',
   "tenantName",
-  "uuid",
   "description",
   "owner.label"
    /* skip system columns _id*/,
@@ -65,15 +65,10 @@ const columns = [
         v-model="data.tenantName"
       />
 
-      <SimpleAppText
-        :setting="o.getField('#/properties/uuid')"
-        v-model="data.uuid"
-      />
-
       <SimpleAppCheckbox
         autofocus
-        :setting="o.getField('#/properties/isactive')"
-        v-model="data.isactive"
+        :setting="o.getField('#/properties/active')"
+        v-model="data.active"
       />
 
       <SimpleAppText

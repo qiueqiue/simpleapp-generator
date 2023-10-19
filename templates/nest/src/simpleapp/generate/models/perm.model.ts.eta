@@ -30,7 +30,7 @@ const schemasetting = {
           user_id: {type: String, required: false},  //field 
           
     
-          //_id: {type:'string', required:false}  //force _id not inside
+          _id: {type:'string', required:true},
           
     
           doctype: {type: String, required: false},  //field 

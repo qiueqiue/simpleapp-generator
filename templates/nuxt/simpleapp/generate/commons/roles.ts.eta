@@ -1,0 +1,21 @@
+type roletype = {resource:string, action:string}
+const allroles:roletype[] = [
+<% for(let i=0;i<it.modules.length; i++){ %>
+        <% const m = it.modules[i] %>
+        {resource: '<%=m.docname%>', action:'create'},
+        {resource: '<%=m.docname%>', action:'update'},
+        {resource: '<%=m.docname%>', action:'delete'},
+        {resource: '<%=m.docname%>', action:'search'},
+       
+
+        <% if(m.api && m.api.length >0) {%>
+
+            <% for(let j=0;j<m.api.length; j++){ %>
+                <%let api = m.api[j]%>
+        {resource: '<%=m.docname%>', action:'<%=api.action%>'},
+        
+        
+            <%}%>
+        <%}%>
+    <%}%>
+]

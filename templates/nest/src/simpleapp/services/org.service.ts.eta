@@ -11,48 +11,57 @@ import { OrganizationProcessor } from '../generate/processors/org.processor';
 import { Organization } from '../generate/types/org.type';
 export { Organization } from '../generate/types/org.type';
 import { AutoincreamentService } from './autoinc.service';
+import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 import { UserProfile } from '../generate/commons/user.profile';
 
 @Injectable()
 export class OrganizationService extends OrganizationProcessor {
-  protected strictIsolation=false
-  constructor(@InjectModel('Organization') mydoc: Model<Organization>,private increament:AutoincreamentService) {
-    super(mydoc);
+  protected strictIsolation = false;
+  constructor(
+    @InjectModel('Organization') mydoc: Model<Organization>,
+    private increament: AutoincreamentService,
+    docnogenerator: DocNumberFormatGenerator,
+  ) {
+    super(mydoc,docnogenerator);
   }
 
-     hook = async (appuser:UserProfile,type: string, data?: any) => {
-      switch(type){
-  //         case 'init':
-  //         break;
-  //         case 'beforeSearch':
-  //         break;
-  //         case 'afterSearch':
-  //         break;
-  //         case 'beforeValidation':
-  //         break;
-  //         case 'afterValidation':
-  //         break;
-              case 'beforeCreate':        
-                  const searchresult = await this.increament.generateNextNo(appuser,'organization','orgId')         
-                  data.orgId = searchresult.nextno
-                break;
-  //         case 'afterCreate':
-  //         break;
-  //         case 'beforeUpdate':
-  //         break;
-  //         case 'afterUpdate':
-  //         break;
-  //         case 'beforeDelete':
-  //         break;
-  //         case 'afterDelete':
-  //         break;
-  //         case 'beforeFetchRecord':
-  //         break;
-  //         case 'afterFetchRecord':
-  //         break;
-  //         default:
-  //         break;
-          }
-      return true;
-    };
+  hook = async (appuser: UserProfile, type: string, data?: any) => {
+    switch (type) {
+      //         case 'init':
+      //         break;
+      //         case 'beforeSearch':
+      //         break;
+      //         case 'afterSearch':
+      //         break;
+      //         case 'beforeValidation':
+      //         break;
+      //         case 'afterValidation':
+      //         break;
+      case 'beforeCreate':
+        const searchresult = await this.increament.generateNextNo(
+          appuser,
+          'organization',
+          'orgId',
+        );
+        data.orgId = searchresult.nextno;
+        break;
+      //         case 'afterCreate':
+      //         break;
+      //         case 'beforeUpdate':
+      //         break;
+      //         case 'afterUpdate':
+      //         break;
+      //         case 'beforeDelete':
+      //         break;
+      //         case 'afterDelete':
+      //         break;
+      //         case 'beforeFetchRecord':
+      //         break;
+      //         case 'afterFetchRecord':
+      //         break;
+      //         default:
+      //         break;
+    }
+    return true;
+  };
 }

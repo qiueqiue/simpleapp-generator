@@ -15,13 +15,13 @@ const schemasetting = {
 
   uuid: { type: String, required: false }, //field
 
-  isactive: { type: Boolean, required: false }, //field
+  active: { type: Boolean, required: false,default:true }, //field
 
   description: { type: String, required: false }, //field
 
   owner: { type: <TenantOwner>{}, required: false }, //object
 
-  //_id: {type:'string', required:false}  //force _id not inside
+  _id: {type:'string', required:true},
 
   doctype: { type: String, required: false }, //field
 

@@ -1,0 +1,269 @@
+<template>
+    <button class="btn-primary" @click="newRecord">New</button>
+    <ConfirmPopup></ConfirmPopup>
+    <DebugDocumentData v-model="data"></DebugDocumentData>
+    <SimpleAppDatatable
+        
+        v-model="recordlist"                                 
+        :setting="{}"
+        :columns="['docNoFormatNo','docNoFormatName','active','docNoPattern','nextNumber','isMonthly']"
+        >
+        <Column header="action">
+            <template #body="{data,index}">
+                <button class="pi pi-pencil btn-primary" @click="triggerEdit(data)"></button>
+                <button class="pi pi-times  btn-danger" @click="triggerDelete(data)"></button>
+            </template>
+            
+        </Column>         
+    </SimpleAppDatatable>
+    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
+        <div class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
+              <button class="btn-default" :disabled="disabled" @click="newRecord" type="button" v-if="canPerform(resourcename,'create')">New</button>
+              <button class="btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(resourcename,'create') && data._id==''">Create</button>
+              <button class="btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(resourcename,'update') && data._id!=''">Update</button>
+              <button class="btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(resourcename,'delete') && data._id!=''">Delete</button>
+              <ProgressSpinner v-if="disabled==true" style="width: 2rem; height: 2rem" ></ProgressSpinner>
+              <ConfirmPopup></ConfirmPopup>
+              
+            </div>
+        <SimpleAppForm 
+            :document="doc" 
+            #default="o" 
+            title="Document No"                
+            
+            >
+            <div class="grid grid-cols-4">            
+                <SimpleAppText
+                    autofocus
+                    :setting="o.getField('#/properties/docNoFormatNo')"
+                    v-model="data.docNoFormatNo"
+                />
+                <SimpleAppText
+                    autofocus
+                    :setting="o.getField('#/properties/docNoFormatName')"
+                    v-model="data.docNoFormatName"
+                />
+                <SimpleAppCheckbox
+                    autofocus
+                    :setting="o.getField('#/properties/active')"
+                    v-model="data.active"
+                />
+
+                <SimpleAppCheckbox
+                    autofocus
+                    :setting="o.getField('#/properties/default')"
+                    v-model="data.default"
+                />
+
+            
+
+                <SimpleAppText
+                    autofocus
+                    :setting="o.getField('#/properties/docNoPattern')"
+                    v-model="data.docNoPattern"
+                />
+
+                <SimpleAppCheckbox
+                    autofocus
+                    :setting="o.getField('#/properties/isMonthly')"
+                    v-model="data.isMonthly"
+                />
+
+                <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/nextNumber')"
+                    v-model="data.nextNumber"
+                />
+
+                <SimpleAppValue :setting="o.getField('#/properties/monthlySetting')">
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/jan')"
+                    instancePath="#/monthlySetting/jan"
+                    v-model="data.monthlySetting.jan"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/feb')"
+                    instancePath="#/monthlySetting/feb"
+                    v-model="data.monthlySetting.feb"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/mar')"
+                    instancePath="#/monthlySetting/mar"
+                    v-model="data.monthlySetting.mar"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/apr')"
+                    instancePath="#/monthlySetting/apr"
+                    v-model="data.monthlySetting.apr"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/may')"
+                    instancePath="#/monthlySetting/may"
+                    v-model="data.monthlySetting.may"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/jun')"
+                    instancePath="#/monthlySetting/jun"
+                    v-model="data.monthlySetting.jun"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/jul')"
+                    instancePath="#/monthlySetting/jul"
+                    v-model="data.monthlySetting.jul"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/aug')"
+                    instancePath="#/monthlySetting/aug"
+                    v-model="data.monthlySetting.aug"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/sep')"
+                    instancePath="#/monthlySetting/sep"
+                    v-model="data.monthlySetting.sep"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/oct')"
+                    instancePath="#/monthlySetting/oct"
+                    v-model="data.monthlySetting.oct"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/nov')"
+                    instancePath="#/monthlySetting/nov"
+                    v-model="data.monthlySetting.nov"
+                    />
+
+                    <SimpleAppNumber
+                    autofocus
+                    :setting="o.getField('#/properties/monthlySetting/properties/dec')"
+                    instancePath="#/monthlySetting/dec"
+                    v-model="data.monthlySetting.dec"
+                    />
+                </SimpleAppValue>
+            </div>
+        </SimpleAppForm>
+    </Dialog>
+</template>
+<script setup lang="ts">
+import _ from 'lodash'
+import Dialog from 'primevue/dialog';
+import Column from 'primevue/column';
+import {ListItem} from '@/types/listview'
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useConfirm } from "primevue/useconfirm";
+const {$event,$listen, $DocnoformatDoc} = useNuxtApp()
+const doc = $DocnoformatDoc()
+const data = doc.getReactiveData()
+
+const visible = ref(false)
+const disabled = ref(false)
+const popuptitle = ref('edit')
+const recordlist = ref()
+const selectedDoctype = ref('')
+const confirm = useConfirm();
+// This will work in both `<script setup>` and `<script>`
+definePageMeta({
+  layout: 'sidelistcrud',
+});
+
+const resourcename = ref( _.upperFirst(doc.getDocName()))
+
+const refresh = async() =>{
+    const filter = {docNoType: selectedDoctype.value}
+    
+    console.log("selectedDoctype",selectedDoctype.value)
+    
+    const results = await doc.search(filter)
+    recordlist.value = results
+}
+$listen('itemselected', (item:ListItem)=>{
+    selectedDoctype.value = item.code
+    refresh()
+    
+})
+
+onMounted(()=>{
+    const doclist = getDocTypes()
+    console.log(doclist)
+    const listdata:ListItem[] = getDocTypes().map(item=> ({name:item.docName,code:item.docType} as ListItem))    
+    $event('listloaded',listdata)
+})
+const newRecord = () => {
+//   useRouter().push({ path: `${props.path}` })  
+  doc.setNew()   
+  data.value.docNoType=selectedDoctype.value
+
+  visible.value=true;
+  $event("newRecord")
+};
+const createData= ()=>{
+    disabled.value=true
+  
+    doc.create().then(()=>{
+      visible.value=false
+      refresh()
+    }).catch(err=>{
+      console.error(err)
+    }).finally(()=>disabled.value=false)
+}
+const updateData= ()=>{
+    disabled.value=true
+  
+    doc.update().then(()=>{
+      visible.value=false
+      refresh()
+    }).catch(err=>{
+      console.error(err)
+    }).finally(()=>disabled.value=false)
+}
+const deleteData= (e:any)=>{
+    confirm.require({
+        target: e.currentTarget as HTMLElement,
+        message:'Delete?',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: ()=>{
+            disabled.value=true 
+            doc.delete(data.value._id ?? "").then(()=>visible.value=false).finally(() => {
+                refresh();    
+            });
+        },
+        reject: () => {
+            console.log("Cancel delete")
+        }
+    })  
+}
+
+const triggerDelete = async (event: any) => {
+  let id = event._id.toString()
+  await doc.delete(id)  
+  refresh()
+};
+const triggerEdit = async (event: any) => {
+  let id = event._id.toString()
+  await doc.getById(id)
+  console.log(id)
+  visible.value=true
+  useRouter().push({ path:`/${useRoute().params.xorg}/docnoformat/${id}` })  
+};
+</script>

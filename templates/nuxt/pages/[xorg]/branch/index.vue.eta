@@ -77,8 +77,8 @@ const columns = [
 
       <SimpleAppCheckbox
         autofocus
-        :setting="o.getField('#/properties/isactive')"
-        v-model="data.isactive"
+        :setting="o.getField('#/properties/active')"
+        v-model="data.active"
       />
 
       <SimpleAppText
@@ -96,6 +96,7 @@ const columns = [
         :setting="o.getField('#/properties/branchId')"
         v-model="data.branchId"
       />
+      
     </CrudSimple>
   </div>
 </template>

@@ -9,6 +9,8 @@
 
         <small v-if="error" class="input-desc">{{ error }}</small>
         <small v-else class="input-desc">{{ fielddesc }}</small>
+
+        <slot></slot>
     </div>
     <div v-else class="simpleapp-input-container">
         <label class="input-error">wrong path in getField()</label>
@@ -18,10 +20,9 @@
 <script setup lang="ts">
 import {camelCaseToWords} from './helper'
 import {computed,watch} from 'vue'
-import {v4 as uuidv4} from 'uuid';
 import {ref} from 'vue'
 const modelValue = defineModel()
-const uuid =  uuidv4();
+const uuid = crypto.randomUUID()
 const fieldlabel = ref('')
 const fielddesc = ref('')
 const defaultcssclass='simpleapp-input-container'

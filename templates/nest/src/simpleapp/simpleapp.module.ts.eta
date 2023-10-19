@@ -8,6 +8,9 @@
  */
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import {DocNumberFormatGenerator} from './generate/commons/docnogenerator.service'
+
+// auto import modules
 <% for(let i=0;i<it.modules.length; i++){ %>
 <% let obj = it.modules[i]%>
 import { <%= obj.docname %>Service } from './services/<%= obj.doctype %>.service';    
@@ -34,7 +37,7 @@ import { ProfileService } from './profile/profile.service';
       ]),
   ],
   controllers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Controller,<%}%> ProfileController],
-  providers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,],
-  exports:[<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,]
+  providers: [DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,],
+  exports:[DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,]
 })
 export class GenerateModule {}

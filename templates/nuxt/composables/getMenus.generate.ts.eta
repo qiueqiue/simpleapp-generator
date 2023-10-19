@@ -5,6 +5,10 @@
  * author: Ks Tan
  */
 import _ from 'lodash'
+import {alldocuments} from '../simpleapp/generate/commons/documents'
+export const getDocTypes = ()=>{
+  return alldocuments.filter(item=>item.page!='')
+}
 export const getMenus =()=>{
     const logout = async () => {
         const { signOut } = useAuth();
@@ -18,13 +22,7 @@ export const getMenus =()=>{
   const xorg = route.params.xorg
   let data =[];
   //sss
-  let allmenus:string[] = [
-    <%for(let i=0; i<it.modules.length;i++){ %>
-      <% if(it.modules[i].pagetype){ %>
-      '<%= it.modules[i]['docname'] %>',
-      <%}%>
-    <%}%>
-  ]
+  let allmenus:string[] = alldocuments.filter(item=>item.page!='').map(item=>item.docName)
 
  const roles = $userstore.getUserInfo().roles
   let allowmenus=[]

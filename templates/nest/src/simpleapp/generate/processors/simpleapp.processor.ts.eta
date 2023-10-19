@@ -1,6 +1,6 @@
 import { Injectable, Logger,Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {foreignkeys} from './dicts/foreignkeys'
+import {foreignkeys} from '../commons/dicts/foreignkeys'
 import { Model,Types,PipelineStage,mongo} from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -10,7 +10,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common/exceptions';
-import { UserProfile } from './user.profile';
+import { UserProfile } from '../commons/user.profile';
 
 export enum IsolationType {
   'none' = 'none',
@@ -52,6 +52,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected data: T = { _id: '' } as T;
   protected doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
+  protected withDocNumberFormat=false
   
   // protected userprovider = new UserProfile() ;
 
@@ -62,7 +63,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     isolationtype: IsolationType = IsolationType.org,
   ) {            
     // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
-    this.documentType = doctype;
+    this.documentType = doctype.toUpperCase();
     this.documentName = docname;
     this.doc = newdoc;
     this.isolationtype = isolationtype;
@@ -242,10 +243,13 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   async create(appuser:UserProfile, data:T) {
     let result;
-    // const tempTenantId = data['tenantId'];
-    // const tempOrgId = data['orgId'];
-    // const tempBranchId = data['branchId'];
-    
+    if(!data._id){
+      data._id = crypto.randomUUID()
+    }
+    if(this.withDocNumberFormat && !data[this.documentIdentityCode]){
+      await this.genNewDocNo(appuser,data)
+    }
+    console.log("DATA for create",data)
     await this.hook(appuser,HookType.beforeCreate, data);
     
     let isolationFilter:any =  {...appuser.getCreateFilter()}    
@@ -489,5 +493,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     //   data,
     // );
   }
-
+  
+  async genNewDocNo(appuser:UserProfile,data:T){
+    //do nothing, by right at processor 
+  }
 }

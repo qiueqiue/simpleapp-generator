@@ -11,17 +11,21 @@ import { Injectable } from '@nestjs/common';
 import { TenantProcessor } from '../generate/processors/tenant.processor';
 import { Tenant } from '../generate/types/tenant.type';
 import { AutoincreamentService } from './autoinc.service';
-import { v4 as uuidv4 } from 'uuid';
 import { UserProfile } from '../generate/commons/user.profile';
+import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 export { Tenant } from '../generate/types/tenant.type';
 
 @Injectable()
 export class TenantService extends TenantProcessor {
-  constructor(@InjectModel('Tenant') mydoc: Model<Tenant>, private increament:AutoincreamentService) {
-    super(mydoc);
+  constructor(
+    @InjectModel('Tenant') mydoc: Model<Tenant>,
+    private increament: AutoincreamentService,
+    docnogenerator: DocNumberFormatGenerator,
+  ) {
+    super(mydoc,docnogenerator);
   }
 
-  hook = async (appuser:UserProfile,type: string, data?: any) => {
+  hook = async (appuser: UserProfile, type: string, data?: any) => {
     switch (type) {
       //         case 'init':
       //         break;
@@ -33,11 +37,15 @@ export class TenantService extends TenantProcessor {
       //         break;
       //         case 'afterValidation':
       //         break;
-                case 'beforeCreate':        
-                  const searchresult = await this.increament.generateNextNo(appuser,'tenant','tenantId')         
-                  data.tenantId = searchresult.nextno
-                  data.uuid = uuidv4()        
-                break;
+      case 'beforeCreate':
+        const searchresult = await this.increament.generateNextNo(
+          appuser,
+          'tenant',
+          'tenantId',
+        );
+        data.tenantId = searchresult.nextno;
+        data.uuid = crypto.randomUUID()
+        break;
       // case 'afterCreate':
       //   console.log('this.data',data)
       // break;

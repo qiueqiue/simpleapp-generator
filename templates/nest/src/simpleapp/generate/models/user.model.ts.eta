@@ -21,10 +21,10 @@ const schemasetting = {
           email: {type: String, required: true},  //field 
           
     
-          isactive: {type: Boolean, required: false},  //field 
+          active: {type: Boolean, required: false,default:true},  //field 
           
     
-          //_id: {type:'string', required:false}  //force _id not inside
+          _id: {type:'string', required:true}, 
           
     
           doctype: {type: String, required: false},  //field 

@@ -11,7 +11,9 @@ import { Injectable } from '@nestjs/common';
 import { UserProcessor } from '../generate/processors/user.processor';
 import { Permission } from '../generate/types/perm.type';
 import { User } from '../generate/types/user.type';
+import { DocNumberFormatGenerator } from '../generate/commons/docnogenerator.service';
 export { User } from '../generate/types/user.type';
+
 
 @Injectable()
 export class UserService extends UserProcessor {
@@ -19,8 +21,9 @@ export class UserService extends UserProcessor {
   constructor(
     @InjectModel('User') mydoc: Model<User>,
     @InjectModel('Permission') private permdoc: Model<Permission>,
+    docnogenerator: DocNumberFormatGenerator,
   ) {
-    super(mydoc);
+    super(mydoc,docnogenerator);
   }
 
   hook = async (appuser: UserProfile, type: string, data?: any) => {

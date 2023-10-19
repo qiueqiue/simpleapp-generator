@@ -355,7 +355,7 @@ export class UserProfile {
     if(!res.uid){
       res.uid = this.getUid()
       res.fullname = this.fullname
-      res.isactive = true
+      res.active = true
       
       if(decision=='accept'){
         const result = await res.save({session:this.dbsession})

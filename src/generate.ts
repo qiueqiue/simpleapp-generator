@@ -106,14 +106,15 @@ const generateSchema = async( docname: string,
   allmodels: ChildModels)=>{
     const simpleapptemplates = `${constants.templatedir}/basic`
     const finalizefolder = `${constants.templatedir}/nest`
+    const currentmodel = allmodels[capitalizeFirstLetter(docname)]
     const variables:TypeGenerateDocumentVariable = {
       name: docname,
       doctype: doctype,
       models: allmodels,
-      autocompletecode:allmodels[capitalizeFirstLetter(docname)].codeField,
-      autocompletename:allmodels[capitalizeFirstLetter(docname)].nameField,
-      moreAutoComplete:allmodels[capitalizeFirstLetter(docname)].moreAutoComplete,
-      schema: allmodels[capitalizeFirstLetter(docname)].model,
+      autocompletecode:currentmodel.codeField,
+      autocompletename:currentmodel.nameField,
+      moreAutoComplete:currentmodel.moreAutoComplete,
+      schema: currentmodel.model,
       apiSchemaName: capitalizeFirstLetter(docname), //capitalizeFirstLetter(doctype) + 'ApiSchema',
       typename: capitalizeFirstLetter(docname),
       fullApiSchemaName:
@@ -125,10 +126,11 @@ const generateSchema = async( docname: string,
       backEndCode: '',
       controllerCode:'',
       apiSchemaCode:'',
-      docStatusSettings:allmodels[capitalizeFirstLetter(docname)].docStatusSettings,
-      apiSettings:allmodels[capitalizeFirstLetter(docname)].apiSettings,
-      requireautocomplete:allmodels[capitalizeFirstLetter(docname)].requireautocomplete,
-      isolationtype:allmodels[capitalizeFirstLetter(docname)].isolationtype,      
+      docStatusSettings: currentmodel.docStatusSettings,
+      apiSettings: currentmodel.apiSettings,
+      requireautocomplete: currentmodel.requireautocomplete,
+      isolationtype: currentmodel.isolationtype,      
+      hasdocformat: currentmodel.hasdocformat
     };
 
     const templatefolder = `${constants.templatedir}/${rendertype}`
@@ -162,7 +164,7 @@ const generateSchema = async( docname: string,
           const arrfilename:string[] = filename.split('.')
           const filecategory = arrfilename[0]
           const filetype = arrfilename[1]        
-          const autogeneratetypes = ['apischema','controller','jsonschema','model','processor','type']
+          const autogeneratetypes = ['apischema','controller','jsonschema','model','processor','type','default']
           if(autogeneratetypes.includes(filecategory)){
             //multiple files in folder, append s at folder name
             const storein = `${backendTargetFolder}/${filecategory}s`  
@@ -213,6 +215,14 @@ const generateSchema = async( docname: string,
               as:`${capname}Doc.ts`,
               validate: (folder:string,isexists:boolean)=>!isexists
             },
+            'default.ts.eta': { 
+              to:`simpleapp/generate/defaults`, 
+              as:`${capname}.default.ts`,
+              validate: (folder:string,isexists:boolean)=>{
+                return true
+              }
+            },
+            
             'simpleapp.generate.client.ts.eta': { 
               to:`simpleapp/generate/clients`, 
               as:`${capname}Client.ts`, 

@@ -27,7 +27,7 @@
         "type": "string",
         "x-document-label":true        
       },
-      "isactive": {
+      "active": {
         "type": "boolean",
         "default":true        
       },

@@ -30,13 +30,15 @@ const X_DOCUMENT_STATUS='x-document-status'
 const X_DOCUMENT_API='x-document-api'
 const X_IGNORE_AUTOCOMPLETE='x-ignore-autocomplete'
 const FOREIGNKEY_PROPERTY='x-foreignkey'
-const X_TEL_NO='x-tel'
+
+const FORMAT_TEL='tel'
+const FORMAT_DOCNO='documentno'
 const X_ISOLATION_TYPE='x-isolation-type'
 
 let docSetting:DocSetting={} as DocSetting
 
 
-
+let hasdocformat = false
 let allmodels: ChildModels = {};
 let fullschema={}
 // let fieldAutoCompleteCode=''
@@ -66,6 +68,7 @@ export const readJsonSchemaBuilder = async (
   allforeignkeys:TypeForeignKeyCatalogue
 ) => {
   docSetting=newDocSetting(doctype,docname)
+  hasdocformat=false
   // fieldAutoCompleteCode=''
   // fieldAutoCompleteName=''
   moreAutoComplete=[]
@@ -222,17 +225,26 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     }
     const newName: string = docname + capitalizeFirstLetter(key);
     // log.info("property is:",key,newName,obj)
-   if(obj[X_DOCUMENT_NO]){
-    
+   if(obj[X_DOCUMENT_NO]){    
     docSetting.colDocNo=key
-    obj.minLength=obj.minLength??1
-    jsondata[key]['minLength']=obj.minLength
+    if(obj['format'] && obj['format']==FORMAT_DOCNO){
+      hasdocformat=true
+    }else{
+      hasdocformat=false
+      obj.minLength=obj.minLength??1
+      jsondata[key]['minLength']=obj.minLength  
+    }
+    
    }
    if(obj[X_DOCUMENT_LABEL]){
     docSetting.colDocLabel=key
     obj.minLength=obj.minLength??1
     jsondata[key]['minLength']=obj.minLength
    }
+
+   //this field reserved for X_DOCUMENT_NO only
+   
+  
    
   //  if(obj[X_COLLECTION_NAME]){
   //   docSetting.collectionName=key    
@@ -244,7 +256,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
    }
    
 
-  //  if(obj.format && obj.format==X_TEL_NO){
+  //  if(obj.format && obj.format==FORMAT_TEL){
   //   obj.pattern=obj.pattern ?? '/^\d{7,15}$/gm'
   //  }
   //  if (obj.type == 'object' && obj.items  ){
@@ -278,8 +290,23 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
       genSchema(newName, obj.type, obj.properties, obj.required);
       newmodel[key] = newName;
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
-      //array need submodel
-      // console.log("======",newName,key)
+      const childprops = objectitem?.properties
+      if(!childprops['created']){
+        childprops['created']={type:'string',format:'datetime'}
+      }
+      if(!childprops['updated']){
+        childprops['updated']={type:'string',format:'datetime'}
+      }
+      if(!childprops['createdby']){
+        childprops['createdby']={type:'string'}
+      }
+      if(!childprops['updatedby']){
+        childprops['updatedby']={type:'string'}
+      }
+      if(!childprops['_id']){
+        childprops['_id']={type:'string',format:'uuid'}
+      }
+
       genSchema(newName, obj.type, objectitem?.properties, obj.items['required']);
       newmodel[key] = [newName];
     } else if (obj.type == 'array' && objectitem?.type != 'object') {
@@ -301,7 +328,9 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     docStatusSettings:docSetting.docStatusSettings,
     apiSettings:docSetting.apiSettings,
     requireautocomplete:docSetting.requireautocomplete,
-    isolationtype:docSetting.isolationtype
+    isolationtype:docSetting.isolationtype,
+    hasdocformat:hasdocformat
+
   };
   // console.warn("-------------apiSettings-----",docname,"::::",docSetting.apiSettings)
   return newmodel;

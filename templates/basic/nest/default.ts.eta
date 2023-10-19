@@ -1,0 +1,42 @@
+
+<%Object.keys(it.models).forEach(function(modelname) { %>    
+export const Default<%=modelname%> = (uuid:string)=>{
+    // <%~ JSON.stringify(it.models[modelname].model) %>
+        
+    return {
+        _id : uuid,
+        <%Object.keys(it.models[modelname].model).forEach(function(key){%>      
+          <%let field=it.models[modelname].model[key]%>                
+            
+          <%if(key=='_id'){ %>
+          // skip cause already hardcoded
+          <%}else if(key=='tenantId'){ %>
+            tenantId : 0,//it will override by save handle
+          <%}else if(key=='orgId'){ %>
+            orgId : 0, //it will override by save handle
+          <%}else if(key=='branchId'){ %>
+            branchId : 0,  //it will override by save handle
+          <%}else if(key=='doctype'){ %>
+            doctype : '<%=it.doctype.toUpperCase()%>',
+          <% } else if(typeof field.default !='undefined' && field.type=='string'){%> 
+            <%=key%> : '<%= field.default  %>',
+          <%} else if(typeof field.default !='undefined'){%> 
+            <%=key%> : <%= field.default  %>,
+          <%} else if(field.type=='boolean' ){%> 
+              <%=key%> :false ,
+          <%} else if(typeof field=='string'){%>
+            <%=key%> : Default<%= field  %>(''),
+          <%} else if(field.type=='string'){%>
+              <%=key%> : '<%= field.default  %>',
+
+            <%} else if(Array.isArray(field) && ['string','integer','number','boolean'].includes(field[0])) {%>
+              <%=key%> : <<%=field[0]%>[]>[],  //typeof field == array     <%~JSON.stringify(field)%>    
+            <%} else if(Array.isArray(field)) {%>
+              <%=key%> : [Default<%=field[0]%>(crypto.randomUUID())],  //typeof field == array     <%~JSON.stringify(field)%>    
+            <%} else {%>
+              <%=key%> : <%=field.default%>,  //else <%= typeof field %>
+          <%}%>
+        <%})%>
+    }
+} 
+<%})%>

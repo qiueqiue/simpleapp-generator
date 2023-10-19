@@ -10,6 +10,7 @@ export type ChildModels = {
     apiSettings?:ApiSetting[],
     requireautocomplete: boolean
     isolationtype:string
+    hasdocformat:boolean
   };
 };
 export enum Fieldtypes {
@@ -79,6 +80,7 @@ docStatusSettings:DocStatusSetting[],
 apiSettings:ApiSetting[],
 requireautocomplete:boolean,
 isolationtype:string
+hasdocformat:boolean
 }
 
 export type DocStatusSetting = {
