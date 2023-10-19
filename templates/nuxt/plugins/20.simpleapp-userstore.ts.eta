@@ -60,7 +60,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             }).catch((err:any)=>{
               if(err.response.status==401){
                 console.error("Unauthorise(plugin-userstore)")
-                // logout()
+                logout()
               }else{
                 console.error("Unknown error,", err.response)
               }

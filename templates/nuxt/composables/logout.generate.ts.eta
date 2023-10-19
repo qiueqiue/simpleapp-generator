@@ -6,8 +6,11 @@ export const logout = async () => {
     // console.log(data.value)
     if(data['value']&& data['value']['path']){
         // const logoutkeycloak = await <any>useFetch(data.value.path); 
-        console.log('logoutkeycloak',data['value']['path'])
-        // navigateTo(data.value.path, { external: true })
+        // console.log('logoutkeycloak',data['value']['path'])
+        if(data['value']['path']){
+            navigateTo(data.value.path, { external: true })
+        }
+        // 
     }
     
     // console.log('logout data',data.value)

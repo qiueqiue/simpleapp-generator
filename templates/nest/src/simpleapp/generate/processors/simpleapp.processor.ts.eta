@@ -8,7 +8,9 @@ import addErrors from 'ajv-errors';
 import {
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
   InternalServerErrorException,
+  HttpExceptionOptions,
 } from '@nestjs/common/exceptions';
 import { UserContext } from '../commons/user.context';
 
@@ -316,21 +318,21 @@ export class SimpleAppService<T extends { _id?: string }> {
     ajv.addFormat('documentno', /.*$/);
     
 
-    ajv.addKeyword({ keyword: 'x-document-no', type: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-document-label', type: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-document-status', type: 'array' });
-    ajv.addKeyword({ keyword: 'x-document-api', type: 'array' });
-    ajv.addKeyword({ keyword: 'x-page-type', type: 'string' }); // undefine mean no generate page
-    ajv.addKeyword({ keyword: 'x-ignore-autocomplete', type: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-isolation-type', type: 'string' });
-    ajv.addKeyword({ keyword: 'x-document-type', type: 'string' });
-    ajv.addKeyword({ keyword: 'x-document-name', type: 'string' });
-    ajv.addKeyword({ keyword: 'x-collection-name', type: 'string' });
-    ajv.addKeyword({ keyword: 'x-autocomplete-field', type: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-foreignkey', type: 'string' });
-    ajv.addKeyword({ keyword: 'x-import-lib', type: 'array' });
-    ajv.addKeyword({ keyword: 'x-compute', type: 'array' });
-    ajv.addKeyword({ keyword: 'x-required-role', type: 'array' });
+    ajv.addKeyword({ keyword: 'x-document-no', schemaType:'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-label',schemaType: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-document-status', schemaType: 'array' });
+    ajv.addKeyword({ keyword: 'x-document-api',schemaType: 'array' });
+    ajv.addKeyword({ keyword: 'x-page-type',schemaType:'string' }); // undefine mean no generate page
+    ajv.addKeyword({ keyword: 'x-ignore-autocomplete',schemaType: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-isolation-type', schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-type', schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-document-name', schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-collection-name',schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-autocomplete-field', schemaType: 'boolean' });
+    ajv.addKeyword({ keyword: 'x-foreignkey', schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-import-lib', schemaType: 'array' });
+    ajv.addKeyword({ keyword: 'x-compute', schemaType: 'object' });
+    ajv.addKeyword({ keyword: 'x-required-role', schemaType: 'array' });
     
     const issuccess = await this.hook(appuser,HookType.beforeValidation, data);
     if (!issuccess) {
@@ -339,23 +341,23 @@ export class SimpleAppService<T extends { _id?: string }> {
         errormsg.push(this.errorlist[i].message);
       }
       this.logger.log('run hook during validation');
-      throw new BadRequestException(JSON.stringify(errormsg));
+      throw new BadRequestException("Before validation hook failed",errormsg as HttpExceptionOptions);
     }
 
     let validate;
     try {
       validate = ajv.compile(this.jsonschema);
-
+    } catch (err) {
+      this.logger.error('compile error', err);
+      throw new ForbiddenException(err.message);
+    }
       const valid = validate(data);
       if (!valid) {
         this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
-        throw new BadRequestException(JSON.stringify(validate.errors));
+        throw new BadRequestException("Data validation failed",validate.errors as HttpExceptionOptions);
       }
       await this.hook(appuser,HookType.afterValidation, data);
-    } catch (err) {
-      this.logger.error('compile error', err);
-      throw new InternalServerErrorException(err.message);
-    }
+    
   }
 
   polishIsolationFilter = (filterIsolation:any,data:any={}) =>{
@@ -387,32 +389,35 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async findIdThenDelete(appuser:UserContext,id: string): Promise<any> {
     const deletedata = await this.findById(appuser,id);    
+    let dependency
     try {
       await this.hook(appuser,HookType.beforeDelete, id);
       this.logger.debug('delete record',this.documentName, id);
-      const dependency = await this.getRelatedRecords(id);
+      dependency = await this.getRelatedRecords(id);
       console.log('dependency', dependency);
       if (!dependency) {
         let filterIsolation = this.getIsolationFilter(appuser);
-        this.polishIsolationFilter(filterIsolation)
-        
-
+        this.polishIsolationFilter(filterIsolation)        
         
         filterIsolation['_id'] =  id;
         this.logger.debug('delete filter', filterIsolation);
         const result = await this.doc.deleteOne(filterIsolation).session(appuser.getDBSession());
         const deleteresult = {result:result, data: deletedata}
-        this.logger.debug(this.doc.collection.name, " delete result",deleteresult)
+        this.logger.debug(deleteresult, " delete result" +this.doc.collection.name,)
         // this.doc.findByIdAndDelete(id)
         await this.hook(appuser,HookType.afterDelete, deleteresult);
         
         //this.doc.findByIdAndDelete(id);
         return deleteresult;
       } else {
-        return Promise.reject(dependency);
+        console.log("reject query",dependency)
+        
+        throw new ForbiddenException('Foreignkey constraint',dependency)
       }
     } catch (err) {
-      throw new InternalServerErrorException(err.message);
+      
+      throw new InternalServerErrorException(err);
+      //JSON.stringify(dependency),JSON.stringify(dependency)
     }
   }
 
@@ -450,6 +455,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     
     
     if(foreignkeys === undefined){
+      this.logger.error("foreignkeys object undetected")
       throw new InternalServerErrorException("foreignkeys object undetected")
     }
     
@@ -469,18 +475,24 @@ export class SimpleAppService<T extends { _id?: string }> {
         //single schema may have multiple foreign key link here, loop all
         for (let j = 0; j < fobjs.length; j++) {
           const fkey = fobjs[j] + '._id';
-          const filter = {};
-          filter[fkey] = id;
-          //console.log('getRelatedRecords get filter', collectionname, filter);
-          const result = await collection.findOne(filter);
-          //console.log('getRelatedRecords', result);
+          let filter1 = {}
+          filter1[fkey] = id;
+          let filter2 = {}
+          filter2[fobjs[j] ] = id;
+
+          const filters = {$or:[
+            filter1,filter2
+          ]};
+                    
+          const result = await collection.findOne(filters);          
           if (result) {
-            return Promise.reject(result);
+            this.logger.error(result,"related result found")
+            return result;
           }
         }
       }
     }
-    return Promise.resolve(null);
+    return null;
   }
 
   /**
