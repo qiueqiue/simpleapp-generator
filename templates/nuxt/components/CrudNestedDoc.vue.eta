@@ -7,6 +7,7 @@
  */
 import {ref} from 'vue'
 import _ from 'lodash'
+import {SearchBody} from '~/types'
 import { SimpleAppClient } from  '../simpleapp/generate/clients/SimpleAppClient' //'../SimpleAppClient';
 // import SimpleAppForm from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppForm.vue';
 // import SimpleAppDatatable from '@simitgroup/simpleapp-vue-component/src/components/SimpleAppDatatable.vue';

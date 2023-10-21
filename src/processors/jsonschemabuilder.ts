@@ -2,7 +2,7 @@
 import { JSONSchema7, JSONSchema7Definition,JSONSchema7Array,JSONSchema7TypeName } from 'json-schema';
 import * as js7 from 'json-schema';
 import { capitalizeFirstLetter } from '../libs';
-import {JsonSchemaProperties} from "../type"
+import {JsonSchemaProperties,MyForeignKey} from "../type"
 import { Logger, ILogObj } from "tslog";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import {foreignkeys} from '../storage'
@@ -37,7 +37,6 @@ const X_ISOLATION_TYPE='x-isolation-type'
 
 let docSetting:DocSetting={} as DocSetting
 
-
 let hasdocformat = false
 let allmodels: ChildModels = {};
 let fullschema={}
@@ -57,7 +56,8 @@ const newDocSetting=(doctype:string,docname:string):DocSetting=>{
     docStatusSettings:[],
     apiSettings:[],
     requireautocomplete:true,
-    isolationtype:"org"
+    isolationtype:"org",    
+    foreignkeys:{}
 
   }
 }
@@ -199,13 +199,14 @@ const processObject =  (doctype: string,
       'object',
       jsondata.properties,
       jsondata['required'] ?? [],
+      '$'
     );
     
     return data
 }
 
 const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProperties,
-  requiredlist: string[] | undefined): SchemaModel => {
+  requiredlist: string[] | undefined,parentpath:string): SchemaModel => {
   const newmodel: SchemaModel = {};
   const props = Object.getOwnPropertyNames(jsondata ??{});
   // console.log('==== jsondata', jsondata);
@@ -268,26 +269,34 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     // newmodel[key] = 'Object';
     // }
     // else 
-    if (obj.type == 'object') {
+    if(obj[FOREIGNKEY_PROPERTY]){
+      // console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
+      const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
+      const clientdatacollection = docname.toLowerCase()
+      const foreignkeyidentity= key
+      const foreignkeypath = (obj.type=='object') ?`${parentpath}.${key}._id`:`${parentpath}.${key}`
       
-      if(obj[FOREIGNKEY_PROPERTY]){
-        // console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
-        const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
-        const clientdatacollection = docname.toLowerCase()
-        const foreignkeyidentity= key
-        if(!foreignkeys[masterdatacollection]){
-          let tmp:TypeForeignKey = {} as TypeForeignKey
-          tmp[clientdatacollection]=[foreignkeyidentity]
-          foreignkeys[masterdatacollection] = tmp
-        }
-        else if(!foreignkeys[masterdatacollection][clientdatacollection]){
-          foreignkeys[masterdatacollection][clientdatacollection]=[foreignkeyidentity]
-        }else{
-          foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
-        }
-                
+      if(docSetting.foreignkeys[masterdatacollection]){
+        docSetting.foreignkeys[masterdatacollection].push(foreignkeypath)
+      }else{
+        docSetting.foreignkeys[masterdatacollection]=[foreignkeypath]
       }
-      genSchema(newName, obj.type, obj.properties, obj.required);
+      if(!foreignkeys[masterdatacollection]){
+        let tmp:TypeForeignKey = {} as TypeForeignKey
+        tmp[clientdatacollection]=[foreignkeyidentity]
+        foreignkeys[masterdatacollection] = tmp
+      }
+      else if(!foreignkeys[masterdatacollection][clientdatacollection]){
+        foreignkeys[masterdatacollection][clientdatacollection]=[foreignkeyidentity]
+      }else{
+        foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
+      }
+              
+    }
+
+    if (obj.type == 'object') {
+            
+      genSchema(newName, obj.type, obj.properties, obj.required,`${parentpath}.${key}`);
       newmodel[key] = newName;
     } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
       const childprops = objectitem?.properties
@@ -307,7 +316,7 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
         childprops['_id']={type:'string'}
       }
 
-      genSchema(newName, obj.type, objectitem?.properties, obj.items['required']);
+      genSchema(newName, obj.type, objectitem?.properties, obj.items['required'],`${parentpath}.${key}[*]`);
       newmodel[key] = [newName];
     } else if (obj.type == 'array' && objectitem?.type != 'object') {
       //array need submodel
@@ -329,8 +338,8 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
     apiSettings:docSetting.apiSettings,
     requireautocomplete:docSetting.requireautocomplete,
     isolationtype:docSetting.isolationtype,
-    hasdocformat:hasdocformat
-
+    hasdocformat:hasdocformat,
+    foreignkeys: docSetting.foreignkeys
   };
   // console.warn("-------------apiSettings-----",docname,"::::",docSetting.apiSettings)
   return newmodel;

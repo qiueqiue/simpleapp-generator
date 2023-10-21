@@ -34,6 +34,12 @@ export const <%= capitalizeFirstLetter(it.name) %>MongoSchema = new Schema(schem
     .index({tenantId:1,orgId:1},{unique:true})
   <%} else {%>
     .index({<%=it.autocompletecode%>:1,orgId:1},{unique:true})
-    .index({<%=it.autocompletename%>:1,orgId:1});
+    .index({<%=it.autocompletename%>:1,orgId:1})
   <%}%>
 <%}%>
+<%Object.keys(it.foreignkeys).forEach(function(key) { %>
+
+  <%for(let i =0 ; i < it.foreignkeys[key].length; i++){%>
+    .index({'<%= it.foreignkeys[key][i].replace('$.','').replaceAll('[*]','') %>':1})
+  <%}%>
+<%})%>

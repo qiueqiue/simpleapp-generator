@@ -29,7 +29,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
         // const { signOut } = useAuth();
         // signOut({redirect:false});
         // navigateTo('/login')
-        // logout()
+        logout()
       }else{
         return Promise.reject(error)
       }

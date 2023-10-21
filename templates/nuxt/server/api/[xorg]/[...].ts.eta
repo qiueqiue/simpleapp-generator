@@ -122,9 +122,9 @@ export default defineEventHandler(async (event) => {
             // console.log('@@@@@@@@@@@@@ API error', error)
             // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             // console.log('######### response', error.response)
-            console.log('#####################################')
-            console.log(axiosConfig);
-            console.log('#####################################')
+            // console.log('#####################################')
+            // console.log(axiosConfig);
+            // console.log('#####################################')
 
             if (error.response?.status && error.response.status == '401') {
                 //return reject({ statusMessage: 'Unauthorized', statusCode: 401 });

@@ -130,7 +130,8 @@ const generateSchema = async( docname: string,
       apiSettings: currentmodel.apiSettings,
       requireautocomplete: currentmodel.requireautocomplete,
       isolationtype: currentmodel.isolationtype,      
-      hasdocformat: currentmodel.hasdocformat
+      hasdocformat: currentmodel.hasdocformat,
+      foreignkeys: currentmodel.foreignkeys
     };
 
     const templatefolder = `${constants.templatedir}/${rendertype}`

@@ -15,13 +15,14 @@ import Dialog from 'primevue/dialog';
 import ProgressSpinner from 'primevue/progressspinner';
 import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from "primevue/useconfirm";
-
+import {SearchBody} from '~/types'
 const confirm = useConfirm();
 const props = defineProps<{
     document:SimpleAppClient<any,any>
     listColumns:string[]
     path:string
     title:string
+    sorts?: any
 }>()
 const resourcename = ref( _.upperFirst(props.document.getDocName()))
 const visible = ref(false)
@@ -51,8 +52,13 @@ watch(visible,(newvalue )=>{
 defineShortcuts({
   'ctrl_enter': () => newData()
 })
+
 const refresh = () => {
-  obj.list().then((res:any) => {    
+  const searchbody: SearchBody = {
+    fields: props.listColumns.concat(['created']),
+    sorts:props.sorts
+  }
+  obj.search(searchbody).then((res:any) => {    
     recordlist.value = res;
     disabled.value=false
   });

@@ -7,6 +7,7 @@
  */
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
+import {SearchBody} from '~/types'
 import _ from "lodash";
 import Panel from "primevue/panel";
 import { ref } from "vue";
@@ -23,7 +24,7 @@ import Card from "primevue/card";
 import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
 import { Permission, User } from "../../../simpleapp/generate/openapi/api";
-import BlockUI from 'primevue/blockui';
+import BlockUI from "primevue/blockui";
 
 //initialize api
 const {
@@ -51,7 +52,7 @@ const grouplist = getAllGroups().map((item) => {
 });
 
 //initialize some runtime variable
-const blockscreen = ref(false)
+const blockscreen = ref(false);
 const inviteemail = ref("");
 const selected = ref("");
 const activeuser = ref("");
@@ -66,14 +67,15 @@ const permissiontitle = "Permission Information";
  */
 const refreshList = async (resetpage: boolean = true) => {
   const items: any[] = [];
-  userlist.value = await userdoc.list();
+  const searchbody: SearchBody = {fields:['uid','email','created','fullname','active']}
+  userlist.value = await userdoc.search(searchbody);
   //listUser();
   // userlist.value = _.uniqBy(permlist.value, "uid");
   if (resetpage) {
     selected.value = "";
     activeuser.value = "";
   }
-  blockscreen.value=false
+  blockscreen.value = false;
   // console.log("userlist", userlist.value);
 };
 
@@ -88,11 +90,16 @@ const refreshList = async (resetpage: boolean = true) => {
  */
 const onSelectUser = async (menuitem: any) => {
   const user: UserListItem = { ...menuitem };
-  orglist.value = await orgdoc.list();
-  branchlist.value = await branchdoc.list();
-  permlist.value = await permdoc.search({
-    $or: [{ uid: user.uid }, { user_id: user._id }],
-  });
+  const orgsearchbody: SearchBody = {fields:['orgId','orgCode','orgName','active']}
+  const branchsearchbody: SearchBody = {fields:['orgId','branchId','branchCode','branchName','active']}
+  const permsearchbody: SearchBody = {
+    filter:{$or: [{ uid: user.uid }, { user_id: user._id }],},
+    fields:['uid','branchId','tenantId','orgId','active','group','created']
+  }
+  
+  orglist.value = await orgdoc.search(orgsearchbody);
+  branchlist.value = await branchdoc.search(branchsearchbody);
+  permlist.value = await permdoc.search(permsearchbody);
   userdoc.getById(menuitem._id);
   // console.log("orglist.value", orglist.value);
   // console.log("branchlist.value", branchlist.value);
@@ -120,8 +127,7 @@ const onSelectUser = async (menuitem: any) => {
     };
     currentpermissions.value.push(tmp);
   }
-  blockscreen.value=false
-  // console.log("currentpermissions", currentpermissions.value);
+  blockscreen.value = false;
 };
 
 /**
@@ -141,7 +147,6 @@ const getPermssionData = (uid: string, branchId: number) => {
     uid: uid,
     group: result?.group ?? "",
   };
-
   return pm;
 };
 
@@ -204,7 +209,7 @@ const deleteUser = async (user: any) => {
  */
 const applPermission = async (d: Permission) => {
   let result;
-  blockscreen.value=true
+  blockscreen.value = true;
   d._id = String(d._id ?? "");
   d.group = String(d.group ?? "");
   const data = permdoc.getReactiveData();
@@ -225,7 +230,7 @@ const applPermission = async (d: Permission) => {
     console.warn("unknown apply permission", result);
   }
   refreshList(false);
-  blockscreen.value=false
+  blockscreen.value = false;
 };
 //init ui
 onMounted(() => {
@@ -408,19 +413,19 @@ onMounted(() => {
         class="m-2"
         :header="permissiontitle"
       >
-      <BlockUI :blocked="blockscreen">
-        <div class="text-right m mr-2">
-          <button
-            class="btn-primary pi pi-question"
-            @click="previewPermission"
-          ></button>
-        </div>
-        
-        
+        <BlockUI :blocked="blockscreen">
+          <div class="text-right m mr-2">
+            <button
+              class="btn-primary pi pi-question"
+              @click="previewPermission"
+            ></button>
+          </div>
+
           <div class="grid grid-cols-2">
             <Card v-for="o in orglist" class="m-2">
               <template #title>{{ o.orgName }}</template>
               <template #content>
+                
                 <table class="w w-full">
                   <thead class="">
                     <tr>

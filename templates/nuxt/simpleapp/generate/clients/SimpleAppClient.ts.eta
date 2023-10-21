@@ -5,6 +5,7 @@ import addErrors from 'ajv-errors';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import type { AxiosResponse } from 'axios';
+import {SearchBody} from '~/types'
 // import { useToast, } from 'primevue/usetoast';
 // import type {  ToastMessageOptions } from 'primevue/toast';
 // const toast = useToast();
@@ -12,9 +13,9 @@ import type { AxiosResponse } from 'axios';
 type crudType = {
   runFindOne: Function;  
   runCreate: Function;
-  runUpdate: Function;
-  runList: Function;
+  runUpdate: Function;  
   runDelete: Function;
+  runSearch: Function
 };
 export class SimpleAppClient<
   TData extends { _id?: string },
@@ -114,8 +115,8 @@ export class SimpleAppClient<
         return Promise.reject(errors)
       });
   }
-  async list() {
-    return await this.docapi.runList({timeout:this.defaultTimeOut})
+  async search(searchbody:SearchBody) {
+    return await this.docapi.runSearch(searchbody,{timeout:this.defaultTimeOut})
         .then((res:AxiosResponse)=>{
           if(this.event){this.event('info:listready',res.data);}
           return res.data
@@ -124,7 +125,7 @@ export class SimpleAppClient<
           return Promise.reject(errors)
         });
   }
-  find() {}
+  
   hook(type: string, data: TData) {
     console.log('internal save hook');
     return true;

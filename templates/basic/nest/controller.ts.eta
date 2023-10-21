@@ -22,6 +22,8 @@ import {
 import { SimpleAppAbstractController } from './simpleapp.controller';
 import { <%= it.typename %>Service } from '../../services/<%= it.doctype %>.service';
 import * as <%= it.doctype %>type from '../types/<%= it.doctype %>.type';
+import {SearchBody} from '../types';
+import {ApiSearchBody} from '../apischemas';
 import * as <%= it.doctype %>apischema from '../apischemas/<%= it.doctype %>.apischema';
 import { ApiTags, ApiBody, ApiResponse,ApiOperation,ApiQuery } from '@nestjs/swagger';
 import {Roles} from '../commons/roles/roles.decorator'
@@ -52,12 +54,12 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({
     status: 200,
     description: 'Found',
-    type: [<%= it.fullApiSchemaName%>]
+    type: String //[<%= it.fullApiSchemaName%>]
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
-  @ApiOperation({ operationId: 'runList', description:"List all data" })
+  @ApiOperation({ operationId: 'runList', description:"Say hello only" })
   async list(@AppUser() appuser: UserContext) {
-    return this._list(appuser);
+    return `Hello, welcome to ${ this.service.getDocumentName()}`//this._list(appuser);
   }
   //autocomplete shall above :id
   @Get('/autocomplete')
@@ -105,15 +107,15 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @Roles(Role.SuperAdmin,Role.SuperUser,Role.<%= `${it.typename}_search`%>)
   <%}%>
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'success',
     type: [<%= it.fullApiSchemaName%>]
   })
   @ApiResponse({ status: 400, description: 'bad request' })
   @ApiResponse({ status: 500, description: 'internal error' })
-  @ApiBody({ description: 'Data', type: Object })
+  @ApiBody({ description: 'Data', type: ApiSearchBody })
   @ApiOperation({ operationId: 'runSearch' })
-  async search(@AppUser() appuser: UserContext,@Body() data: Object) {
+  async search(@AppUser() appuser: UserContext,@Body() data: SearchBody) {
     return await this._search(appuser,data)
   }
 

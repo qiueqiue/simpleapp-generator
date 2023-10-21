@@ -29,8 +29,10 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
   protected documentIdentityLabel='<%~ it.autocompletename %>'
   protected withDocNumberFormat= <%= it.hasdocformat %>
 
-    constructor(mydoc: Model<<%= it.typename %>>,private docnogenerator:DocNumberFormatGenerator) {
-    super('<%= it.doctype.toUpperCase() %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>);
+  protected foreignkeys = <%~ JSON.stringify(it.foreignkeys)%>
+
+    constructor(mydoc: Model<<%= it.typename %>>, docnogenerator:DocNumberFormatGenerator) {
+    super('<%= it.doctype.toUpperCase() %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>,docnogenerator);
     this.setSchema(<%= it.typename%>JsonSchema)
     this.setData(Default<%=it.typename%>(crypto.randomUUID()))
     <%if(it.moreAutoComplete.length>0){%>
@@ -41,15 +43,8 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
         <%})%>
       })
     <%}%>
-    
-  }
-
-  <% if(it.hasdocformat){ %>
-  async genNewDocNo(appuser:UserContext,data:<%= it.typename%>){
-    const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)
-    data[this.documentIdentityCode]=result    
-  }
-  <%}%>
+    }
+  
 
    reCalculateValue(){
     console.log('trigger new recalculate')

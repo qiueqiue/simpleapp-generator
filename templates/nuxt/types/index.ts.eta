@@ -53,3 +53,13 @@ export type ForeignKey = {
   _id : string
   label: string
 }
+
+
+export type SearchBody = {
+    
+    filter?:Object;
+    
+    fields?: any[];
+    
+    sorts?: any[];
+}

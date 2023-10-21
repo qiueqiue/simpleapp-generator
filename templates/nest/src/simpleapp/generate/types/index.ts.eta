@@ -7,3 +7,13 @@ export type DocNumberFormatResult = {
     formatName: string 
     result: string
 }
+
+
+export type SearchBody = {
+    
+    filter?:Object;
+    
+    fields?: any[];
+    
+    sorts?: any[];
+}

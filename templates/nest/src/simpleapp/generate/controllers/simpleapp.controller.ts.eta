@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 // import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import {UserContext} from '../commons/user.context'
+import {SearchBody} from '../types';
 const doctype = 'person'.toUpperCase();
 type ServiceType = {
   list: Function;
@@ -38,8 +39,9 @@ export class SimpleAppAbstractController<TService extends ServiceType, TApiSchem
   async _list(appuser:UserContext) {
     return this.service.list(appuser,);
   }
-  async _search(appuser:UserContext,searchObject:Object) {
-    return this.service.search(appuser,searchObject);
+  async _search(appuser:UserContext,searchObject:SearchBody) {
+    
+    return this.service.search(appuser,searchObject['filter'], searchObject['fields'],searchObject['sorts']);
   }
   async _autocomplete(appuser:UserContext,keyword: string) {
     return this.service.getAutoComplete(appuser,keyword);

@@ -1,3 +1,4 @@
+import { foreignkeys } from './storage';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 export type ChildModels = {
   [key: string]: { 
@@ -10,7 +11,8 @@ export type ChildModels = {
     apiSettings?:ApiSetting[],
     requireautocomplete: boolean
     isolationtype:string
-    hasdocformat:boolean
+    hasdocformat:boolean,
+    foreignkeys:any
   };
 };
 export enum Fieldtypes {
@@ -46,6 +48,13 @@ export type JsonSchemaProperties= {
   // JSONSchema7Definition ,JSONSchema7
 }
 
+//foreign key setting in current document
+export type MyForeignKey = {
+  [collectionname:string]:string[]
+}
+
+
+//centralize foreignkey catalogue for all document
 export type TypeForeignKeyCatalogue = {
   [cataloguename:string]:TypeForeignKey
 }
@@ -80,7 +89,9 @@ docStatusSettings:DocStatusSetting[],
 apiSettings:ApiSetting[],
 requireautocomplete:boolean,
 isolationtype:string
-hasdocformat:boolean
+hasdocformat:boolean,
+foreignkeys: MyForeignKey
+
 }
 
 export type DocStatusSetting = {
@@ -110,4 +121,5 @@ export type DocSetting = {
   apiSettings:ApiSetting[],
   requireautocomplete:boolean
   isolationtype:string
+  foreignkeys: MyForeignKey
 }

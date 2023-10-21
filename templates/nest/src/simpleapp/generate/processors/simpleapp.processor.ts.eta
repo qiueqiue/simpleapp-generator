@@ -1,7 +1,10 @@
 import { Injectable, Logger,Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as jsonpath from 'jsonpath'
+import {  uniq } from 'lodash';
+
 import {foreignkeys} from '../commons/dicts/foreignkeys'
-import { Model,Types,PipelineStage,mongo} from 'mongoose';
+import { Model,Types,PipelineStage,mongo, FilterQuery, ProjectionType} from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
@@ -13,6 +16,7 @@ import {
   HttpExceptionOptions,
 } from '@nestjs/common/exceptions';
 import { UserContext } from '../commons/user.context';
+import { DocNumberFormatGenerator } from '../commons/docnogenerator.service';
 
 export enum IsolationType {
   'none' = 'none',
@@ -55,7 +59,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
   protected withDocNumberFormat=false
-  
+  protected foreignkeys = {}
   // protected userprovider = new UserContext() ;
 
   constructor(
@@ -63,6 +67,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     docname: string,
     newdoc: Model<T>,
     isolationtype: IsolationType = IsolationType.org,
+    private docnogenerator:DocNumberFormatGenerator
   ) {            
     // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
     this.documentType = doctype.toUpperCase();
@@ -72,6 +77,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.hook(undefined,HookType.init, undefined);
     // this.tenantdoc = tenantdoc
   }
+  getDocumentType = () => this.documentType;
+  getDocumentName = () => this.documentName;
   getRecordId = (): string => this.data._id;
   setSchema = (newschema) => (this.jsonschema = newschema);
   getSchema = () => this.doc.schema.obj;
@@ -206,7 +213,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
 
   }
-  async search(appuser:UserContext,filters: Object,sort:any=undefined) {
+  async search(appuser:UserContext,filters: FilterQuery<T>,projection:ProjectionType<T>=undefined,sort:any=undefined) {
     try {
       const isolationFilter= {... this.getIsolationFilter(appuser)}
       this.polishIsolationFilter(isolationFilter)      
@@ -216,7 +223,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       await this.hook(appuser,HookType.beforeSearch, newfilters);
       // console.log("before _find",newfilters)
       // console.log("this.doc",this.doc)
-      const products = await this.doc.find(newfilters).sort(sort);
+      const products = await this.doc.find(newfilters,projection).sort(sort);
       // console.log("after search",products)
       const productlist = products.map((p: T) => {
         return p;
@@ -226,7 +233,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       //   console.log(products);
       return productlist;
     } catch (err) {
-      throw new InternalServerErrorException(err.message);
+      throw new BadRequestException(err.message);
     }
     // return this;
   }
@@ -530,7 +537,93 @@ export class SimpleAppService<T extends { _id?: string }> {
     // );
   }
   
+
+
   async genNewDocNo(appuser:UserContext,data:T){
-    //do nothing, by right at processor 
+    const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)
+    data[this.documentIdentityCode]=result    
   }
+
+
+  async identifyUniqueKeys(appuser:UserContext,data:T){
+     /**
+     * 1. looping schemas identify what foreign key exists
+     * 2. loop through record obtain all foreign key value 
+     * 3. get all unique key value in array {product:['xxxx','yyyy'],customer:['aaa']}
+     */
+     const schema = this.jsonschema
+
+     //get all foreign keys catalogue
+     const collections = Object.getOwnPropertyNames(this.foreignkeys)
+ 
+     //obtain exists data in according foreign key
+     const pipelines :PipelineStage[] =[ {$match:{_id:false}}] //exclude data from current collection
+     const vdata = data['_doc']
+     const keystore = {}
+     collections.forEach((collectionname)=>{
+       const fks:string[] = this.foreignkeys[collectionname]
+       let  results:string[] = []
+       fks.forEach(fieldpath=>{        
+         const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
+         results = results.concat(tmp)        
+       })
+       
+       
+ 
+       if(results.length>0){  
+         console.log(results)
+         if(results.length>1){
+           results = uniq<string>(results)   
+         }
+         
+         keystore[collectionname]= results   
+         let addfield={$addFields:{collection:collectionname}}        
+         
+         const stagefilter:PipelineStage =  {
+           $unionWith: {coll:collectionname,pipeline: [{ $match: { _id: {$in:results}} },addfield,{$project:{collection:1}}, ]}          
+         }
+         pipelines.push(stagefilter)
+       }            
+     })
+ 
+     // this.doc.db.collection(collectionname);
+     const unionresult = await this.doc.aggregate(pipelines)
+     
+     if(!unionresult){
+       throw new InternalServerErrorException("Foreignkey check execution error",pipelines as HttpExceptionOptions)
+     }else{
+       let searchresult:any = {}
+       unionresult.forEach(item=>{
+         if(searchresult[item.collection]){
+           searchresult[item.collection].push(item._id)
+         }else{
+           searchresult[item.collection] = [item._id]
+         }
+       })
+ 
+       //search is it all foreign key exists in db
+       for(let i=0; i<collections.length; i++){
+         const collectionname = collections[i]
+         const keys:string[] = keystore[collectionname]
+         if(!keys){
+           continue
+         }
+         for(let k=0;k<keys.length; k++){
+           const key = keys[k]
+           if(!searchresult[collectionname].includes(key)){
+             console.log(`Foreignkey ${key} at collection ${collectionname} does not exist`)
+             throw new BadRequestException(`Foreignkey ${key} at collection ${collectionname} does not exist`)
+           }
+           else{
+            //  console.log(`${collectionname} - ${key} found`)      
+           }
+         }
+ 
+       }      
+       
+     }    
+     
+  }
+
+
 }

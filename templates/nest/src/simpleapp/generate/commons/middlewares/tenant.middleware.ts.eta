@@ -75,9 +75,14 @@ export class TenantMiddleware implements NestMiddleware {
       }
       
     } catch(err) {
-      this.logger.warn("invalid xorg or user info")
+      this.logger.warn(err,"invalid xorg or user info",)
       this.logger.error(err)
-      return res.status(401).send('Invalid x-org or user info');
+      if(err=='invalid x-org'){
+        return res.status(403).send(err);
+      }else{
+        return res.status(401).send(err);
+      }
+      
     }
   }
 }
