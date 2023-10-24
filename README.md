@@ -308,4 +308,90 @@ SimpleApp-Vue-Component Fix:
 4. search at frontend
 
 
+Coding Rules
+1. create type and codes in 'shares'
+2. service class and doc class 
 
+
+
+
+JSON Properties
+document level property
+{ 
+  "type":"object"
+  "x-simpleapp-config":{
+    //isolation type, none/tenant/org/branch
+    "isolationType":"none",       
+    
+    //what special allow access it, undefine mean only super admin, and resource+action role can go in  
+    "requiredRoles":["SuperAdmin"],   
+    
+    // page type (example: crud), undefine will not generate page in frontend
+    "pageType":"crud",        
+    
+    //unique key for document, it build compound index depends on isolationtype
+    "uniqueKey":"invoiceNo",  
+    
+    //use as display name in autocomplete, also add into textsearch
+    "documentTitle":"InvoiceTitle",      //no define this will not have auto complete and text search for this field
+    
+    
+    //frontend uniqueKey field become special input field which can generate doc number, once activated auto create new field `docNoFormat`
+    "generateDocumentNumber":true,
+    
+    //frontend use this field to show current month document, docNumberFormat generator will have monthly document number setting
+    "documentDate":"invoiceDate",
+
+    //manage document status and accessibility, it auto add field `documentStatus` when define
+    "allStatus":[
+      {"status":"CO","readOnly":true,"actions":["revert","void","close"]},
+      {"status":"V","readOnly":true,"actions":["revert"]},
+    ],
+    
+    //all custom api, response, paras, operation put here. variable define at entrypoint or querypara
+    "allApi":[{
+      "action":"confirm",
+      "entrypoint":":id/confirm",
+      "requiredrole":["SuperUser"],
+      "method":"post", 
+      "execute":"ping",
+      "description":"confirm document and change status to CO"
+    },{
+      "action":"void",
+      "entrypoint":":id/void",
+      "querypara":["reason"],
+      "requiredrole":["SuperUser"],
+      "method":"post", 
+      "execute":"ping",
+      "description":"confirm document and change status to CO"
+    }],      
+
+    // simple => pure model and service(no page,api),
+    // default => force masterdata property,  
+    // transaction => force masterdata property
+    "schemaType": "default",  
+
+    //frontend(client) and backend (processor) typescript class auto import this lib, helper for `formula`
+    "libs":[{"lib":"lodash","as":"_"}],   // both process class and frontend client class will import same lib
+
+    // frontend apply recalculation everytime current document change
+    // backend auto apply formula during create and update
+    "formula": [   //apply both frontend and backend, it different with concept on change, sequence of formula important
+      {"jsonpath":"$.subtotal","formula":"jslib.getDocumentSubTotal(@F{$.details})"},  //apply formula into single field
+      {"jsonpath":"$.tags","formula":"$F{$.tags}.map(item=>item.toUppeCase())"}, //apply upper case to all item in string array
+      {"jsonpath":"$.details","loop":"jslib.calculateLineTotal(item)"}, //apply multiple calculation of subtotal, tax, amtaftertax and etc, using loop
+      {"jsonpath":"$.total","formula":"@F{$.subtotal} + @F{$.taxamt}"}, //apply simple formula here
+    ],    
+    
+    // auto generate fields
+    documentType: 'SI',
+    documentName: 'Sales Invoice',
+    
+    //auto generated foreign keys catalogue
+    "foreignKeys":{ "customer":["$.customer._id"], "user":[{"$.preparedby._id"},{$.approveby._id"}]}  
+  },
+  "properties":{
+      "invoiceDate":{"type":"string"},
+       //and others field
+   }
+}

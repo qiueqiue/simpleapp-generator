@@ -482,16 +482,11 @@ export class SimpleAppService<T extends { _id?: string }> {
         //single schema may have multiple foreign key link here, loop all
         for (let j = 0; j < fobjs.length; j++) {
           const fkey = fobjs[j] + '._id';
-          let filter1 = {}
-          filter1[fkey] = id;
-          let filter2 = {}
-          filter2[fobjs[j] ] = id;
-
-          const filters = {$or:[
-            filter1,filter2
-          ]};
+          let filter = {}
+          filter[fkey] = id;
+         
                     
-          const result = await collection.findOne(filters);          
+          const result = await collection.findOne(filter);          
           if (result) {
             this.logger.error(result,"related result found")
             return result;

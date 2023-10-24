@@ -44,7 +44,7 @@ if(!options.configFile){
     throw error
   }
   const configs = require(path)
-  console.log("configurations: ",configs)
+  // console.log("configurations: ",configs)
   const jsonschemaFolder = configs.jsonschemaFolder
   const bpmnFolder = configs.bpmnFolder
   const backendFolder = configs.backendFolder 

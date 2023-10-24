@@ -1,7 +1,7 @@
 import * as constants from './constant'
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
-import {allforeignkeys} from './storage'
-import {TypeGenerateDocumentVariable,ChildModels,ModuleObject, SchemaType, SchemaConfig } from './type'
+import {foreignkeys} from './storage'
+import {TypeGenerateDocumentVariable,ChildModels,ModuleObject } from './type'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
 const clc = require("cli-color");
@@ -9,7 +9,6 @@ const path = require('path');
 import {mkdirSync, readdir,readFileSync,writeFileSync,existsSync,copyFileSync, readdirSync} from 'fs'
 import _ from 'lodash'
 import * as buildinschemas from './buildinschemas'
-import { JSONSchema7 } from 'json-schema';
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
 const X_DOCUMENT_TYPE='x-document-type'
@@ -29,13 +28,10 @@ let frontendpagefolder=''
 const allroles:any={}
 let activatemodules:ModuleObject[]=[]
 let generateTypes:any = {}
-
-
 export const run =  async (paraconfigs:any,genFor:string[],callback:Function) => {
   configs = paraconfigs
   frontendFolder=configs.frontendFolder
   backendFolder=configs.backendFolder
-  
   const groupFolder = configs.groupFolder
   if(genFor.includes('nest')){
     generateTypes['nest']=backendFolder
@@ -43,18 +39,13 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
   if(genFor.includes('nuxt')){
     generateTypes['nuxt']=frontendFolder
   }
-  // console.log("genForgenForgenForgenFor",genFor,generateTypes)
+  
   // 
   frontendpagefolder = `${frontendFolder}/pages/[xorg]`  
-  const buildinschemanames = Object.keys(buildinschemas)
-  for(let i=0; i<buildinschemanames.length;i++){
-    const schemaname = buildinschemanames[i]
-  // .forEach(async(schemaname)=>{    
-    const cloneschema:JSONSchema7  = {...buildinschemas[schemaname]}
-    // console.log("=====>>>>>",schemaname,cloneschema)
-    await processSchema(schemaname,cloneschema)
-  }
-  // console.log('jsonschemasjsonschemasjsonschemasjsonschemas',jsonschemas)
+  Object.keys(buildinschemas).forEach(schemaname=>{
+    await processSchema(schemaname,buildinschemas[schemaname])
+  })
+
   // const buildinschemas = readdirSync(constants.buildinschemafolder)
   // for(let i = 0; i< buildinschemas.length;i++){
   //   const file = buildinschemas[i]
@@ -62,32 +53,10 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
   // }
   // load available bpmn into array
   // const files = readdirSync(configs.jsonschemaFolder)
-  // for(let i = 0; i< files.length;i++){
-  //   const file = files[i]
-  //   await processSchema(file,constants.buildinschemafolder)
+  // for(let j = 0; j< files.length;j++){
+  //   const file = files[j]
+  //   await processSchema(file,configs.jsonschemaFolder)    
   // }
-  // const schemapath = process.cwd()+'/'+ configs.jsonschemaFolder 
-  // console.log("dynamic import" ,schemapath)
-  // const {category} = require(schemapath)
-  // const schemas = await import('/Users/kstan/dev/products/simtrain-next/project-design/jsonschemas');
-
-  // console.log(schemas)
-  // const schemanames = Object.keys(schemas)
-  // for(let i=0; i<schemanames.length;i++){
-  //   const schemaname = schemanames[i]
-  // .forEach(async(schemaname)=>{    
-    // const cloneschema:JSONSchema7  = {...buildinschemas[schemaname]}
-    // console.log("=====>>>>>",schemaname,cloneschema)
-    // await processSchema(schemaname,cloneschema)
-  // }
-//   
-  const files = readdirSync(configs.jsonschemaFolder)
-  for(let j = 0; j< files.length;j++){
-    const file = files[j]
-    const jsoncontent = readFileSync(`${configs.jsonschemaFolder}/${file}`, 'utf-8');      
-    const jsonschema = JSON.parse(jsoncontent)
-    await processSchema(file,jsonschema)    
-  }
   // //generate groups
   // const systemgroups = readdirSync(`${groupFolder}`)
   // for(let g = 0; g< systemgroups.length;g++){
@@ -98,23 +67,21 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
   //   const roles = prepareRoles(groupdata)
   //   allroles[documentname]=roles
   // }
-  finalize(activatemodules)
-  callback()
+  // finalize(activatemodules)
+  // callback()
 }
 
 // const processSchema=async (file:string,defFolder:string)=>{
-const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
+const processSchema=async (docname:string,jsondata:any)=>{
   
     // console.log(file,defFolder)
     // const filearr = file.split('.');
     // let rendertype = 'basic';
     // let docname = filearr[0].toLowerCase();
     // let doctype = filearr[1].toLowerCase();
-    const config:SchemaConfig = jsondata['x-simpleapp-config']
-    let doctype = config.documentType
-    let docname = config.documentName
+  
     // const jsonstring = readFileSync(defFolder +path.sep+ file, 'utf-8');      
-    
+    let allmodels: ChildModels = {} as ChildModels;
     
     // if (file.endsWith('.ts')) {  
     //   log.info(`Load `+clc.green(file))
@@ -123,17 +90,16 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
     //   const jsondata = require(filepath)
     //   console.log(jsondata)
       // const jsondata = JSON.parse(jsonstring);    
-      const  rendertype = 'basic';
+      // rendertype = 'basic';
       jsonschemas[docname] = jsondata;
-      const allmodels:ChildModels =  await readJsonSchemaBuilder(docname, jsondata);
-      console.log("allmodels",docname,allmodels)
-      generateSchema(docname, doctype, rendertype, allmodels);        
-      activatemodules.push({
-        doctype:doctype,
-        docname:capitalizeFirstLetter(docname),
-        pagetype: config.pageType??'',
-        api:config.additionalApis
-      })
+      allmodels = await readJsonSchemaBuilder(doctype, docname, jsondata,foreignkeys);
+      // generateSchema(docname, doctype, rendertype, allmodels);        
+      // activatemodules.push({
+      //   doctype:doctype,
+      //   docname:capitalizeFirstLetter(docname),
+      //   pagetype: jsonschemas[docname][X_PAGE_TYPE]??'',
+      //   api:jsondata['x-document-api']
+      // })
     // } else {
       // log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
     // }      
@@ -143,25 +109,20 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
  * generate frontend nuxt and backend nest codes.
  * 
 */
-const generateSchema = ( docname: string,
+const generateSchema = async( docname: string,
   doctype: string,
   rendertype: string,
   allmodels: ChildModels)=>{
-
-    
     const simpleapptemplates = `${constants.templatedir}/basic`
     const finalizefolder = `${constants.templatedir}/nest`
-    const modelname = _.upperFirst(docname)
-    const currentmodel = allmodels[modelname]
-
-    //console.log("---^^^^^------",modelname,docname, doctype, rendertype,currentmodel,allmodels)
+    const currentmodel = allmodels[capitalizeFirstLetter(docname)]
     const variables:TypeGenerateDocumentVariable = {
       name: docname,
       doctype: doctype,
       models: allmodels,
-      autocompletecode:currentmodel.codeField??'',
-      autocompletename:currentmodel.nameField??'',
-      moreAutoComplete:currentmodel.moreAutoComplete ??[],
+      autocompletecode:currentmodel.codeField,
+      autocompletename:currentmodel.nameField,
+      moreAutoComplete:currentmodel.moreAutoComplete,
       schema: currentmodel.model,
       apiSchemaName: capitalizeFirstLetter(docname), //capitalizeFirstLetter(doctype) + 'ApiSchema',
       typename: capitalizeFirstLetter(docname),
@@ -174,11 +135,12 @@ const generateSchema = ( docname: string,
       backEndCode: '',
       controllerCode:'',
       apiSchemaCode:'',
-      docStatusSettings: currentmodel.docStatusSettings??[],
-      apiSettings: currentmodel.apiSettings??[],
+      docStatusSettings: currentmodel.docStatusSettings,
+      apiSettings: currentmodel.apiSettings,
+      requireautocomplete: currentmodel.requireautocomplete,
       isolationtype: currentmodel.isolationtype,      
       hasdocformat: currentmodel.hasdocformat,
-      foreignkeys: currentmodel.foreignkeys ?? {}
+      foreignkeys: currentmodel.foreignkeys
     };
 
     const templatefolder = `${constants.templatedir}/${rendertype}`
@@ -194,7 +156,7 @@ const generateSchema = ( docname: string,
     const backendServiceFolder = `${backendFolder}/src/simpleapp/services`    
     
     
-    Object.keys(generateTypes).forEach((foldertype)=>{
+    Object.getOwnPropertyNames(generateTypes).forEach((foldertype)=>{
       
 
       //generate code for every schema      
@@ -320,7 +282,7 @@ const finalize=(modules:ModuleObject[])=>{
     configs:configs,
     modules:modules,
     allroles:allroles,
-    foreignkeys:allforeignkeys,
+    foreignkeys:foreignkeys,
   }
   
   

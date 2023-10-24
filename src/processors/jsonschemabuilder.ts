@@ -1,11 +1,13 @@
 // import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
-import { JSONSchema7, JSONSchema7Definition,JSONSchema7Array,JSONSchema7TypeName } from 'json-schema';
+import { JSONSchema7, JSONSchema7Definition,JSONSchema7Array,JSONSchema7TypeName, JSONSchema7Object } from 'json-schema';
 import * as js7 from 'json-schema';
+import _ from 'lodash'
 import { capitalizeFirstLetter } from '../libs';
-import {JsonSchemaProperties,MyForeignKey} from "../type"
+import {SchemaType,SchemaConfig,JsonSchemaProperties,MyForeignKey} from "../type"
+// import * as schematemplates from '../schematype'
 import { Logger, ILogObj } from "tslog";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
-import {foreignkeys} from '../storage'
+import {allforeignkeys} from '../storage'
 // import { ConflictException } from '@nestjs/common';
 import {
   FieldModel,
@@ -14,336 +16,234 @@ import {
   SchemaModel,
   TypeForeignKey,
   TypeForeignKeyCatalogue,
-  DocSetting,ApiSetting,DocStatusSetting,
+  DocSetting,
   
 } from '../type';
-import { json } from 'stream/consumers';
 const log: Logger<ILogObj> = new Logger();
-
-const X_DOCUMENT_NO='x-document-no'
-const X_DOCUMENT_LABEL='x-document-label'
-const X_AUTOCOMPLETE_FIELD='x-autocomplete-field'
-const X_DOCUMENT_NAME='x-document-name'
-const X_DOCUMENT_TYPE='x-document-type'
-const X_COLLECTION_NAME='x-document-collection'
-const X_DOCUMENT_STATUS='x-document-status'
-const X_DOCUMENT_API='x-document-api'
-const X_IGNORE_AUTOCOMPLETE='x-ignore-autocomplete'
-const FOREIGNKEY_PROPERTY='x-foreignkey'
-
-const FORMAT_TEL='tel'
-const FORMAT_DOCNO='documentno'
-const X_ISOLATION_TYPE='x-isolation-type'
-
-let docSetting:DocSetting={} as DocSetting
-
-let hasdocformat = false
-let allmodels: ChildModels = {};
-let fullschema={}
-// let fieldAutoCompleteCode=''
-// let fieldAutoCompleteName=''
-let moreAutoComplete:string[]=[]
-
-
-const newDocSetting=(doctype:string,docname:string):DocSetting=>{
-  return {
-    docName:docname,  //done
-    docType:doctype,  //done
-    colDocNo:'',      //done
-    colDocLabel:'',   //done
-    collectionName:docname, //done
-    autocompleteFields:[],
-    docStatusSettings:[],
-    apiSettings:[],
-    requireautocomplete:true,
-    isolationtype:"org",    
-    foreignkeys:{}
-
-  }
+const configname =  "x-simpleapp-config"
+const FOREIGNKEY_PROPERTY = 'x-foreignkey'
+const COMPULSORYFIELDS={  _id:{type:'string'},
+  created:{type:'string'},
+  updated:{type:'string'},
+  createdby:{type:'string'},
+  updatedby:{type:'string'},
+  tenantId: {type:'integer',default:1,minimum:1 },
+  orgId: {type:'integer',default:1,minimum:1 },
+  branchId: {type:'integer',default:1,minimum:1 },
 }
-export const readJsonSchemaBuilder = async (
-  doctype: string,
-  docname: string,
-  orijsondata:JSONSchema7,
-  allforeignkeys:TypeForeignKeyCatalogue
+export const readJsonSchemaBuilder = async (docname: string,orijsondata:JSONSchema7,
 ) => {
-  docSetting=newDocSetting(doctype,docname)
-  hasdocformat=false
-  // fieldAutoCompleteCode=''
-  // fieldAutoCompleteName=''
-  moreAutoComplete=[]
-  allmodels = {};
+  // log.info(`----------------------------------------------------`)
+  // log.error(`Processing schema ${docname}`)
+  //validation
+  if(!orijsondata[configname]) throw new Error(`Undefine ${configname}`)
   
-  const validateddata: JSONSchema7 = { ...orijsondata };
-  let schema: SchemaModel | SchemaModel[];
-  const  tmpjsondata = await $RefParser.dereference(orijsondata).then((schema)=>{
-    // console.log("schema",doctype, schema['properties']['category']? schema['properties']['category']:'')
-    return schema
+  // // Object.assign(targettemplate,schematemplates[currentschematype])
+  // console.log("just want process schemaprops ********>>",targettemplate)
+  
+  let schemaconfigs:SchemaConfig = orijsondata[configname]
+  const doctype=schemaconfigs.documentType
+  if(!schemaconfigs.collectionName){
+    schemaconfigs.documentName
+  }
+
+  if(!schemaconfigs.foreignKeys){
+    schemaconfigs.foreignKeys={}
+  }
+
+  // let schemaprops:any = targettemplate.properties 
+  // console.log("just want process targettemplate ######>>>",orijsondata)
+  // let schemadefinitions = targettemplate.definitions
+
+  
+  // Object.assign(schemaconfigs,orijsondata[configname])
+  // Object.assign(schemaprops,orijsondata.properties)
+  
+  // if(orijsondata['definitions']){
+  //   Object.assign(schemadefinitions,orijsondata['definitions'])
+  // }
+  
+  
+  // //merge properties from template
+  // Object.keys(schemaconfigs).forEach(keyname=>{
+  //   if(!schemaconfigs[keyname]){
+  //     log.fatal(`Undefine ${keyname} in "${configname}"`)
+  //   }
+  // })
+
+  //fill in default values
+  
+
+
+  // let newschema:JSONSchema7 & SchemaType = {
+  //   type: 'object',
+  //   "x-simpleapp-config":schemaconfigs,
+  //   properties:schemaprops,
+  //   definitions:schemadefinitions
+    
+  // }
+  // log.warn("------------------")
+  // log.warn(newschema)
+  // dereference in case implement remote schema
+  // console.log("before dereference jsondata.properties =======---",newschema)
+  const  tmpjsondata = await $RefParser.dereference(orijsondata).then((tmp)=>{    
+    return tmp
   })
+  // console.log("First level jsondata.properties =======++",tmpjsondata)
+  // log.info(tmpjsondata,`==========================${schemaconfigs.documentType}==========================`)
   const  jsondata:JSONSchema7 = {...tmpjsondata} as JSONSchema7
-
+  let allmodels: ChildModels = {};
   
-  if (jsondata && jsondata.type == 'object') {
-    //no _id then need add
-    // console.log(jsondata)
-    schema = processObject(doctype,docname, jsondata)
-    // console.log("schema",schema)
-  } else if (jsondata.type == 'array') {
-    throw(`unsupport array type for ${docname}.${doctype}`)
-  }
-
-  if(docSetting.colDocNo=='' && docSetting.requireautocomplete) {
-    log.error(`you shall define 1 field with property:'${X_DOCUMENT_NO}'`)
-    throw "missing field property"
-  }
-  if(docSetting.colDocLabel=='' && docSetting.requireautocomplete) {
-    log.error(`you shall define 1 field with property: '${X_DOCUMENT_LABEL}'}`)
-    throw "missing field property"
-  }
-  
-  return Promise.resolve(allmodels);
+  await genSchema(
+    schemaconfigs.documentName,
+    'object',
+    jsondata.properties,
+    jsondata['required'] ?? [],
+    '$',
+    schemaconfigs,
+    allmodels
+  );
+  return allmodels
 };
 
 
-const processObject =  (doctype: string,
-  docname: string,
-  jsondata:JSONSchema7,)  =>{
-    if(!jsondata['properties']){      
-      throw ("Invalid json schema {doctype}.{docname}, no 'properties' defined")
-    }
-    log.info("processObject document type",doctype,docname)
+/**
+ * process recursively every property in schema
+ * @param SchemaConfig 
+ * @param parentName 
+ * @param schematype 
+ * @param jsondata 
+ * @param requiredlist 
+ * @param parentpath 
+ * @param schemaconfigs
+ * @returns 
+ */
+const genSchema = async (
+    docname: string,
+    schematype: string,
+    jsondata: JsonSchemaProperties,
+    requiredlist: string[] | undefined,parentpath:string,
+    schemaconfigs:SchemaConfig,
+    allmodels: ChildModels
+  ): Promise<SchemaModel> => {
     
+    const newmodel: SchemaModel = {};
+    // console.log("jsondata--->>>>",docname,jsondata)
+    Object.keys(jsondata).forEach(async (key) => {          
+      //below is Object.assign use for force datatype compatibility
+      const obj:JSONSchema7={}
+      Object.assign(obj,jsondata[key]);
+      const objectitem:JSONSchema7= {} as JSONSchema7    
+      Object.assign(objectitem,obj.items);
 
-    //ensure some field exists, also override it
-    jsondata.properties['_id'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
-    jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['updatedby'] = {type: 'string',description: 'Control value, dont edit it',};
-
-    if(doctype !='tenant'){
-      jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
-    }
-    if(doctype !='org'){
-      jsondata.properties['orgId'] = {type: 'number',description: 'Control value, dont edit it',};
-    }
-    if(doctype !='branch'){
-      jsondata.properties['branchId'] = {type: 'number',description: 'Control value, dont edit it',};
-    }
-    
-    if(jsondata[X_ISOLATION_TYPE] && ['none','tenant','org','branch'].includes(jsondata[X_ISOLATION_TYPE])  ){      
-      docSetting.isolationtype=jsondata[X_ISOLATION_TYPE]
-    }
-    if(jsondata[X_IGNORE_AUTOCOMPLETE] && jsondata[X_IGNORE_AUTOCOMPLETE]==true){
-      docSetting.requireautocomplete=false
-    }
-    if(jsondata[X_DOCUMENT_API] && Array.isArray(jsondata[X_DOCUMENT_API])){
-      // log.warn("x-document-api exists:")
-      // log.warn(jsondata[X_DOCUMENT_API])
-      for(let i=0; i<jsondata[X_DOCUMENT_API].length;i++){
-        
-        const tmp:ApiSetting =jsondata[X_DOCUMENT_API][i]
-        // console.log(i,jsondata[X_DOCUMENT_API]['action'])
-        if(!tmp.action){
-          const errmsg = "x-document-api defined but undefine property 'action'"
-          log.error(errmsg)
-          
-          throw errmsg
-        }
-        if(!tmp.method){
-          const errmsg = "x-document-api defined but undefine property 'method'"
-          log.error(errmsg)
-          throw errmsg
-        }
-        
-        let isexists = false
-        for(let i =0; i< docSetting.apiSettings.length ; i++){
-          const apiobj = docSetting.apiSettings[i]
-          // log.info(docname," validate:tmp["+tmp['action']+"]==apiobj["+apiobj['action'] +"]&&tmp["+ tmp['method']+"] == apiobj["+apiobj['method']+"]")
-          if(tmp['action']==apiobj['action'] && tmp['method'] == apiobj['method']){
-            //skip
-            isexists=true
-            break;
-          }
-        }
-        if(!isexists){
-          docSetting.apiSettings.push(tmp)
-        }
-     }
-    }
-    // log.warn("docSetting.apiSettings",docSetting.apiSettings)
-      if(jsondata[X_DOCUMENT_STATUS] && Array.isArray(jsondata[X_DOCUMENT_STATUS])){
-        for(let i=0; i<jsondata[X_DOCUMENT_STATUS].length;i++){
-          const tmp:DocStatusSetting =jsondata[X_DOCUMENT_STATUS][i]
-          if(tmp.statusCode ===undefined){
-            const errmsg = "x-document-status defined but undefine property 'statusCode'"
-            log.error(errmsg)
-            throw errmsg
-          }
-          if(!tmp.statusName ===undefined){
-            const errmsg = "x-document-status defined but undefine property 'statusName'"
-            log.error(errmsg)
-            throw errmsg            
-          }
-          docSetting.docStatusSettings.push(tmp)
-        }
-     }
-
-    //  moreAutoComplete:docSetting.autocompleteFields,
-    // docStatusSettings:docSetting.docStatusSettings,
-    // apiSettings:docSetting.apiSettings,
-    // SchemaModel | SchemaModel[]
-    let data =  genSchema(
-      capitalizeFirstLetter(docname),
-      'object',
-      jsondata.properties,
-      jsondata['required'] ?? [],
-      '$'
-    );
-    
-    return data
-}
-
-const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProperties,
-  requiredlist: string[] | undefined,parentpath:string): SchemaModel => {
-  const newmodel: SchemaModel = {};
-  const props = Object.getOwnPropertyNames(jsondata ??{});
-  // console.log('==== jsondata', jsondata);
-  console.log("requiredlist:::::",docname,"::::",requiredlist)
-  for (let i = 0; i < props.length; i++) {    
-    const key = props[i];
-    
-    //below is Object.assign use for force datatype compatibility
-    const obj:JSONSchema7={}
-    Object.assign(obj,jsondata[key]);
-    const objectitem:JSONSchema7= {} as JSONSchema7    
-    Object.assign(objectitem,obj.items);
-
-    let isrequired = false
-    if(requiredlist &&  requiredlist.includes(key)){
-      isrequired=true
-    }
-    const newName: string = docname + capitalizeFirstLetter(key);
-    // log.info("property is:",key,newName,obj)
-   if(obj[X_DOCUMENT_NO]){    
-    docSetting.colDocNo=key
-    if(obj['format'] && obj['format']==FORMAT_DOCNO){
-      hasdocformat=true
-    }else{
-      hasdocformat=false
-      obj.minLength=obj.minLength??1
-      jsondata[key]['minLength']=obj.minLength  
-    }
-    
-   }
-   if(obj[X_DOCUMENT_LABEL]){
-    docSetting.colDocLabel=key
-    obj.minLength=obj.minLength??1
-    jsondata[key]['minLength']=obj.minLength
-   }
-
-   //this field reserved for X_DOCUMENT_NO only
-   
-  
-   
-  //  if(obj[X_COLLECTION_NAME]){
-  //   docSetting.collectionName=key    
-  //  }
+      let isrequired = false
+      if(requiredlist &&  requiredlist.includes(key)){
+        isrequired=true
+      }
+      const newName: string = _.upperFirst(docname) + _.upperFirst(key);
 
 
-   if(obj[X_AUTOCOMPLETE_FIELD]){
-    docSetting.autocompleteFields.push(key)
-   }
-   
-
-  //  if(obj.format && obj.format==FORMAT_TEL){
-  //   obj.pattern=obj.pattern ?? '/^\d{7,15}$/gm'
-  //  }
-  //  if (obj.type == 'object' && obj.items  ){
-  //   console.log("Refer to another object",docname,': ',key,obj,obj.items)
-    
-    // obj,obj.items
-    //foreignkeys
-    //FOREIGNKEY_PROPERTY
-    // newmodel[key] = 'Object';
+    // if(obj[X_AUTOCOMPLETE_FIELD]){
+    //   docSetting.autocompleteFields.push(key)
     // }
-    // else 
-    if(obj[FOREIGNKEY_PROPERTY]){
-      // console.warn("FOREIGNKEY_PROPERTY exists",FOREIGNKEY_PROPERTY,obj[FOREIGNKEY_PROPERTY])
-      const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
-      const clientdatacollection = docname.toLowerCase()
-      const foreignkeyidentity= key
-      const foreignkeypath = (obj.type=='object') ?`${parentpath}.${key}._id`:`${parentpath}.${key}`
+    
+
+    //  if(obj.format && obj.format==FORMAT_TEL){
+    //   obj.pattern=obj.pattern ?? '/^\d{7,15}$/gm'
+    //  }
+    //  if (obj.type == 'object' && obj.items  ){
+    //   console.log("Refer to another object",docname,': ',key,obj,obj.items)
       
-      if(docSetting.foreignkeys[masterdatacollection]){
-        docSetting.foreignkeys[masterdatacollection].push(foreignkeypath)
-      }else{
-        docSetting.foreignkeys[masterdatacollection]=[foreignkeypath]
-      }
-      if(!foreignkeys[masterdatacollection]){
-        let tmp:TypeForeignKey = {} as TypeForeignKey
-        tmp[clientdatacollection]=[foreignkeyidentity]
-        foreignkeys[masterdatacollection] = tmp
-      }
-      else if(!foreignkeys[masterdatacollection][clientdatacollection]){
-        foreignkeys[masterdatacollection][clientdatacollection]=[foreignkeyidentity]
-      }else{
-        foreignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
-      }
-              
-    }
+      // obj,obj.items
+      //foreignkeys
+      //FOREIGNKEY_PROPERTY
+      // newmodel[key] = 'Object';
+      // }
+      // else 
+      if(obj[FOREIGNKEY_PROPERTY]){
+        const masterdatacollection = obj[FOREIGNKEY_PROPERTY]
+        const clientdatacollection = docname.toLowerCase()
+        const foreignkeyidentity= (obj.type=='object')? `${key}._id` : key
+        const foreignkeypath = (obj.type=='object') ?`${parentpath}.${key}._id`:`${parentpath}.${key}`
+        
+        //current document foreignkeys
+        if(schemaconfigs.foreignKeys[masterdatacollection]){
+          schemaconfigs.foreignKeys[masterdatacollection].push(foreignkeypath)
+        }else{
+          schemaconfigs.foreignKeys[masterdatacollection]=[foreignkeypath]
+        }
 
-    if (obj.type == 'object') {
-            
-      genSchema(newName, obj.type, obj.properties, obj.required,`${parentpath}.${key}`);
-      newmodel[key] = newName;
-    } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
-      const childprops = objectitem?.properties
-      if(!childprops['created']){
-        childprops['created']={type:'string',description:'iso8601 dataempty mean new record'}
-      }
-      if(!childprops['updated']){
-        childprops['updated']={type:'string',description:'iso8601 or empty'}
-      }
-      if(!childprops['createdby']){
-        childprops['createdby']={type:'string'}
-      }
-      if(!childprops['updatedby']){
-        childprops['updatedby']={type:'string'}
-      }
-      if(!childprops['_id']){
-        childprops['_id']={type:'string'}
+        //centralize foreignkeys catalogue
+        if(!allforeignkeys[masterdatacollection]){
+          let tmp:TypeForeignKey = {} as TypeForeignKey
+          tmp[clientdatacollection]=[foreignkeyidentity]
+          allforeignkeys[masterdatacollection] = tmp
+        }
+        else if(!allforeignkeys[masterdatacollection][clientdatacollection]){
+          allforeignkeys[masterdatacollection][clientdatacollection]=[foreignkeyidentity]
+        }else{
+          allforeignkeys[masterdatacollection][clientdatacollection].push(foreignkeyidentity)
+        }
+                
       }
 
-      genSchema(newName, obj.type, objectitem?.properties, obj.items['required'],`${parentpath}.${key}[*]`);
-      newmodel[key] = [newName];
-    } else if (obj.type == 'array' && objectitem?.type != 'object') {
-      //array need submodel
-      // genSchema(newName, obj.type, obj.items.properties);
-      const objecttype:string = objectitem.type?.toString() ?? 'string'
-      newmodel[key] = [objecttype];
-    } else {
-      newmodel[key] = getField(key, obj, isrequired);
-      // console.log(key,'--------newmodel',obj, newmodel[key]);
-    }
-  }
-  allmodels[docname] = { 
-    type: schematype, 
-    model: newmodel,
-    codeField: docSetting.colDocNo ,
-    nameField: docSetting.colDocLabel,
-    moreAutoComplete:docSetting.autocompleteFields,
-    docStatusSettings:docSetting.docStatusSettings,
-    apiSettings:docSetting.apiSettings,
-    requireautocomplete:docSetting.requireautocomplete,
-    isolationtype:docSetting.isolationtype,
-    hasdocformat:hasdocformat,
-    foreignkeys: docSetting.foreignkeys
-  };
-  // console.warn("-------------apiSettings-----",docname,"::::",docSetting.apiSettings)
-  return newmodel;
+      if (obj.type == 'object') {
+        // console.log("line  175",key,obj.type,obj.properties)      
+        await genSchema(newName, obj.type, obj.properties, obj.required,`${parentpath}.${key}`,schemaconfigs,allmodels);
+        newmodel[key] = newName;
+      } else if (obj.type == 'array' && obj.items && objectitem?.type == 'object') {
+        const childprops = objectitem?.properties
+        if(!childprops['created']){
+          childprops['created']={type:'string',description:'iso8601 dataempty mean new record'}
+        }
+        if(!childprops['updated']){
+          childprops['updated']={type:'string',description:'iso8601 or empty'}
+        }
+        if(!childprops['createdby']){
+          childprops['createdby']={type:'string'}
+        }
+        if(!childprops['updatedby']){
+          childprops['updatedby']={type:'string'}
+        }
+        if(!childprops['_id']){
+          childprops['_id']={type:'string'}
+        }
+        // console.log("line  195")      
+        await genSchema(newName, obj.type, objectitem?.properties, obj.items['required'],`${parentpath}.${key}[*]`,schemaconfigs,allmodels);
+        newmodel[key] = [newName];
+      } else if (obj.type == 'array' && objectitem?.type != 'object') {
+        //array need submodel
+        // genSchema(newName, obj.type, obj.items.properties);
+        const objecttype:string = objectitem.type?.toString() ?? 'string'
+        newmodel[key] = [objecttype];
+      } else {
+        newmodel[key] = getField(key, obj, isrequired);
+        // console.log(key,'--------newmodel',obj, newmodel[key]);
+      }
+    })
+    log.warn(newmodel,docname)
+    
+    const modelname= _.upperFirst(docname)
+    log.warn("$$$$$$$$$$>>>",modelname,)
+    log.warn(newmodel,modelname)
+    allmodels[modelname] = { 
+      type: schematype, 
+      model: newmodel,
+      codeField: schemaconfigs.uniqueKey??'' ,
+      nameField: schemaconfigs.documentTitle ?? '',
+      moreAutoComplete:schemaconfigs.additionalAutoCompleteFields ?? [],
+      docStatusSettings:schemaconfigs.allStatus ?? [],
+      apiSettings:schemaconfigs.additionalApis ?? [],
+      // requireautocomplete:docSetting.requireautocomplete,
+      isolationtype:schemaconfigs.isolationType ,
+      hasdocformat:schemaconfigs.generateDocumentNumber ?? false,
+      foreignkeys: schemaconfigs.foreignKeys ?? {}
+    };
+    // console.warn("-------------apiSettings-----",docname,"::::",docSetting.apiSettings)
+    return newmodel;
 };
+
+
 
 const getField = (
   fieldname: string,
@@ -380,4 +280,3 @@ const getField = (
   }
   return f;
 };
-

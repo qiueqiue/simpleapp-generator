@@ -17,7 +17,7 @@
       "orgId": {"type": "integer"},
       "branchId": {"type": "integer"},
       "group": {"type": "string"},
-      "uid": {"type": "string"},
+      "uid": {"type": "string","x-foreignkey":"user"},
       "user_id" : {"type":"string"}
     }
   }

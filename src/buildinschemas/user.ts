@@ -1,0 +1,28 @@
+import {SchemaType,RESTMethods,IsolationType} from '../type'
+
+export const user:SchemaType ={
+    type: "object",
+    "x-simpleapp-config":{
+        documentType:'user',
+        documentName:'user',
+        isolationType:IsolationType.tenant,
+        uniqueKey:'email',
+        documentTitle:'fullname',
+        requiredRoles:["SuperUser"],    
+        additionalAutoCompleteFields:['uid']      
+    },
+    properties: {
+        _id:{type:'string'},
+        created:{type:'string'},
+        updated:{type:'string'},
+        createdby:{type:'string'},
+        updatedby:{type:'string'},
+        tenantId: {type:'integer',default:1,minimum:1 },
+        orgId: {type:'integer',default:1,minimum:1 },
+        branchId: {type:'integer',default:1,minimum:1 },
+        uid: {type: "string",},
+        fullname: {type: "string",minLength:3},
+        email: {type: "string",minLength:10,format: "email"},
+        active: {type: "boolean",default:true}   
+      }
+}
