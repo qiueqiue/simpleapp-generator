@@ -1,6 +1,6 @@
 {
   "name": "@simitgroup/simpleapp-generator",
-  "version": "1.0.37",
+  "version": "1.0.40",
   "description": "frontend nuxtjs and backend nests code generator using jsonschema",
   "main": "dist/index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^10.1.0",
+    "@simitgroup/simpleapp-generator": "^1.0.36",
     "@simitgroup/simpleapp-vue-component": "^1.0.65",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",

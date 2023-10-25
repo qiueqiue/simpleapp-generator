@@ -1,4 +1,5 @@
-import {SchemaType,RESTMethods,IsolationType} from '/Users/kstan/dev/lowcode/simpleapp-generator/src/type'
+//examples
+import {SchemaType,RESTMethods,IsolationType} from '/usr/local/lib/node_modules/@simitgroup/simpleapp-generator/src/type'
 export const category:SchemaType =
  {
     type: "object",
