@@ -1,0 +1,17 @@
+#!/bin/bash
+ts-node generate.ts   
+npx prettier  --write jsonschemas
+
+type=$1
+if [ type == 'frontend' ]; then
+    simpleapp-generator -c config.json -g frontend
+elif [ type == 'updatefrontend' ]; then
+    simpleapp-generator -c config.json -g updatefrontend
+elif [ type == 'backend' ]; then
+    simpleapp-generator -c config.json -g backend
+elif [ type == 'updatebackend' ]; then
+    simpleapp-generator -c config.json -g updatebackend
+fi
+
+cp -a ./shares backend/src/simpleapp/generate
+cp -a ./shares frontend/simpleapp/generate

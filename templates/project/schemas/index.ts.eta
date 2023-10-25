@@ -1,0 +1,5 @@
+//examples
+export { product } from './product';
+export {category} from './category'
+
+

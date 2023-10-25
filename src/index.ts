@@ -30,7 +30,15 @@ let path=''
 const options = program.opts();
 console.log(figlet.textSync(`SimpleApp Generator`));
 console.log(figlet.textSync(`${version}`));
-if(!options.configFile){
+let continueexecute = true
+if(options.generateType && options.generateType=='init'){
+  continueexecute=false
+  fw.prepareProject(()=>{
+    process.exit(1)
+  })  
+  
+}
+else if(!options.configFile){
     log.error("Config file parameter is required. Example: simpleapp-generator -c ./config.json")
     throw "Undefine configuration file"
   }
@@ -43,89 +51,94 @@ if(!options.configFile){
     log.error("undefine configuration file, use command simpleapp-generator -c <configfilename.json>")  
     throw error
   }
-  const configs = require(path)
-  // console.log("configurations: ",configs)
-  const jsonschemaFolder = configs.jsonschemaFolder
-  const bpmnFolder = configs.bpmnFolder
-  const backendFolder = configs.backendFolder 
-  const frontendFolder = configs.frontendFolder   
+
+if(continueexecute){
+    
+    const configs = require(path)
+    // console.log("configurations: ",configs)
+    const jsonschemaFolder = configs.jsonschemaFolder
+    const bpmnFolder = configs.bpmnFolder
+    const backendFolder = configs.backendFolder 
+    const frontendFolder = configs.frontendFolder   
 
 
 
-const run = async()=>{
+  const run = async()=>{
+      fw.setConfiguration(configs)
+      fw.runCreateNuxt(()=>{
+          fw.runCreateNest(()=>{
+              fw.prepareNest(()=>{
+                  fw.prepareNuxt(()=>{
+                      // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
+                        generate.run(configs,['nest','nuxt'],()=>{
+                          fw.prettyNuxt()    
+                          fw.prettyNest()                                                
+                      })                    
+                  })                
+              })            
+          })
+      })
+  }
+  const reGenFrontend = async()=>{
     fw.setConfiguration(configs)
-    fw.runCreateNuxt(()=>{
+    generate.run(configs,['nuxt'],()=>{
+      fw.prettyNuxt()                                      
+    })  
+  }
+  const reGenBackend = async()=>{
+    fw.setConfiguration(configs)
+    generate.run(configs,['nest'],()=>{
+      fw.prettyNest()                                                
+    })  
+  }
+
+  const runbackend = async()=>{
+    fw.setConfiguration(configs)
+    fw.setConfiguration(configs)
         fw.runCreateNest(()=>{
             fw.prepareNest(()=>{
-                fw.prepareNuxt(()=>{
-                    // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{                        
-                      generate.run(configs,['nest','nuxt'],()=>{
-                        fw.prettyNuxt()    
+                    // generate.run(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                      generate.run(configs,['nest'],()=>{
                         fw.prettyNest()                                                
                     })                    
-                })                
-            })            
-        })
-     })
-}
-const reGenFrontend = async()=>{
-  fw.setConfiguration(configs)
-  generate.run(configs,['nuxt'],()=>{
-    fw.prettyNuxt()                                      
-  })  
-}
-const reGenBackend = async()=>{
-  fw.setConfiguration(configs)
-  generate.run(configs,['nest'],()=>{
-    fw.prettyNest()                                                
-  })  
-}
-
-const runbackend = async()=>{
-  fw.setConfiguration(configs)
-  fw.setConfiguration(configs)
-      fw.runCreateNest(()=>{
-          fw.prepareNest(()=>{
-                  // generate.run(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
-                    generate.run(configs,['nest'],()=>{
-                      fw.prettyNest()                                                
-                  })                    
-        })                
-      
-    })
-}
-
-const runfrontend = async()=>{
-  fw.setConfiguration(configs)
-  fw.runCreateNuxt(()=>{
-              fw.prepareNuxt(()=>{
-                  // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
-                  generate.run(configs,['nuxt'],()=>{
-                      fw.prettyNuxt()    
-                  })                    
+          })                
+        
       })
-   })
-}
+  }
+
+  const runfrontend = async()=>{
+    fw.setConfiguration(configs)
+    fw.runCreateNuxt(()=>{
+                fw.prepareNuxt(()=>{
+                    // generate.initialize(jsonschemaFolder,configs.groupFolder,bpmnFolder,backendFolder,frontendFolder,()=>{
+                    generate.run(configs,['nuxt'],()=>{
+                        fw.prettyNuxt()    
+                    })                    
+        })
+    })
+  }
 
 
-switch(options.generateType){
-  case 'updatefrontend':
-    reGenFrontend()
-  break;
-  case 'updatebackend':
-    reGenBackend()
-  break;
-  case 'frontend':
-    runfrontend()
-  break;
-  case 'backend':
-    runbackend()
-  break;
-  case 'all':
-    run()
-  break;
-  default:
-    log.error("unknown generate type")
-  break;
+  switch(options.generateType){  
+    case 'updatefrontend':
+      reGenFrontend()
+    break;
+    case 'updatebackend':
+      reGenBackend()
+    break;
+    case 'frontend':
+      runfrontend()
+    break;
+    case 'backend':
+      runbackend()
+    break;
+    case 'all':
+      run()
+    break;
+    default:
+      log.error("unknown generate type")
+    break;
+
+  }
 
 }

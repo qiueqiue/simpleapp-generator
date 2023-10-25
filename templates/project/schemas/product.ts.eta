@@ -1,0 +1,59 @@
+//examples
+import {SchemaType,RESTMethods,IsolationType} from '/Users/kstan/dev/lowcode/simpleapp-generator/src/type'
+export const product:SchemaType =
+{
+    type: "object",
+    "x-simpleapp-config":{
+      documentType:'cat',
+      documentName:'category',
+      isolationType:IsolationType.org,
+      pageType:"crud"      
+    }, 
+
+    properties: {
+      _id:{type:'string'},
+      created:{type:'string'},
+      updated:{type:'string'},
+      createdby:{type:'string'},
+      updatedby:{type:'string'},
+      tenantId: {type:'integer',default:1,minimum:1 },
+      orgId: {type:'integer',default:1,minimum:1 },
+      branchId: {type:'integer',default:1,minimum:1 },
+      productCode: {type: "string",examples: ["BK-MTHP1"]},
+      productName: {type: "string",examples: ["Math Primary 1 Book"]},
+      level: {
+        type: "object",
+        "x-foreignkey":"level", 
+        properties: {
+          "_id": {
+            "type": "string",
+            "examples": [
+              "aaa"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "examples": [
+              "P1"
+            ]
+          }
+        }
+      },
+      category: {type: "object","x-foreignkey":"category", properties: {_id: {type: "string"},label: {type: "string"}}},
+      defaultprice: {"type": "number",},
+      taxsetting: {
+        type: "object",
+        "x-foreignkey":"taxsetting", 
+        properties: {
+          "_id": {"type": "string",},
+          "label": {"type": "string","examples": ["6%"]},
+          "taxpercent":{"type":"number","examples":[6]}
+        }
+      },
+      "taxinclusive": {type: "boolean",},
+      active: {type: "boolean",default:true,},
+      description: {type: "string",},
+      tags: {type: "array",items: {type: "string",examples: ["P1","Math"]}
+      }
+    }
+  }

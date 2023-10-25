@@ -1,18 +1,19 @@
-import fs from 'fs'
+import fs, { copyFileSync, mkdirSync,existsSync, writeFileSync } from 'fs'
 import {spawn,exec} from "child_process"
+import _ from 'lodash'
 import { Logger, ILogObj } from "tslog";
 import * as constants from './constant'
 import  {Eta}  from 'eta';
 const log: Logger<ILogObj> = new Logger();
 
 let config = {
-    "jsonschemaFolder":"./jsonschemaFolder",
+    "jsonschemaFolder":"./jsonschemas",
     "bpmnFolder":"./bpmn",
-    "backendFolder":"./mybackend", 
+    "backendFolder":"./backend", 
     "groupFolder":"./groups",
     "backendPort":"8000",
     "mongoConnectStr":'mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT',
-    "frontendFolder":"./myfrontend",
+    "frontendFolder":"./frontend",
     "frontendPort":"8080",
     "oauthSetting":{
         "oauthBaseUrl":"https://keycloak-server-url/",
@@ -99,6 +100,49 @@ export const prepareNest = (callback:Function)=>{
         log.info(`${targetfolder}/.env exists, skip regenerate environment`)
         callback()
     }
+}
+
+export const prepareProject =  async (callback)=>{
+    const dir = process.cwd() +'/'
+    log.info("prepareProject")
+    const generateTemplatefolder = `${constants.templatedir}/project/`
+    const eta = new Eta({views:generateTemplatefolder});
+    const vars = {
+        config:config
+    }
+    fs.readdirSync(`${constants.templatedir}/project`,{recursive:true}).forEach( (fullfilename)=>{        
+        const templatepath = `${generateTemplatefolder}/${fullfilename}`        
+        const filename:string = _.last(fullfilename.split('/'))
+        const targetfolder = dir+String(fullfilename).replace(filename,'')
+        console.log("Filename",targetfolder, filename)
+        if(targetfolder && !existsSync(targetfolder)){
+            console.log("Write directory",targetfolder)
+            mkdirSync(targetfolder,{recursive:true})
+        }
+        if(filename.includes('.eta')){    
+            const tofilename =targetfolder + filename.replace('.eta','')        
+            log.info(tofilename,"Render file")
+            const txt = eta.render(fullfilename,vars)
+            // log.info(fullfilename+"====>>"+tofilename)
+            // console.log(txt)
+            writeFileSync(tofilename,txt)            
+        }else if(filename.includes('.md')){
+            const tofilename =dir + filename.replace('.eta','')        
+            log.info(tofilename,"Copy")            
+            copyFileSync(templatepath ,tofilename)            
+        }
+    })
+
+    await exec(`npx prettier --write . `,()=>{
+        callback()
+    })
+    
+    
+
+    // fs.mkdirSync(`${dir}/groups`,{recursive:true})
+    // fs.mkdirSync(`${dir}/schemas`,{recursive:true})
+    // fs.mkdirSync(`${dir}/shares`,{recursive:true})
+
 }
 //prepare nuxt project for simpleapp generator
 export const prepareNuxt = (callback:Function)=>{
