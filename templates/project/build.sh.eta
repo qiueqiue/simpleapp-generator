@@ -1,15 +1,17 @@
 #!/bin/bash
+type=$1
+
 ts-node generate.ts   
 npx prettier  --write jsonschemas
 
-type=$1
-if [ type == 'frontend' ]; then
+
+if [ $type == 'frontend' ]; then
     simpleapp-generator -c config.json -g frontend
-elif [ type == 'updatefrontend' ]; then
+elif [ $type == 'updatefrontend' ]; then
     simpleapp-generator -c config.json -g updatefrontend
-elif [ type == 'backend' ]; then
+elif [ $type == 'backend' ]; then
     simpleapp-generator -c config.json -g backend
-elif [ type == 'updatebackend' ]; then
+elif [ $type == 'updatebackend' ]; then
     simpleapp-generator -c config.json -g updatebackend
 fi
 

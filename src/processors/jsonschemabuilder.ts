@@ -221,11 +221,11 @@ const genSchema = async (
         // console.log(key,'--------newmodel',obj, newmodel[key]);
       }
     })
-    log.warn(newmodel,docname)
+    // log.warn(newmodel,docname)
     
     const modelname= _.upperFirst(docname)
-    log.warn("$$$$$$$$$$>>>",modelname,)
-    log.warn(newmodel,modelname)
+    // log.warn("$$$$$$$$$$>>>",modelname,)
+    // log.warn(newmodel,modelname)
     allmodels[modelname] = { 
       type: schematype, 
       model: newmodel,

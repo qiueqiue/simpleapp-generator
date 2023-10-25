@@ -126,7 +126,7 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
       const  rendertype = 'basic';
       jsonschemas[docname] = jsondata;
       const allmodels:ChildModels =  await readJsonSchemaBuilder(docname, jsondata);
-      console.log("allmodels",docname,allmodels)
+      // console.log("allmodels",docname,allmodels)
       generateSchema(docname, doctype, rendertype, allmodels);        
       activatemodules.push({
         doctype:doctype,
@@ -182,7 +182,7 @@ const generateSchema = ( docname: string,
     };
 
     const templatefolder = `${constants.templatedir}/${rendertype}`
-    log.info(`- Generate ${docname}, ${doctype}, ${templatefolder}`)
+    // log.info(`- Generate ${docname}, ${doctype}, ${templatefolder}`)
     const eta = new Eta({
       views: '/',
       functionHeader:
@@ -205,7 +205,7 @@ const generateSchema = ( docname: string,
         const templatepath = `${generateTemplatefolder}/${filename}`        
         
         if(_.last(filename.split('.'))!='eta'){
-          log.warn("skip file: ",filename)
+          // log.warn("skip file: ",filename)
           continue;
         }
         if(foldertype=='nest'){
@@ -221,6 +221,7 @@ const generateSchema = ( docname: string,
               mkdirSync(storein,{recursive:true})
             }                
             const filecontent = eta.render(templatepath, variables)     
+            log.info("process: ",targetfile)
             writeFileSync(targetfile,filecontent);
           }else if(filecategory=='service'){ //service file won't override if exists
 
@@ -229,6 +230,7 @@ const generateSchema = ( docname: string,
               mkdirSync(backendServiceFolder,{recursive:true})
             }         
             if(!existsSync(targetfile)){
+              log.info("process: ",targetfile)
               const filecontent = eta.render(templatepath, variables)     
               writeFileSync(targetfile,filecontent);
             }
@@ -285,17 +287,12 @@ const generateSchema = ( docname: string,
             const targetfile = `${targetfolder}/${target.as}`
             const isexists = existsSync(targetfile)
             const iswrite:boolean = target.validate(targetfolder,isexists)
-            log.warn("process: ",filename,'---->',targetfile)
+            log.info("process: ",targetfile)
             if(iswrite && !existsSync(targetfolder)){
               mkdirSync(targetfolder,{recursive:true})
               writeFileSync(`${targetfolder}/delete-me.txt`,"delete this file for keep modified page");
             }
-
-            // if(
-            //   target.override=="always" ||  
-            //     !existsSync(targetfile) || 
-            //     (target.override=="check"  && existsSync(`${targetfolder}/delete-me.txt`))
-            //     ){
+           
             if(iswrite){
               const filecontent = eta.render(templatepath, variables)     
               writeFileSync(targetfile,filecontent);
@@ -326,7 +323,7 @@ const finalize=(modules:ModuleObject[])=>{
   
   Object.getOwnPropertyNames(generateTypes).forEach((foldertype)=>{
       const frameworkpath = generateTypes[foldertype]
-      log.info("Generate ",foldertype)
+      // log.info("Generate ",foldertype)
       const frameworkfolder = `${constants.templatedir}/${foldertype}`
       const frameworkfiles = readdirSync(frameworkfolder,{recursive:true})
       const eta = new Eta({views:frameworkfolder});
@@ -348,12 +345,12 @@ const finalize=(modules:ModuleObject[])=>{
             mkdirSync(foldername,{recursive:true})
           }
           const templatename = `${frameworkfolder}/${longfilename}`.replace(".eta","")
-          log.info("Write template:",templatename, '----> ',targetfilename)
+          log.info("Write template:",targetfilename)
           const txt = eta.render(longfilename, renderProperties)
           writeFileSync(targetfilename,txt)
           
         }else{
-          log.warn("skip: ",longfilename)
+          // log.warn("skip: ",longfilename)
         }
         
         }
