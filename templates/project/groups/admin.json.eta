@@ -1,0 +1,40 @@
+{
+    "Autoincreament": [
+      "create",
+      "update",
+      "delete",
+      "search",
+      "genNextNumber"
+    ],
+    "Branch": [
+      "create",
+      "update",
+      "delete",
+      "search"
+    ],    
+    "Organization": [
+      "create",
+      "update",
+      "search",
+      "delete"
+    ],
+    "Permission": [
+      "listUser",
+      "search",
+      "delete",
+      "update",
+      "create"
+    ],
+    "Tenant": [
+      "create",
+      "update",
+      "delete",
+      "search"
+    ],
+    "User": [
+      "create",
+      "update",
+      "search",
+      "delete"
+    ]
+}
