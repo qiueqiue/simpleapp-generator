@@ -40,7 +40,10 @@ npm install -g @simitgroup/simpleapp-generator ts-node
 4. init project folder, it will create some samples too
 ```sh
 simpleapp-generator -g init
+# !important
+# Modify value in config.json, it will copy over to both frontend and backend .env
 ```
+
 5. prepare backend
 ```sh
 sh build.sh backend
