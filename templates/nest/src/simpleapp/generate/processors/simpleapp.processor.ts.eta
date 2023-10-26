@@ -255,6 +255,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     if(!data._id){
       data._id = crypto.randomUUID()
     }
+
+    this.logger.debug('this.withDocNumberFormat :' + this.withDocNumberFormat + '  && ' + '!data[this.documentIdentityCode] ==' + !data[this.documentIdentityCode])
     if(this.withDocNumberFormat && !data[this.documentIdentityCode]){
       await this.genNewDocNo(appuser,data)
     }
@@ -277,7 +279,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.applyNestedDateTime(appuser,data,'create')
     const newdoc = new this.doc(data);
     
-    result = await newdoc.save({session:appuser.getDBSession()})
+    try{
+      result = await newdoc.save({session:appuser.getDBSession()})
+    }catch(err){
+      this.logger.error(err)
+      throw new InternalServerErrorException(err)
+    }
+    
+
     
     // this.doc.create(data)
     // this.doc
@@ -327,7 +336,7 @@ export class SimpleAppService<T extends { _id?: string }> {
 
     ajv.addKeyword({ keyword: 'x-foreignkey', schemaType: 'string' });
     ajv.addKeyword({ keyword: 'x-simpleapp-config', schemaType: 'object' });    
-    
+
     const issuccess = await this.hook(appuser,HookType.beforeValidation, data);
     if (!issuccess) {
       const errormsg: string[] = [];
@@ -522,7 +531,9 @@ export class SimpleAppService<T extends { _id?: string }> {
 
 
   async genNewDocNo(appuser:UserContext,data:T){
+    this.logger.debug("genNewDocNo")
     const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)
+    this.logger.debug(result,"genNewDocNo")
     data[this.documentIdentityCode]=result    
   }
 

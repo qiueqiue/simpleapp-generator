@@ -12,14 +12,14 @@ import * as buildinschemas from './buildinschemas'
 import { JSONSchema7 } from 'json-schema';
 const { Eta } = require('eta');
 const { capitalizeFirstLetter }= require('./libs');
-const X_DOCUMENT_TYPE='x-document-type'
-const X_DOCUMENT_NAME='x-document-name'
-const X_COLLECTION_NAME='x-collection-name'
-const X_PAGE_TYPE='x-page-type'
-const extFb = '.xfb.json';
-const extHfb = '.xhfb.json';
-const extjsonschema = '.jsonschema.json';
-const extgroups = '.group.json';
+// const X_DOCUMENT_TYPE='x-document-type'
+// const X_DOCUMENT_NAME='x-document-name'
+// const X_COLLECTION_NAME='x-collection-name'
+const X_SIMPLEAPP_CONFIG='x-simpleapp-config'
+// const extFb = '.xfb.json';
+// const extHfb = '.xhfb.json';
+// const extjsonschema = '.jsonschema.json';
+// const extgroups = '.group.json';
 let jsonschemas = {};
 let configs:any = {}
 const docs = [];
@@ -242,7 +242,7 @@ const generateSchema = ( docname: string,
         }else if(foldertype=='nuxt'){
           const capname = capitalizeFirstLetter(docname)
           const validateWritePage = (folder:string,isexists:boolean)=>{
-            if(!jsonschemas[docname][X_PAGE_TYPE] ){
+            if(!jsonschemas[docname][X_SIMPLEAPP_CONFIG]['pageType'] ){
               return false
             }else if(!isexists){
               return true

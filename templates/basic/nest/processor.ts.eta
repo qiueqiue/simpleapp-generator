@@ -27,7 +27,9 @@ import { <%Object.keys(it.models).forEach(function(modelname) { %>  Default<%=mo
 export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typename %>>  {
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityLabel='<%~ it.autocompletename %>'
-  protected withDocNumberFormat= <%= it.hasdocformat %>
+  <%if(it.jsonschema['x-simpleapp-config']['generateDocumentNumber']){%>
+  protected withDocNumberFormat = true
+  <%}%>
 
   protected foreignkeys = <%~ JSON.stringify(it.foreignkeys)%>
 

@@ -4,14 +4,15 @@ import {
   IsolationType,
 } from '/usr/local/lib/node_modules/@simitgroup/simpleapp-generator/src/type'
 //"/Users/kstan/dev/lowcode/simpleapp-generator/src/type";
-export const category: SchemaType = {
+export const customer: SchemaType = {
   type: "object",
   "x-simpleapp-config": {
-    documentType: "cat",
-    documentName: "category",
+    documentType: "cust",
+    documentName: "customer",
+    uniqueKey:'customerNo',
+    documentTitle:'customerName',
+    generateDocumentNumber:true,
     isolationType: IsolationType.org,
-    uniqueKey:'categoryCode',
-    documentTitle:'categoryName',
     pageType: "crud",
   },
   properties: {
@@ -23,18 +24,12 @@ export const category: SchemaType = {
     tenantId: { type: "integer", default: 1, minimum: 1 },
     orgId: { type: "integer", default: 1, minimum: 1 },
     branchId: { type: "integer", default: 1, minimum: 1 },
-    categoryCode: { type: "string", examples: ["TUITION"] },
-    categoryName: { type: "string", examples: ["Tuition Service"] },
-    active: { type: "boolean", default: true, examples: [true] },
-    categoryType: {
-      type: "string",
-      enum: ["class", "charge"],
-      examples: ["class"],
-    },
-    description: {
-      type: "string",
-      format: "text",
-      examples: ["Maths Tuition primary 1"],
+    customerNo: { type: "string", format:"documentno",examples: ["S0001"] },
+    customerName: { type: "string", examples: ["Customer 1"] },
+    active: { type: "boolean", default: true, examples: [true] },            
+    description: {type: "string",format: "text"},      
+    docNoFormat: {type: "object","x-foreignkey":"docnoformat", 
+      properties: { _id: { type: "string" }, label: { type: "string" } },
     },
   },
 };

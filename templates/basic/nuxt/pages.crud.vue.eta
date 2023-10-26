@@ -125,8 +125,9 @@
                     <%let tablefields = Object.keys(obj.items.properties) %>
                     <% for(let a=0;a<tablefields.length;a++){%>
                         <%let col= tablefields[a] %>
+                        <% if(skipcolumns.includes(col)){ continue}%> 
                         <%let subobj = obj.items.properties[col] %>
-                        <column field="<%=col%>" #body="{index}" :header="camelCaseToWords('<%=col%>')">
+                        <column field="<%=col%>" #body="{index}" :header="camelCaseToWords('<%=col%>')">                            
                             <%if(subobj['x-foreignkey']){%>
                                 <SimpleAppAutocomplete v-model="data.<%=key%>[index].<%=col%>" 
                                     :setting="o.getField('#/properties/<%=key%>/items/properties/<%=col%>')" 

@@ -5,7 +5,9 @@
  * last change 2023-09-23
  * Author: Ks Tan
  */
- import _ from 'lodash'
+import _ from 'lodash'
+import * as sharelibs from '../sharelibs'
+import * as jsonpath from 'jsonpath'
 import { SimpleAppClient } from "./SimpleAppClient";
 import {
   <%Object.keys(it.models).forEach(function(modelname) { %>  Default<%=modelname%>,  <%})%>
@@ -47,6 +49,9 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
   public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityName='<%~ it.autocompletename %>'  
+  <%if(it.jsonschema['x-simpleapp-config']['generateDocumentNumber']){%>
+  protected withDocNumberFormat = true
+  <%}%>
   constructor() {    
     const {$event,$listen,$axios}=useNuxtApp()
     let xorg = useRoute().params.xorg
@@ -137,7 +142,18 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
   reCalculateValue(){
     console.log('trigger new recalculate')
     const data = this.getData()
+    
+    <% if(it.jsonschema['x-simpleapp-config']['formulas']){ %>
+      <%Object.keys(it.jsonschema['x-simpleapp-config']['formulas']).forEach(function(index) { %>
+        <% let fml = it.jsonschema['x-simpleapp-config']['formulas'][index] %>
+        // <%~ JSON.stringify(fml) %>
+        //const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
+        
+        jsonpath.apply(data, '<%~ fml.jsonpath %>', function(value) { return <%~fml.formula %> });
 
+      <%}) %>
+    <%} %>
+    /*
     <%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
       <%let obj = it.jsonschema.properties[key]%>
       <%if(obj['x-compute']){%> //x-compute first level field
@@ -207,6 +223,6 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
         <%}) %> 
         } 
       <%} /*process compute for 2nd level sub tables*/%>
-    <%}) %>
+    <%}) %> */
   }
 }

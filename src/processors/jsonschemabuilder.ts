@@ -3,7 +3,7 @@ import { JSONSchema7, JSONSchema7Definition,JSONSchema7Array,JSONSchema7TypeName
 import * as js7 from 'json-schema';
 import _ from 'lodash'
 import { capitalizeFirstLetter } from '../libs';
-import {SchemaType,SchemaConfig,JsonSchemaProperties,MyForeignKey} from "../type"
+import {SchemaType,SchemaConfig,JsonSchemaProperties} from "../type"
 // import * as schematemplates from '../schematype'
 import { Logger, ILogObj } from "tslog";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
@@ -43,6 +43,7 @@ export const readJsonSchemaBuilder = async (docname: string,orijsondata:JSONSche
   
   let schemaconfigs:SchemaConfig = orijsondata[configname]
   const doctype=schemaconfigs.documentType
+
   if(!schemaconfigs.collectionName){
     schemaconfigs.documentName
   }
@@ -50,6 +51,18 @@ export const readJsonSchemaBuilder = async (docname: string,orijsondata:JSONSche
   if(!schemaconfigs.foreignKeys){
     schemaconfigs.foreignKeys={}
   }
+
+  if(schemaconfigs.generateDocumentNumber){
+    const tmp = {
+        type: "object",       
+        "x-foreignkey":"docnoformat", 
+        properties: {_id: {type: "string"},label: {type: "string"}}
+    }
+    orijsondata.properties["docNoFormat"] = tmp as JSONSchema7Definition
+  }
+
+  //apply some controls
+  //control docnoformatis required
 
   // let schemaprops:any = targettemplate.properties 
   // console.log("just want process targettemplate ######>>>",orijsondata)

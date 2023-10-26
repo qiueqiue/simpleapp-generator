@@ -53,7 +53,11 @@ defineShortcuts({
   'ctrl_enter': () => newData()
 })
 const refresh = () => {
-  obj.list().then((res:any) => {    
+  const searchbody: SearchBody = {
+    fields: props.listColumns.concat(['created']),
+    // sorts:props.sorts
+  }
+  obj.search(searchbody).then((res:any) => {    
     recordlist.value = res;
     disabled.value=false
   });

@@ -1,0 +1,52 @@
+<template>
+    <div>
+        <input 
+        autofocus
+            placeholder="search" 
+            v-model="searchvalue"                    
+            class="w-full border  p-2" 
+            type="search" />
+    </div>
+    <div class="max-h-screen overflow-auto">
+        <ul >
+            
+            <li v-for="item in filterlist">
+            
+                <div  :class="getSelectedCSS(item)">
+                    <a class="flex flex-row " @click="clickRow(item)">
+                        <div class="mr-2">{{item.name  }}</div>
+                        <div class="font font-bold text-right">{{item.code}}</div>
+                    </a>
+                </div>
+            
+            </li>
+        </ul>
+    </div>
+</template>
+<script setup lang="ts">
+import {ref} from 'vue'
+import {ListItem} from '~/types/listview'
+const props = defineProps<{list:any[]}>()
+const emit = defineEmits(['clickitem'])
+const searchvalue = ref('')
+const selecteditem =ref('')
+const clickRow=(item:ListItem)=>{
+    emit('clickitem',item)
+    selecteditem.value = item.code
+}
+const filterlist =  computed(()=>{    
+    const newlist =props.list.filter(item=>
+            String(item.name).toLowerCase().includes(searchvalue.value.toLowerCase()))
+
+    return newlist
+})
+const getSelectedCSS= (item:ListItem)=>{
+    if(selecteditem.value == item.code){
+        return "p-2 border bg-sky-200"
+    }else{
+        return "p-2 border hover-list-primary"
+    }
+
+}
+
+</script>

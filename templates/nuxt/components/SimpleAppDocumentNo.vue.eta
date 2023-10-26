@@ -1,7 +1,7 @@
 
 <template>
     <FieldContainer :hidelabel="hidelabel" v-model="modelValue" :label="label" :description="description"  :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">
-        <div class="p-inputgroup flex-1 ">
+        <div class="p-inputgroup ">
             <InputText class="simpleapp-inputfield" 
                 :inputId="slotprops.uuid"
                 v-model="modelValue"    

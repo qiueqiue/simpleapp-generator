@@ -21,7 +21,7 @@ export class DocnoformatService extends DocnoformatProcessor {
     @InjectModel('Docnoformat') mydoc: Model<Docnoformat>,
     docnogenerator: DocNumberFormatGenerator,
   ) {
-    super(mydoc,docnogenerator);
+    super(mydoc, docnogenerator);
   }
 
   //    hook = async (type: string, data?: any) => {
@@ -68,10 +68,11 @@ export class DocnoformatService extends DocnoformatProcessor {
     doctype = doctype.toUpperCase();
     const searchresult = await this.search(
       appuser,
-      { docNoType: doctype },
-      { default: 'desc' },
+     { docNoType:doctype},
+     undefined,
+     {default:'desc'}
     );
-    console.log(searchresult);
+    console.log('searchresult',searchresult);
     let data: any = [];
     for (let i = 0; i < searchresult.length; i++) {
       const s = searchresult[i];

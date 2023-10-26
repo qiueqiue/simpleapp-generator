@@ -1,5 +1,5 @@
 //examples
-export { product } from './product';
-export {category} from './category'
-
-
+export { product } from "./product";
+export { category } from "./category";
+export { customer } from "./customer";
+export { invoice } from "./invoice";
