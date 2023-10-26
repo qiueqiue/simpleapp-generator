@@ -32,8 +32,9 @@ docker exec -it mongo1 mongosh --eval "rs.status()"
 mkdir ~/project1
 cd ~/project1
 ```
-3. install latest simpleapp-generator 
+3. install latest simpleapp-generator (tested create tenant successfully with version `1.0.46`)
 ```sh
+
 npm install -g @simitgroup/simpleapp-generator ts-node
 ```
 4. init project folder, it will create some samples too
