@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import {DocNumberFormatResult} from '../types'
 import { Docnoformat } from '../types/docno.type'
 import { Injectable, InternalServerErrorException,BadRequestException } from '@nestjs/common';
-import * as moment from 'moment';
+import moment from 'moment';
 import {ForeignKey} from '../types'
 
 export class DocNumberFormatGenerator{

@@ -4,8 +4,8 @@ export const product:SchemaType =
 {
     type: "object",
     "x-simpleapp-config":{
-      documentType:'cat',
-      documentName:'category',
+      documentType:'prd',
+      documentName:'product',
       isolationType:IsolationType.org,
       pageType:"crud"      
     }, 

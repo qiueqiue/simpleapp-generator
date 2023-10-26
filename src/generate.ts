@@ -84,9 +84,12 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
   const files = readdirSync(configs.jsonschemaFolder)
   for(let j = 0; j< files.length;j++){
     const file = files[j]
-    const jsoncontent = readFileSync(`${configs.jsonschemaFolder}/${file}`, 'utf-8');      
+    // log.warn(file)
+    const fullfilename = `${configs.jsonschemaFolder}/${file}`
+    const jsoncontent = readFileSync(fullfilename, 'utf-8');      
+    // log.debug(jsoncontent)
     const jsonschema = JSON.parse(jsoncontent)
-    await processSchema(file,jsonschema)    
+    await processSchema(file.replace('.json',''),jsonschema)    
   }
   // //generate groups
   // const systemgroups = readdirSync(`${groupFolder}`)
@@ -114,7 +117,7 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
     let doctype = config.documentType
     let docname = config.documentName
     // const jsonstring = readFileSync(defFolder +path.sep+ file, 'utf-8');      
-    
+    // log.warn('config',config)
     
     // if (file.endsWith('.ts')) {  
     //   log.info(`Load `+clc.green(file))
@@ -126,7 +129,7 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
       const  rendertype = 'basic';
       jsonschemas[docname] = jsondata;
       const allmodels:ChildModels =  await readJsonSchemaBuilder(docname, jsondata);
-      // console.log("allmodels",docname,allmodels)
+      // log.error("allmodels",docname,schemaname)
       generateSchema(docname, doctype, rendertype, allmodels);        
       activatemodules.push({
         doctype:doctype,

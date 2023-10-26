@@ -12,7 +12,7 @@ let config = {
     "backendFolder":"./backend", 
     "groupFolder":"./groups",
     "backendPort":"8000",
-    "mongoConnectStr":'mongodb://<user>:<pass>@<host>:<port>/<db>?authMechanism=DEFAULT',
+    "mongoConnectStr":'mongodb://user:pass@localhost:27017/simpleapp?authMechanism=DEFAULT',
     "frontendFolder":"./frontend",
     "frontendPort":"8080",
     "oauthSetting":{

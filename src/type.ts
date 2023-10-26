@@ -1,5 +1,4 @@
-import { allforeignkeys } from './storage';
-import { JSONSchema7, JSONSchema7Definition,JSONSchema7Object } from 'json-schema';
+import  { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 export type ChildModels = {
   [key: string]: { 
     type: string; 

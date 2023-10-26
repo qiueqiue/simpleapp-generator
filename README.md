@@ -1,32 +1,71 @@
 # Quick start
-1. create project folder
+1. Simpleapp implement database transaction, and require mongodb cluster, below setup 3 nodes
 ```sh
-mkdir project1
-cd project1
+#create network
+docker network create mongoCluster
+#prepare node1
+docker run -d -p 27017:27017 --name mongo1 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo1
+#prepare node2
+docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo2
+#prepare node3
+docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:5 mongod --replSet myReplicaSet --bind_ip localhost,mongo3
+
+# build cluster
+docker exec -it mongo1 mongosh --eval "rs.initiate({
+ _id: \"myReplicaSet\",
+ members: [
+   {_id: 0, host: \"mongo1\"},
+   {_id: 1, host: \"mongo2\"},
+   {_id: 2, host: \"mongo3\"}
+ ]
+})"
+\
+#check cluster status
+docker exec -it mongo1 mongosh --eval "rs.status()"
+
 ```
-2. install simpleapp-generator 
+
+
+
+2. create project folder
+```sh
+mkdir ~/project1
+cd ~/project1
+```
+3. install simpleapp-generator 
 ```sh
 npm install -g @simitgroup/simpleapp-generator
 ```
-3. init project folder, it will create some samples too
+4. init project folder, it will create some samples too
 ```sh
 simpleapp-generator -g init
 ```
-4. prepare backend
+5. prepare backend
 ```sh
 sh build.sh backend
-cd backend
+```
+6. update backend configurations file by modify `~/project1/backend/.env`, change mongodb, keycloak settings according your requirements
+7. start backend:
+```sh
+cd ~/project1/backend
 pnpm start:dev
 ```
-5. prepare frontend
+
+8. prepare frontend
 ```sh
 sh build.sh frontend
 cd frontend
+```
+9. modify frontend configuration by modify `~/project1/frontend/.env`
+10. start frontend:
+```sh
+cd ~/project1/frontend
 pnpm start
 ```
 
+
 # Perform Development
-1. add some schemas from project1/schemas
+1. add some schemas at `~/project1/schemas`
 2. then run 
 ```sh
 sh build.sh updatebackend
@@ -36,3 +75,10 @@ sh build.sh updatefrontend
 
 
 
+# Error handling
+## Cannot start backend due to `Unable to connect to the database. Retryi...`
+1. You may have wrong configuration of mongodb connection string, try use mongodb compass access your clusters using same connection string
+2. the mongodb primary node may switch to another host, try restart mongodb container `node2`,`node3` until primary server at `node1`. monitor using 
+```sh
+docker exec -it mongo1 mongosh --eval "rs.status()"
+```
