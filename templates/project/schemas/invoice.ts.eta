@@ -12,6 +12,7 @@ import {
       isolationType: IsolationType.org,
       uniqueKey:'invoiceNo',
       documentTitle:'invoiceTitle',
+      generateDocumentNumber:true,
       pageType: "crud",
       formulas:[
         {jsonpath:'$.details[*]',formula:'sharelibs.getSubtotal(value)'},
