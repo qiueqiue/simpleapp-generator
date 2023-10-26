@@ -325,21 +325,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     ajv.addFormat('documentno', /.*$/);
     
 
-    ajv.addKeyword({ keyword: 'x-document-no', schemaType:'boolean' });
-    ajv.addKeyword({ keyword: 'x-document-label',schemaType: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-document-status', schemaType: 'array' });
-    ajv.addKeyword({ keyword: 'x-document-api',schemaType: 'array' });
-    ajv.addKeyword({ keyword: 'x-page-type',schemaType:'string' }); // undefine mean no generate page
-    ajv.addKeyword({ keyword: 'x-ignore-autocomplete',schemaType: 'boolean' });
-    ajv.addKeyword({ keyword: 'x-isolation-type', schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-document-type', schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-document-name', schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-collection-name',schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-autocomplete-field', schemaType: 'boolean' });
     ajv.addKeyword({ keyword: 'x-foreignkey', schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-import-lib', schemaType: 'array' });
-    ajv.addKeyword({ keyword: 'x-compute', schemaType: 'object' });
-    ajv.addKeyword({ keyword: 'x-required-role', schemaType: 'array' });
+    ajv.addKeyword({ keyword: 'x-simpleapp-config', schemaType: 'object' });    
     
     const issuccess = await this.hook(appuser,HookType.beforeValidation, data);
     if (!issuccess) {

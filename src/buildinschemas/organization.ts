@@ -20,7 +20,7 @@ export const organization:SchemaType ={
         updatedby:{type:'string'},
         tenantId: {type:'integer',default:1,minimum:1 },
         orgId: {type:'integer',default:1,minimum:1 },
-        branchId: {type:'integer',default:1,minimum:1 },
+        branchId: {type:'integer',default:1,minimum:0 },
         orgCode: {"type": "string",  "minLength":1,},
         orgName: {type: "string",},
         active: {type: "boolean","default":true,},

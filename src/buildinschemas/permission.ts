@@ -21,9 +21,9 @@ export const permission:SchemaType ={
         updated:{type:'string'},
         createdby:{type:'string'},
         updatedby:{type:'string'},
-        tenantId: {type:'integer',default:1,minimum:1 ,"x-foreignkey":"branch" },
-        orgId: {type:'integer',default:1,minimum:1 ,"x-foreignkey":"branch" },
-        branchId: {type:'integer',default:1,minimum:1 ,"x-foreignkey":"branch" },
+        tenantId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"tenant" },
+        orgId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"organization" },
+        branchId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"branch" },
         group: {"type": "string"},
         uid: {"type": "string","x-foreignkey":"user"},
         user_id : {"type":"string"}

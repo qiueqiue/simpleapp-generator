@@ -23,9 +23,9 @@ export const autoincreament:SchemaType = {
       updated:{type:'string'},
       createdby:{type:'string'},
       updatedby:{type:'string'},
-      tenantId: {type:'integer',default:1,minimum:1 },
-      orgId: {type:'integer',default:1,minimum:1 },
-      branchId: {type:'integer',default:1,minimum:1 },
+      tenantId: {type:'integer',default:1,minimum:0 },
+      orgId: {type:'integer',default:1,minimum:0 },
+      branchId: {type:'integer',default:1,minimum:0 },
       collectionName: {type: "string",minLength:1,},
       fieldName: {type: "string",minLength:1,},
       nextno:{type: "integer","minimum":1}
