@@ -32,9 +32,9 @@ docker exec -it mongo1 mongosh --eval "rs.status()"
 mkdir ~/project1
 cd ~/project1
 ```
-3. install simpleapp-generator 
+3. install latest simpleapp-generator 
 ```sh
-npm install -g @simitgroup/simpleapp-generator
+npm install -g @simitgroup/simpleapp-generator ts-node
 ```
 4. init project folder, it will create some samples too
 ```sh
@@ -51,12 +51,11 @@ cd ~/project1/backend
 pnpm start:dev
 ```
 
-8. prepare frontend
+8. prepare frontend (i use pnpm cause faster)
 ```sh
 sh build.sh frontend
-cd frontend
 ```
-9. modify frontend configuration by modify `~/project1/frontend/.env`
+9. modify frontend configuration by modify `~/project1/frontend/.env`, change keycloak settings
 10. start frontend:
 ```sh
 cd ~/project1/frontend
@@ -75,10 +74,19 @@ sh build.sh updatefrontend
 
 
 
-# Error handling
+# Error Troubleshoot
+
 ## Cannot start backend due to `Unable to connect to the database. Retryi...`
 1. You may have wrong configuration of mongodb connection string, try use mongodb compass access your clusters using same connection string
 2. the mongodb primary node may switch to another host, try restart mongodb container `node2`,`node3` until primary server at `node1`. monitor using 
 ```sh
 docker exec -it mongo1 mongosh --eval "rs.status()"
+```
+
+
+## ERROR  [worker reload] [worker init] Cannot find package 'memory-cache' imported 
+1. nuxt seems have some issue, try install this package manually
+```sh
+cd ~/project1/frontend
+pnpm install memory-cache
 ```
