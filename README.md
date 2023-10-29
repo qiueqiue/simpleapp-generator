@@ -1,3 +1,30 @@
+# Introduction
+SimpleApp generator is a typescript code generator for convert jsonschemas become workable frontend (nuxt) and backend (nest). There is plenty of benefit included:
+1. complex multi-tenancy data isolation structure which support tenant/organization/branches
+2. unified frontend and backend data validation according jsonschemas
+3. Auto generate frontend template, frontend developer freely modify layout without worry integration lose
+4. It design as easy to understand as possible, developer can work at frontend and backend separately after code generated.
+5. It design with concept allow unlimited regenerate without break your codes, schemas can change anytime and the impact should be minimal
+6. visualize as much as possible programming design, formula in jsonschemas, reduce burden of software audit and handover. included
+  a. schemas
+  b. additional api besides CRUD
+  c. document status
+  d. authorization
+  e. formulas of specific fields
+  f. data types and validations
+7. build in enterprise functionality included:
+  a. document numbering [60%]
+  b. authentication and authorization [x]
+  c. data modification audit trail []
+  d. SSO [x]
+  e. openapi interface [x]
+  f. pdf document []
+  g. document uploads[]
+  h. workflow integration[]
+
+
+
+
 # Quick start
 1. Simpleapp implement database transaction, and require mongodb cluster, below setup 3 nodes
 ```sh
@@ -19,6 +46,13 @@ docker exec -it mongo1 mongosh --eval "rs.initiate({
    {_id: 2, host: \"mongo3\"}
  ]
 })"
+
+# set mongod1 high priority as primary server
+docker exec -it mongo3 mongosh --eval "cfg = rs.conf()
+cfg.members[0].priority = 50
+cfg.members[1].priority = 1
+cfg.members[2].priority = 1
+rs.reconfig(cfg)"
 
 #check cluster status
 docker exec -it mongo1 mongosh --eval "rs.status()"

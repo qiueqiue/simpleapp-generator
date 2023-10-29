@@ -12,6 +12,7 @@ import {
       isolationType: IsolationType.org,
       uniqueKey:'invoiceNo',
       documentTitle:'invoiceTitle',
+      documentDate:"invoiceDate",
       generateDocumentNumber:true,
       pageType: "crud",
       formulas:[

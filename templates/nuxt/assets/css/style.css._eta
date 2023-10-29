@@ -1,0 +1,12 @@
+.btn {
+    @apply p-2  border-2
+}
+.btn-primary{
+    @apply bg-primary-600 text-white
+}
+.btn-danger{
+    @apply bg-danger-600 text-white
+}
+.btn-warning{
+    @apply bg-danger-600 text-white
+}

@@ -126,6 +126,14 @@ export const prepareProject =  async (callback)=>{
             // log.info(fullfilename+"====>>"+tofilename)
             // console.log(txt)
             writeFileSync(tofilename,txt)            
+        }else if(filename.includes('._eta')){    
+            const tofilename =targetfolder + filename.replace('._eta','')        
+            log.info(tofilename,"Render file")
+            const txt = eta.render(fullfilename,vars)
+            if(!existsSync(tofilename)){
+                writeFileSync(tofilename,txt)            
+            }
+            
         }else if(filename.includes('.md')){
             const tofilename =dir + filename.replace('.eta','')        
             log.info(tofilename,"Copy")            
@@ -149,10 +157,10 @@ export const prepareNuxt = (callback:Function)=>{
     const targetfolder = config.frontendFolder
     if(!fs.existsSync(`${targetfolder}/.env`)){
         //asume no environment. prepare now
-        exec(`cd ${targetfolder};pnpm install;pnpm install -D @nuxtjs/tailwindcss @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core nuxt-security prettier `, (error, stdout, stderr)=>{                
+        exec(`cd ${targetfolder};pnpm install;pnpm install -D nuxt-primevue @nuxtjs/tailwindcss @sidebase/nuxt-auth @nuxt/ui @types/node @vueuse/nuxt @sidebase/nuxt-auth @vueuse/core  prettier `, (error, stdout, stderr)=>{                
             //;pnpm install    
             console.log(error, stdout, stderr)
-                exec(`cd ${targetfolder};pnpm install --save  jsonpath pinia @pinia/nuxt @nuxt/kit lodash @types/lodash @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill primeflex primeicons prettier primevue axios json-schema mitt @simitgroup/simpleapp-vue-component@latest`, (error, stdout, stderr)=>{                
+                exec(`cd ${targetfolder};pnpm install --save  moment memory-cache jsonpath pinia @pinia/nuxt @nuxt/kit lodash @types/lodash @darkwolf/base64url next-auth@4.21.1 @darkwolf/base64url @nuxt/ui ajv ajv-formats ajv-errors dotenv @fullcalendar/core @fullcalendar/vue3 quill prettier axios json-schema mitt `, (error, stdout, stderr)=>{                
                 console.log(error, stdout, stderr)
                 
                 // fs.mkdirSync(`${targetfolder}/assets/css/`,{recursive:true})

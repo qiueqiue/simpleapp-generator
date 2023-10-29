@@ -33,8 +33,8 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
 
   protected foreignkeys = <%~ JSON.stringify(it.foreignkeys)%>
 
-    constructor(mydoc: Model<<%= it.typename %>>, docnogenerator:DocNumberFormatGenerator) {
-    super('<%= it.doctype.toUpperCase() %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>,docnogenerator);
+    constructor(mydoc: Model<<%= it.typename %>>) {
+    super('<%= it.doctype.toUpperCase() %>','<%= it.name %>',mydoc,IsolationType.<%=it.isolationtype%>);
     this.setSchema(<%= it.typename%>JsonSchema)
     this.setData(Default<%=it.typename%>(crypto.randomUUID()))
     <%if(it.moreAutoComplete.length>0){%>

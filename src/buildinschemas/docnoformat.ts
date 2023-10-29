@@ -18,8 +18,7 @@ export const docnoformat:SchemaType ={
                 "execute":"listDocFormats",
                 "description":"get list of document format for 1 doctype"
               } ]
-        },
-        
+        },        
         properties: {
             _id:{type:'string'},
             created:{type:'string'},
@@ -29,30 +28,17 @@ export const docnoformat:SchemaType ={
             tenantId: {type:'integer',default:1,minimum:1 },
             orgId: {type:'integer',default:1,minimum:1 },
             branchId: {type:'integer',default:1,minimum:1 },
-          "docNoFormatNo": {"type": "string","examples": ["INV"]},
-          "docNoFormatName": { "type": "string", "examples": ["Invoice Default Format"]},
-          "active": {"type": "boolean","examples": [true],"default":true},
-          "default":{"type": "boolean","examples": [true],"default":true},
-          "docNoType": {"type": "string","examples": ["SI","PI"]},
-          "docNoPattern": {"type": "string","examples": ["SI{YYMM}-<000>","PI-2023-<0000>"],"description":"{date} format as ISO8601 symbol"},
-          "isMonthly": {"type": "boolean","examples": [false]},
-          "nextNumber":{"type":"integer","examples":[1],"default":1},
-          "monthlySetting": {
-            "type": "object",
-            "properties": {
-              "jan": {"type": "integer","default":1},
-              "feb": {"type": "integer","default":1},
-              "mar": {"type": "integer","default":1},
-              "apr": {"type": "integer","default":1},
-              "may": {"type": "integer","default":1},
-              "jun": {"type": "integer","default":1},
-              "jul": {"type": "integer","default":1},
-              "aug": {"type": "integer","default":1},
-              "sep": {"type": "integer","default":1},
-              "oct": {"type": "integer","default":1},
-              "nov": {"type": "integer","default":1},
-              "dec": {"type": "integer","default":1}
-            }
-          }
+            branch:{type:"object", "x-foreignkey":"branch",properties:{
+              "_id":{"type":"string"},
+              "label":{"type":"string"},
+              "branchId":{type:"integer"},
+            }},
+            docNoFormatNo: {"type": "string","examples": ["INV"]},
+            docNoFormatName: { "type": "string", "examples": ["Invoice Default Format"]},
+            active: {type: "boolean","examples": [true],default:true},
+            default:{type: "boolean","examples": [true],default:true},
+            docNoType: {type: "string","examples": ["SI","PI"]},
+            docNoPattern: {type: "string","examples": ["SI{YYMM}-<000>","PI-2023-<0000>"],"description":"{date} format as ISO8601 symbol"},          
+            nextNumber:{type:"integer",default:1}         
         }
       }

@@ -1,0 +1,38 @@
+<script lang="ts" setup>
+const menus = getMenus();
+const emit = defineEmits(['select'])
+const selectMenu = (menu) =>{
+  navigateTo(menu.to)
+  emit('select',menu)
+}
+</script>
+<template>
+  <div>
+    <div class="desktop-shortcut-link">
+      
+      <button v-for="menu in menus[1].items" @click="menu">
+        <div v-if="menu.isolationType == 'none'" class="adminmenu">
+          * {{ camelCaseToWords(menu.label) }}
+        </div>
+        <div v-else class="usermenu">{{ camelCaseToWords(menu.label) }}</div>
+      </button>
+    </div>
+  </div>
+</template>
+<style scoped>
+.desktop-shortcut-link {
+  @apply m-2 p-2 space-x-2 rounded-sm text-center grid grid-cols-4 gap-4;
+}
+.desktop-shortcut-link .adminmenu {
+  @apply bg-red-300 p-2;
+}
+.desktop-shortcut-link .adminmenu:hover {
+  @apply bg-red-600 p-2;
+}
+.desktop-shortcut-link .usermenu {
+  @apply bg-teal-300 p-2;
+}
+.desktop-shortcut-link .usermenu:hover {
+  @apply bg-teal-600 p-2;
+}
+</style>

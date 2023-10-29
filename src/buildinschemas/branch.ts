@@ -6,7 +6,7 @@ export const branch:SchemaType ={
         isolationType:IsolationType.tenant,
         documentType:'branch',
         documentName:'branch',
-        pageType:"crud", 
+        // pageType:"crud", 
         uniqueKey:'branchCode',
         documentTitle:'branchName',
         additionalAutoCompleteFields: ['branchId']

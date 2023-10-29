@@ -5,7 +5,7 @@ export const autoincreament:SchemaType = {
     "x-simpleapp-config":{
       documentType:'autoinc',
       documentName:'autoincreament',
-      isolationType:IsolationType.tenant,
+      isolationType:IsolationType.none,
       pageType:"crud",      
       additionalApis:[{
         action:"genNextNumber",

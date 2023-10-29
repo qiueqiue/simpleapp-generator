@@ -65,6 +65,7 @@ export type ModuleObject = {
   docname:string
   pagetype:string
   api:DocumentApi[]
+  schema:SimpleAppJSONSchema7
 }
 export type TypeGenerateDocumentVariable ={
 name: string

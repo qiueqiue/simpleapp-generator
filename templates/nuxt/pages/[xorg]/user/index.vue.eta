@@ -7,7 +7,7 @@
  */
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
-import {SearchBody} from '~/types'
+import { SearchBody } from "~/types";
 import _ from "lodash";
 import Panel from "primevue/panel";
 import { ref } from "vue";
@@ -67,7 +67,9 @@ const permissiontitle = "Permission Information";
  */
 const refreshList = async (resetpage: boolean = true) => {
   const items: any[] = [];
-  const searchbody: SearchBody = {fields:['uid','email','created','fullname','active']}
+  const searchbody: SearchBody = {
+    fields: ["uid", "email", "created", "fullname", "active"],
+  };
   userlist.value = await userdoc.search(searchbody);
   //listUser();
   // userlist.value = _.uniqBy(permlist.value, "uid");
@@ -90,13 +92,25 @@ const refreshList = async (resetpage: boolean = true) => {
  */
 const onSelectUser = async (menuitem: any) => {
   const user: UserListItem = { ...menuitem };
-  const orgsearchbody: SearchBody = {fields:['orgId','orgCode','orgName','active']}
-  const branchsearchbody: SearchBody = {fields:['orgId','branchId','branchCode','branchName','active']}
+  const orgsearchbody: SearchBody = {
+    fields: ["orgId", "orgCode", "orgName", "active"],
+  };
+  const branchsearchbody: SearchBody = {
+    fields: ["orgId", "branchId", "branchCode", "branchName", "active"],
+  };
   const permsearchbody: SearchBody = {
-    filter:{$or: [{ uid: user.uid }, { user_id: user._id }],},
-    fields:['uid','branchId','tenantId','orgId','active','group','created']
-  }
-  
+    filter: { $or: [{ uid: user.uid }, { user_id: user._id }] },
+    fields: [
+      "uid",
+      "branchId",
+      "tenantId",
+      "orgId",
+      "active",
+      "group",
+      "created",
+    ],
+  };
+
   orglist.value = await orgdoc.search(orgsearchbody);
   branchlist.value = await branchdoc.search(branchsearchbody);
   permlist.value = await permdoc.search(permsearchbody);
@@ -242,17 +256,7 @@ onMounted(() => {
     @click="refreshList()"
     v-if="useRuntimeConfig().public.DEBUGDATA"
     class="pi pi-refresh"
-  ></button>
-  <Dialog
-    v-model:visible="showpermissioninfo"
-    modal
-    :header="permissiontitle"
-    :autoZIndex="false"
-    :style="{ zIndex: 100, width: '80vw' }"
-  >
-    <PermissionInfo></PermissionInfo>
-  </Dialog>
-
+  ></button>  
   <div class="grid grid-cols-4">
     <div v-if="userlist">
       <TabView>
@@ -415,17 +419,13 @@ onMounted(() => {
       >
         <BlockUI :blocked="blockscreen">
           <div class="text-right m mr-2">
-            <button
-              class="btn-primary pi pi-question"
-              @click="previewPermission"
-            ></button>
+            <ButtonPermissionInfo></ButtonPermissionInfo>           
           </div>
 
           <div class="grid grid-cols-2">
             <Card v-for="o in orglist" class="m-2">
               <template #title>{{ o.orgName }}</template>
               <template #content>
-                
                 <table class="w w-full">
                   <thead class="">
                     <tr>

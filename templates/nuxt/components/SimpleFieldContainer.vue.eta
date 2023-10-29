@@ -5,8 +5,8 @@
         <label v-else  :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="input-error">*</span></label>        
         
         
-        <div v-if="readonly && typeof modelValue =='object' && typeof modelValue['_id']!='undefined' && typeof modelValue['label']!='undefined' " :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue['label'] }}</div>
-        <div v-else-if="readonly" :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue }}</div>
+        <div v-if="typeof modelValue =='object' && typeof modelValue['_id']!='undefined' && typeof modelValue['label']!='undefined' &&  readonly ==true " :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue['label'] }}</div>
+        <div v-else-if="readonly==true" :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue }}</div>
         <slot v-else name="default" :uuid="uuid" :error="error"></slot>
 
         <small v-if="error" class="error-text">{{ error }}</small>
@@ -25,7 +25,7 @@ import {computed,setBlockTracking,watch} from 'vue'
 import {ref} from 'vue'
 const uuid =  crypto.randomUUID();
 const fieldlabel = ref('')
-const fielddesc = ref('')
+// const fielddesc = ref('')
 const defaultcssclass='simpleapp-input-container'
 const fieldcontainerclass = ref(defaultcssclass)
 let instancepath = ref('')
@@ -39,17 +39,23 @@ const props = defineProps<{
     setting:any
 }>()
 
-const readonly = ref(false)
-if(props.readonly !== undefined){
-    readonly.value=props.readonly
-}else if(props.setting.readonly !==undefined){
-    readonly.value=props.readonly
-}
+const readonly = computed(()=>{
+   return props.readonly ??  props.setting.readonly ?? false
+})
+// if(props.readonly !== undefined){
+//     readonly.value=props.readonly
+// }else if(props.setting.readonly !==undefined){
+//     readonly.value=props.readonly
+// }
 // console.log("props.setting.format",props.setting.format)
 const modelValue = defineModel()
 const readonlyclass="simpleapp-value-readonly"
 // console.log('props.setting',modelValue.value,props.setting)
 let schema:any 
+
+const fielddesc = computed(()=>{
+    return props.description ?? schema.description ?? ''
+})
 if(props.setting.fieldsetting && props.setting.fieldsetting.type){
     
     schema = props.setting.fieldsetting
@@ -65,9 +71,9 @@ if(props.setting.fieldsetting && props.setting.fieldsetting.type){
     else if (schema.title ) fieldlabel.value=schema.title
     else fieldlabel.value=fieldname
     
-    if(props.description)fielddesc.value = props.description 
-    else if (schema?.description != 'undefined') fielddesc.value=schema.description
-    else fielddesc.value=''
+    // if(props.description)fielddesc.value = props.description 
+    // else if (schema?.description != 'undefined') fielddesc.value=schema.description
+    // else fielddesc.value=''
 
    
 

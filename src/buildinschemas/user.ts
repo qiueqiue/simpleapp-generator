@@ -5,6 +5,7 @@ export const user:SchemaType ={
     "x-simpleapp-config":{
         documentType:'user',
         documentName:'user',
+        pageType:'crud',
         isolationType:IsolationType.tenant,
         uniqueKey:'email',
         documentTitle:'fullname',

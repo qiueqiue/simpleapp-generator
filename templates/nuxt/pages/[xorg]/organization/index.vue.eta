@@ -12,68 +12,68 @@ import {
   InputTableColumn,
 } from "@simitgroup/simpleapp-vue-component/src/type";
 import Column from "primevue/column";
-const { $OrganizationDoc,$BranchDoc, $listen } = useNuxtApp();
+const { $OrganizationDoc, $BranchDoc, $listen } = useNuxtApp();
 //organization
 const doc = $OrganizationDoc();
 const data = doc.getReactiveData();
 const columns = ["orgCode", "orgName", "description", "tenantId", "orgId"];
-const branchlist = ref()
-const branchdoc = $BranchDoc()
-const branchdata = branchdoc.getReactiveData()
-const currentOrgId=ref()
-const debugdata= ref()
-const showbranchfrom = ref(false)
+const branchlist = ref();
+const branchdoc = $BranchDoc();
+const branchdata = branchdoc.getReactiveData();
+const currentOrgId = ref();
+const debugdata = ref();
+const showbranchfrom = ref(false);
 //branch
 
 const getBranchList = () => {
-  
-  branchdoc.getApi().runSearch({orgId:data.value.orgId}).then((res)=>{
-        branchlist.value =res.data
-      })
-}
-$listen('editRecord',async (editOrgid)=>{
-    //console.log('editRecord',editOrgid)
-    debugdata.value=data.value
-    if(editOrgid){
-      
-      currentOrgId.value=editOrgid
-      getBranchList()           
-    }    
-})
-
-const editBranch=(recordId:string)=>{
-  console.log("edit nested",currentOrgId,recordId)
-  showbranchfrom.value=true
-  debugdata.value=branchdata.value
-  if(!recordId){
-    branchdoc.setNew()
-  }else{
-    branchdoc.getById(recordId)
+  branchdoc
+    .getApi()
+    .runSearch({ orgId: data.value.orgId })
+    .then((res) => {
+      branchlist.value = res.data;
+    });
+};
+$listen("editRecord", async (editOrgid) => {
+  //console.log('editRecord',editOrgid)
+  debugdata.value = data.value;
+  if (editOrgid) {
+    currentOrgId.value = editOrgid;
+    getBranchList();
   }
-}
-const saveBranch= async()=>{
-  branchdata.value.orgId=data.value.orgId
+});
+
+const editBranch = (recordId: string) => {
+  console.log("edit nested", currentOrgId, recordId);
+  showbranchfrom.value = true;
+  debugdata.value = branchdata.value;
+  if (!recordId) {
+    branchdoc.setNew();
+  } else {
+    branchdoc.getById(recordId);
+  }
+};
+const saveBranch = async () => {
+  branchdata.value.orgId = data.value.orgId;
   branchdata.value.organization = {
     _id: data.value._id,
     orgId: data.value.orgId,
-    label: data.value.orgName
+    label: data.value.orgName,
+  };
+  if (branchdoc.isNew()) {
+    console.log("Create");
+    await branchdoc.create();
+  } else {
+    console.log("update");
+    await branchdoc.update();
   }
-  if(branchdata.value._id==''){
-    console.log("Create")
-    await branchdoc.create()
-  }else{
-    console.log("update")
-    await branchdoc.update()
-  }
-  getBranchList()
-
-}
+  getBranchList();
+};
 
 //end
 </script>
 <template>
   <div>
-    <DebugDocumentData v-model="debugdata"/>
+    <DebugDocumentData v-model="debugdata" />
     <CrudNestedDoc
       :document="doc"
       title="Organization"
@@ -116,33 +116,57 @@ const saveBranch= async()=>{
       </div>
       <div class="grid grid-cols-4 gap-4 w-full">
         <div class="col-span-2">
-          
-          <SimpleAppDatatable v-model="branchlist" :columns="['branchId','branchCode','branchName','active']">
+          <SimpleAppDatatable
+            v-model="branchlist"
+            :columns="['branchId', 'branchCode', 'branchName', 'active']"
+          >
             <template #header>
-              <button class="btn-primary" @click="editBranch('')" type="button" ><span class="pi pi-plus "> </span></button>
-            </template>            
-            <Column header="Action" >
-                  <template #body="{index,data}">
-                    <button type="button" class="btn-primary" @click="editBranch(data._id)">Edit</button>
-                  </template>
-              </Column>   
-            
+              <button class="btn-primary" @click="editBranch('')" type="button">
+                <span class="pi pi-plus"> </span>
+              </button>
+            </template>
+            <Column header="Action">
+              <template #body="{ index, data }">
+                <button
+                  type="button"
+                  class="btn-primary"
+                  @click="editBranch(data._id)"
+                >
+                  Edit
+                </button>
+              </template>
+            </Column>
           </SimpleAppDatatable>
         </div>
-        <div class="col-span-2" >
-          <SimpleAppForm :document="branchdoc" #default="o" v-if="showbranchfrom">
-              <SimpleAppText v-model="branchdata.branchCode" :setting="o.getField('#/properties/branchCode')"/>
-              <SimpleAppText v-model="branchdata.branchName" :setting="o.getField('#/properties/branchName')"/>
-              <SimpleAppCheckbox v-model="branchdata.active" :setting="o.getField('#/properties/active')"/>
-              <SimpleAppTextarea v-model="branchdata.description" :setting="o.getField('#/properties/description')"/>
-              <!-- <SimpleAppNumber :readonly="true" v-model="branchdata.orgId" :setting="o.getField('#/properties/orgId')"/> -->
-              <button class="btn-primary" type="button" @click="saveBranch">Save</button>
-              
+        <div class="col-span-2">
+          <SimpleAppForm
+            :document="branchdoc"
+            #default="o"
+            v-if="showbranchfrom"
+          >
+            <SimpleAppText
+              v-model="branchdata.branchCode"
+              :setting="o.getField('#/properties/branchCode')"
+            />
+            <SimpleAppText
+              v-model="branchdata.branchName"
+              :setting="o.getField('#/properties/branchName')"
+            />
+            <SimpleAppCheckbox
+              v-model="branchdata.active"
+              :setting="o.getField('#/properties/active')"
+            />
+            <SimpleAppTextarea
+              v-model="branchdata.description"
+              :setting="o.getField('#/properties/description')"
+            />
+            <!-- <SimpleAppNumber :readonly="true" v-model="branchdata.orgId" :setting="o.getField('#/properties/orgId')"/> -->
+            <button class="btn-primary" type="button" @click="saveBranch">
+              Save
+            </button>
           </SimpleAppForm>
         </div>
-        
       </div>
     </CrudNestedDoc>
-    
   </div>
 </template>

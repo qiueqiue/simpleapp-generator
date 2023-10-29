@@ -92,15 +92,15 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     await processSchema(file.replace('.json',''),jsonschema)    
   }
   // //generate groups
-  // const systemgroups = readdirSync(`${groupFolder}`)
-  // for(let g = 0; g< systemgroups.length;g++){
-  //   const groupfile = systemgroups[g]
-  //   const groupjsonstr = readFileSync(`${groupFolder}/${groupfile}`, 'utf-8');      
-  //   const groupdata = JSON.parse(groupjsonstr);
-  //   const documentname = groupfile.split('.')[0]
-  //   const roles = prepareRoles(groupdata)
-  //   allroles[documentname]=roles
-  // }
+  const systemgroups = readdirSync(`${groupFolder}`)
+  for(let g = 0; g< systemgroups.length;g++){
+    const groupfile = systemgroups[g]
+    const groupjsonstr = readFileSync(`${groupFolder}/${groupfile}`, 'utf-8');      
+    const groupdata = JSON.parse(groupjsonstr);
+    const documentname = groupfile.split('.')[0]
+    const roles = prepareRoles(groupdata)
+    allroles[documentname]=roles
+  }
   finalize(activatemodules)
   callback()
 }
@@ -128,6 +128,7 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
       // const jsondata = JSON.parse(jsonstring);    
       const  rendertype = 'basic';
       jsonschemas[docname] = jsondata;
+      const copyofjsonschema = {...jsondata}
       const allmodels:ChildModels =  await readJsonSchemaBuilder(docname, jsondata);
       // log.error("allmodels",docname,schemaname)
       generateSchema(docname, doctype, rendertype, allmodels);        
@@ -135,7 +136,8 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
         doctype:doctype,
         docname:capitalizeFirstLetter(docname),
         pagetype: config.pageType??'',
-        api:config.additionalApis
+        api:config.additionalApis,
+        schema : copyofjsonschema
       })
     // } else {
       // log.warn(`Load `+clc.yellow(file) + ` but it is not supported`)
@@ -339,15 +341,26 @@ const finalize=(modules:ModuleObject[])=>{
         const arrfilename:string[] = filename.split('.')
         // log.info("check longfilename:::",longfilename,"become====",arrfilename)
         //only process .eta
-        if(_.last(arrfilename)=='eta'){                    
+        if(_.last(arrfilename)=='eta'|| _.last(arrfilename)=='_eta'){                    
           const relativepath = longfilename.includes('/') ? longfilename.replace(`/${filename}`,'') : ''
           const foldername = `${frameworkpath}/${relativepath}`
-          const shortfilename = filename.replace('.eta','')
+          const shortfilename = filename.replace('.eta','').replace('._eta','')
           const targetfilename = `${foldername}/${shortfilename}`
+          let forceoverride=true
+          if(filename.includes('._eta')){
+            forceoverride=false
+          }
+          // log.warn("Process=== ",targetfilename)
+          if(existsSync(targetfilename) &&  forceoverride == false){
+            log.info("file exists, skip: ",targetfilename)
+            continue;
+          }
+
+          
           if(!existsSync(foldername)){
             mkdirSync(foldername,{recursive:true})
           }
-          const templatename = `${frameworkfolder}/${longfilename}`.replace(".eta","")
+          // const templatename = `${frameworkfolder}/${longfilename}`.replace(".eta","").replace('._eta','')
           log.info("Write template:",targetfilename)
           const txt = eta.render(longfilename, renderProperties)
           writeFileSync(targetfilename,txt)

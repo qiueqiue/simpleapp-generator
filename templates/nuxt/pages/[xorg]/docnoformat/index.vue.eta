@@ -6,12 +6,12 @@
     v-model="recordlist"
     :setting="{}"
     :columns="[
+      'branch.label',
       'docNoFormatNo',
       'docNoFormatName',
       'active',
       'docNoPattern',
       'nextNumber',
-      'isMonthly',
     ]"
   >
     <Column header="action">
@@ -79,7 +79,7 @@
       <ConfirmPopup></ConfirmPopup>
     </div>
     <SimpleAppForm :document="doc" #default="o" title="Document No">
-      <div class="grid grid-cols-4">
+      <div class="grid grid-cols-4 gap-4">
         <SimpleAppText
           autofocus
           :setting="o.getField('#/properties/docNoFormatNo')"
@@ -90,6 +90,12 @@
           :setting="o.getField('#/properties/docNoFormatName')"
           v-model="data.docNoFormatName"
         />
+        <SimpleAppAutocomplete
+            v-model="data.branch"
+            :setting="o.getField('#/properties/branch')"
+            :remoteSrc="getAutocomplete('branch')"
+            optionLabel="label"                        
+          />
         <SimpleAppCheckbox
           autofocus
           :setting="o.getField('#/properties/active')"
@@ -106,12 +112,9 @@
           autofocus
           :setting="o.getField('#/properties/docNoPattern')"
           v-model="data.docNoPattern"
-        />
-
-        <SimpleAppCheckbox
-          autofocus
-          :setting="o.getField('#/properties/isMonthly')"
-          v-model="data.isMonthly"
+          @change="updateSample"
+          :description="sample"
+          v-tooltip="'Examples: PO-<00000>, SI{YY}/<000>, SI{YYMM}/<000>'"
         />
 
         <SimpleAppNumber
@@ -119,101 +122,17 @@
           :setting="o.getField('#/properties/nextNumber')"
           v-model="data.nextNumber"
         />
-
-        <SimpleAppValue :setting="o.getField('#/properties/monthlySetting')">
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/jan')"
-            instancePath="#/monthlySetting/jan"
-            v-model="data.monthlySetting.jan"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/feb')"
-            instancePath="#/monthlySetting/feb"
-            v-model="data.monthlySetting.feb"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/mar')"
-            instancePath="#/monthlySetting/mar"
-            v-model="data.monthlySetting.mar"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/apr')"
-            instancePath="#/monthlySetting/apr"
-            v-model="data.monthlySetting.apr"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/may')"
-            instancePath="#/monthlySetting/may"
-            v-model="data.monthlySetting.may"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/jun')"
-            instancePath="#/monthlySetting/jun"
-            v-model="data.monthlySetting.jun"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/jul')"
-            instancePath="#/monthlySetting/jul"
-            v-model="data.monthlySetting.jul"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/aug')"
-            instancePath="#/monthlySetting/aug"
-            v-model="data.monthlySetting.aug"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/sep')"
-            instancePath="#/monthlySetting/sep"
-            v-model="data.monthlySetting.sep"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/oct')"
-            instancePath="#/monthlySetting/oct"
-            v-model="data.monthlySetting.oct"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/nov')"
-            instancePath="#/monthlySetting/nov"
-            v-model="data.monthlySetting.nov"
-          />
-
-          <SimpleAppNumber
-            autofocus
-            :setting="o.getField('#/properties/monthlySetting/properties/dec')"
-            instancePath="#/monthlySetting/dec"
-            v-model="data.monthlySetting.dec"
-          />
-        </SimpleAppValue>
       </div>
     </SimpleAppForm>
   </Dialog>
 </template>
 <script setup lang="ts">
 import _ from "lodash";
+import moment from "moment";
 import Dialog from "primevue/dialog";
 import Column from "primevue/column";
 import { ListItem } from "@/types/listview";
+import ProgressSpinner from "primevue/progressspinner";
 import ConfirmPopup from "primevue/confirmpopup";
 import { useConfirm } from "primevue/useconfirm";
 const { $event, $listen, $DocnoformatDoc } = useNuxtApp();
@@ -225,12 +144,16 @@ const disabled = ref(false);
 const popuptitle = ref("edit");
 const recordlist = ref();
 const selectedDoctype = ref("");
+const havedocdate = ref(false);
 const confirm = useConfirm();
 // This will work in both `<script setup>` and `<script>`
-definePageMeta({
+if(data.value.created==''){
+  definePageMeta({
   layout: "sidelistcrud",
 });
+}
 
+const sample = ref("");
 const resourcename = ref(_.upperFirst(doc.getDocName()));
 
 const refresh = async () => {
@@ -238,20 +161,27 @@ const refresh = async () => {
 
   console.log("selectedDoctype", selectedDoctype.value);
 
-  const results = await doc.search(filter);
+  const results = await doc.search({ filter: filter });
   recordlist.value = results;
 };
 $listen("itemselected", (item: ListItem) => {
   selectedDoctype.value = item.code;
+  havedocdate.value = item.data.documentDate != "";
   refresh();
 });
 
+const updateSample = () => {
+  sample.value = "Example: " + previewDocNo();
+};
 onMounted(() => {
   const doclist = getDocTypes();
   console.log(doclist);
-  const listdata: ListItem[] = getDocTypes().map(
-    (item) => ({ name: item.docName, code: item.docType }) as ListItem,
-  );
+  const listdata: ListItem[] = getDocTypes()
+    .filter((item) => item.docNumber)
+    .map(
+      (item) =>
+        ({ name: item.docName, code: item.docType, data: item }) as ListItem,
+    );
   $event("listloaded", listdata);
 });
 const newRecord = () => {
@@ -321,6 +251,46 @@ const triggerEdit = async (event: any) => {
   await doc.getById(id);
   console.log(id);
   visible.value = true;
-  useRouter().push({ path: `/${useRoute().params.xorg}/docnoformat/${id}` });
+  // useRouter().push({ path: `/${useRoute().params.xorg}/docnoformat/${id}` });
+};
+
+const previewDocNo = (): string => {
+  const pattern = data.value.docNoPattern;
+  if (pattern) {
+    const numberReg: RegExp = /\[(.*?)\]/g;
+    const dateReg: RegExp = /\{(.*?)\}/g;
+    let newvalue = pattern;
+    const numberpattern = pattern.match(numberReg);
+    const datepattern = pattern.match(dateReg);
+
+    if (numberpattern && numberpattern.length > 0) {
+      const numberlength = numberpattern[0]
+        .replace("[", "")
+        .replace("]", "").length;
+
+      let nextnumber = (data.value.nextNumber ?? 0).toString();
+
+      const numberdiff = numberlength - nextnumber.length;
+
+      for (let n = 0; n < numberdiff; n++) {
+        nextnumber = "0" + nextnumber;
+      }
+      newvalue = newvalue.replace(numberpattern[0], nextnumber);
+    }
+
+    if (datepattern && datepattern.length > 0) {
+      for (let d = 0; d < datepattern.length; d++) {
+        const dpattern = datepattern[d];
+        const date = new Date();
+        const formatteddate = moment().format(
+          dpattern.replace("{", "").replace("}", ""),
+        );
+        newvalue = newvalue.replace(dpattern, formatteddate);
+      }
+    }
+    return newvalue;
+  } else {
+    return "";
+  }
 };
 </script>

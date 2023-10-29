@@ -1,0 +1,36 @@
+import { usePassThrough } from "primevue/passthrough";
+import Tailwind from "primevue/passthrough/tailwind";
+
+
+const CustomTailwind = usePassThrough(
+    Tailwind,
+    {
+        dialog:{
+            root:{
+               class:['bg-white border p-2' ]
+            }
+        },
+        panel: {
+            root:{
+                class:['border']
+            },
+            title: {
+                class: ['leading-none font-light text-2xl']
+            },
+            header:{
+                class:['bg bg-gray-200 h-10 content-middle']
+            },
+            content:{
+                class:['']
+            }
+        }
+    },
+    // {
+    //     mergeSections: true,
+    //     mergeProps: false
+    // }
+);
+
+
+
+export default CustomTailwind;

@@ -22,16 +22,16 @@ export const getMenus =()=>{
   const xorg = route.params.xorg
   let data =[];
   //sss
-  let allmenus:string[] = alldocuments.filter(item=>item.page!='').map(item=>item.docName)
+  let allmenus = alldocuments.filter(item=>item.page!='')
 
  const roles = $userstore.getUserInfo().roles
   let allowmenus=[]
   for(let i=0; i< allmenus.length;i++){
-    const keyword = allmenus[i]
+    const keyword = allmenus[i].docName
     // if(m.label)
    
     if($userstore.haveAccess(keyword)){
-      const m = {label: keyword, to:`/${xorg}/${keyword}`}
+      const m = {label: keyword, to:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
       allowmenus.push(m)
     }     
   }
