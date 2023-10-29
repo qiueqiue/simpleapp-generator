@@ -10,7 +10,7 @@
                 :pt="{input:{class:'text-right w-full'}}"                          
             />
             <span class="p-inputgroup-addon p p-0">
-                <button class="pi pi-angle-down"  type="button" @click="toggle"></button>
+                <Button class="pi pi-angle-down"  type="button" @click="toggle"></Button>
 
                 <OverlayPanel ref="op">                    
                     <ul>                      

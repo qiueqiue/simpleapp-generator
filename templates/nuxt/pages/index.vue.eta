@@ -89,9 +89,9 @@ const createTenant = async () => {
           v-model="data"
           label="CreateTenant"
         ></DebugDocumentData>
-        <button class="btn-primary" @click="visible = true">
+        <Button class="btn-primary" @click="visible = true">
           Create My Company
-        </button>
+        </Button>
 
         <Dialog
           v-model:visible="visible"
@@ -112,9 +112,9 @@ const createTenant = async () => {
               placeholder="Organization Name"
             />
 
-            <button class="btn-primary" type="submit" @click="createTenant">
+            <Button class="btn-primary" type="submit" @click="createTenant">
               Create
-            </button>
+            </Button>
           </form>
         </Dialog>
       </div>
@@ -128,11 +128,11 @@ const createTenant = async () => {
       <template #header>
         <div class="flex flex-row">
           <div class="font font-bold">Login To</div>
-          <button
+          <Button
             class="pi pi-refresh ml-4"
             @click="loadProfile"
             v-if="useRuntimeConfig().public.DEBUGDATA"
-          ></button>
+          ></Button>
         </div>
       </template>
       <div class="grid grid-cols-2">

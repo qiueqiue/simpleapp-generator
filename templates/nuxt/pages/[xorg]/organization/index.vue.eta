@@ -121,19 +121,19 @@ const saveBranch = async () => {
             :columns="['branchId', 'branchCode', 'branchName', 'active']"
           >
             <template #header>
-              <button class="btn-primary" @click="editBranch('')" type="button">
-                <span class="pi pi-plus"> </span>
-              </button>
+              <Button class=" btn-primary" @click="editBranch('')" type="button">
+                <span class="font font-normal">Add Branch</span>
+              </Button>
             </template>
             <Column header="Action">
               <template #body="{ index, data }">
-                <button
+                <Button
                   type="button"
-                  class="btn-primary"
+                  class=" btn-primary"
                   @click="editBranch(data._id)"
                 >
                   Edit
-                </button>
+                </Button>
               </template>
             </Column>
           </SimpleAppDatatable>
@@ -161,9 +161,9 @@ const saveBranch = async () => {
               :setting="o.getField('#/properties/description')"
             />
             <!-- <SimpleAppNumber :readonly="true" v-model="branchdata.orgId" :setting="o.getField('#/properties/orgId')"/> -->
-            <button class="btn-primary" type="button" @click="saveBranch">
+            <Button class=" btn-primary" type="button" @click="saveBranch">
               Save
-            </button>
+            </Button>
           </SimpleAppForm>
         </div>
       </div>

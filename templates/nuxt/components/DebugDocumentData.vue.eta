@@ -18,7 +18,7 @@ const label = ref(props.label??'Debug')
 </script>
 <template>
     <div class="floatright" v-if="isdebug=='1'">
-        <button @click="visible=true">{{ label }}</button>
+        <Button @click="visible=true">{{ label }}</Button>
         <Dialog v-model:visible="visible" modal header="Debug data" :style="{ width: '80vw' }">
             <pre>{{ modelValue }}</pre>
         </Dialog>                

@@ -1,5 +1,5 @@
 <template>
-  <button class="btn-primary" @click="newRecord">New</button>
+  <Button class="btn-primary" @click="newRecord">New</Button>
   <ConfirmPopup></ConfirmPopup>
   <DebugDocumentData v-model="data"></DebugDocumentData>
   <SimpleAppDatatable
@@ -16,14 +16,14 @@
   >
     <Column header="action">
       <template #body="{ data, index }">
-        <button
+        <Button
           class="pi pi-pencil btn-primary"
           @click="triggerEdit(data)"
-        ></button>
-        <button
+        ></Button>
+        <Button
           class="pi pi-times btn-danger"
           @click="triggerDelete(data)"
-        ></button>
+        ></Button>
       </template>
     </Column>
   </SimpleAppDatatable>
@@ -36,7 +36,7 @@
     :style="{ zIndex: 100, width: '80vw' }"
   >
     <div class="simpleapp-tool-bar col-span-4 text-left gap-4">
-      <button
+      <Button
         class="btn-default"
         :disabled="disabled"
         @click="newRecord"
@@ -44,8 +44,8 @@
         v-if="canPerform(resourcename, 'create')"
       >
         New
-      </button>
-      <button
+      </Button>
+      <Button
         class="btn-primary"
         :disabled="disabled"
         @click="createData"
@@ -53,8 +53,8 @@
         v-if="canPerform(resourcename, 'create') && data.created == ''"
       >
         Create
-      </button>
-      <button
+      </Button>
+      <Button
         class="btn-primary"
         :disabled="disabled"
         @click="updateData"
@@ -62,8 +62,8 @@
         v-if="canPerform(resourcename, 'update') && data.created != ''"
       >
         Update
-      </button>
-      <button
+      </Button>
+      <Button
         class="btn-danger"
         :disabled="disabled"
         @click="deleteData($event)"
@@ -71,7 +71,7 @@
         v-if="canPerform(resourcename, 'delete') && data.created != ''"
       >
         Delete
-      </button>
+      </Button>
       <ProgressSpinner
         v-if="disabled == true"
         style="width: 2rem; height: 2rem"

@@ -252,11 +252,11 @@ onMounted(() => {
 });
 </script>
 <template>
-  <button
+  <Button
     @click="refreshList()"
     v-if="useRuntimeConfig().public.DEBUGDATA"
     class="pi pi-refresh"
-  ></button>  
+  ></Button>  
   <div class="grid grid-cols-4">
     <div v-if="userlist">
       <TabView>
@@ -285,11 +285,11 @@ onMounted(() => {
                 </div>
                 <div class="basis-1/6 m-2">
                   <!-- only debug mode can delete user -->
-                  <button
+                  <Button
                     v-if="useRuntimeConfig().public.DEBUGDATA"
                     class="pi pi-times btn-danger"
                     @click="deleteUser(item)"
-                  ></button>
+                  ></Button>
                 </div>
               </a>
             </template>
@@ -320,11 +320,11 @@ onMounted(() => {
                 </div>
                 <div class="basis-1/6 m-2">
                   <!-- only debug mode can delete user -->
-                  <button
+                  <Button
                     v-if="useRuntimeConfig().public.DEBUGDATA"
                     class="pi pi-times btn-danger"
                     @click="deleteUser(item)"
-                  ></button>
+                  ></Button>
                 </div>
               </a>
             </template>
@@ -339,9 +339,9 @@ onMounted(() => {
                   placeholder="email"
                   v-model="inviteemail"
                 />
-                <button label="Search" class="btn btn-primary" @click="invite">
+                <Button label="Search" class="btn btn-primary" @click="invite">
                   Invite
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -368,10 +368,10 @@ onMounted(() => {
                   <div class="text text-sm text-right">{{ item.email }}</div>
                 </div>
                 <div class="basis-1/6 m-2">
-                  <button
+                  <Button
                     class="pi pi-times btn-danger"
                     @click="deleteUser(item)"
-                  ></button>
+                  ></Button>
                 </div>
               </a>
             </template>

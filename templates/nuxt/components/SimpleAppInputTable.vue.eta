@@ -4,7 +4,7 @@
     <template #empty> <div class="text-center">No record found.</div> </template>
     <template #header >
         <div>
-            <button icon="pi pi-plus" @click="addNew()" class="simpleapp-datatable-add btn-primary" type="button">Add</button>
+            <Button icon="pi pi-plus" @click="addNew()" class="simpleapp-datatable-add btn-primary" type="button">Add</Button>
         </div>
     </template>
     <slot>
@@ -39,7 +39,7 @@
             </Column>
             <Column v-if="!readonly">
                 <template #body="{data,field,index}">
-                    <button class="simpleapp-inputtable-delrow button-danger" @click="deleteRow(index)" type="button">X</button>
+                    <Button class="simpleapp-inputtable-delrow button-danger" @click="deleteRow(index)" type="button">X</Button>
                 </template>
             </Column> -->
     </DataTable>

@@ -14,10 +14,10 @@ const toggle = (event) => {
     <div>
         <div class=" w-[120px] truncate ...">
             
-            <button class="flex flex-row-reverse  cursor-pointer border-none w-full" @click="toggle">                    
+            <div class="flex flex-row-reverse  cursor-pointer border-none w-full" @click="toggle">                    
                 <p>{{ getUserProfile().fullName }}</p>
                 <Avatar :image="getUserStore().getAvatarLink(32)" class="" size="normal" shape="circle" />                
-            </button>
+            </div>
             
         </div>
         <OverlayPanel ref="userprofileoverlay">                    
@@ -38,12 +38,12 @@ const toggle = (event) => {
             
             
             <div class="flex flex-row gap-2 border">
-                <button class="border">
+                <Button class="border">
                     <i class="pi pi-user"></i>profile
-                </button>    
-                <button class="border" @click="logout()">
+                </Button>    
+                <Button class="border" @click="logout()">
                     <i class="pi pi-sign-out"></i>logout
-                </button>    
+                </Button>    
             </div>
             
         </div>

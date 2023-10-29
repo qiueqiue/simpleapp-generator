@@ -13,21 +13,21 @@ const selectMenu = (menu) =>{
 <template>
   <div>
 
-    <button class="text-center border-none  cursor-pointer" v-if="useRoute().params.xorg" @click="visible=true">
+    <Button class="text-center border-none  cursor-pointer" v-if="useRoute().params.xorg" @click="visible=true">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
       </svg>
-    </button>
+    </Button>
 
      <Dialog v-model:visible="visible" modal header="Pick Document" >
       <div class="desktop-shortcut-link">
           
-          <button v-for="menu in menus[1].items" @click="selectMenu(menu)">
+          <Button v-for="menu in menus[1].items" @click="selectMenu(menu)">
             <div v-if="menu.isolationType == 'none'" class="adminmenu">
               * {{ camelCaseToWords(menu.label) }}
             </div>
             <div v-else class="usermenu">{{ camelCaseToWords(menu.label) }}</div>
-          </button>
+          </Button>
         </div>
     </Dialog>
        

@@ -10,12 +10,12 @@ const selectMenu = (menu) =>{
   <div>
     <div class="desktop-shortcut-link">
       
-      <button v-for="menu in menus[1].items" @click="menu">
+      <Button v-for="menu in menus[1].items" @click="menu">
         <div v-if="menu.isolationType == 'none'" class="adminmenu">
           * {{ camelCaseToWords(menu.label) }}
         </div>
         <div v-else class="usermenu">{{ camelCaseToWords(menu.label) }}</div>
-      </button>
+      </Button>
     </div>
   </div>
 </template>

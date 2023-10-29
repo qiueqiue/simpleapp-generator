@@ -156,7 +156,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <button @click="refreshList()" class="pi pi-refresh"></button>
+  <Button @click="refreshList()" class="pi pi-refresh"></Button>
   <Dialog
     v-model:visible="showpermissioninfo"
     modal
@@ -204,8 +204,8 @@ onMounted(() => {
                   placeholder="email"
                   v-model="inviteemail"
                 />
-                <button label="Search" class="btn btn-primary" @click="invite"
-                  >Invite</button
+                <Button label="Search" class=" btn-primary" @click="invite"
+                  >Invite</Button
               >
             
             </div>
@@ -221,10 +221,10 @@ onMounted(() => {
                 {{ invitation.email }}
               </div>
               <div>
-                <button
+                <Button
                   class="btn-danger pi pi-times"
                   @click="deleteInvitation(invitation._id)"
-                ></button>
+                ></Button>
               </div>
             </div>
           </div>
@@ -235,10 +235,10 @@ onMounted(() => {
       <div class="flex flex-row w w-full">
         <div class="text text-xl p p-2 text-left flex-1">{{ activeuser }}</div>
         <div class="text-right m mr-2">
-          <button
+          <Button
             class="btn-primary pi pi-question"
             @click="previewPermission"
-          ></button>
+          ></Button>
         </div>
       </div>
 

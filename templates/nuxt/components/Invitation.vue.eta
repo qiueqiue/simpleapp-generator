@@ -8,8 +8,8 @@
                     <div class="text text-xs text-gray-500 italic">{{ item.created }}</div>
                 </div>
                 <div >
-                    <button class="btn-primary" @click="approve(item._id)">Approve</button>
-                    <button class="btn-danger" @click="decline(item._id)">Decline</button>
+                    <Button class="btn-primary" @click="approve(item._id)">Approve</Button>
+                    <Button class="btn-danger" @click="decline(item._id)">Decline</Button>
                 </div>
             </div>
         </div>        

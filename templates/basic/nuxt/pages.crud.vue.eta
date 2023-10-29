@@ -170,7 +170,7 @@
                         </column>                        
                     <%}%>
                     <column #body="{index}" header="Delete">
-                            <button class="btn-danger" type="button" @click="data.<%=key%>.splice(index,1)">X</button>
+                            <Button class="btn-danger" type="button" @click="data.<%=key%>.splice(index,1)">X</Button>
                         </column>
             </SimpleAppInputTable>
         <% } else{%>

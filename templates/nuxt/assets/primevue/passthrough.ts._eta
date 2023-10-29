@@ -5,6 +5,11 @@ import Tailwind from "primevue/passthrough/tailwind";
 const CustomTailwind = usePassThrough(
     Tailwind,
     {
+        button:{
+            root:{
+                class:['p-2 m-2 border']
+            }
+        },
         dialog:{
             root:{
                class:['bg-white border p-2' ]
@@ -25,10 +30,6 @@ const CustomTailwind = usePassThrough(
             }
         }
     },
-    // {
-    //     mergeSections: true,
-    //     mergeProps: false
-    // }
 );
 
 

@@ -1,5 +1,5 @@
 .btn {
-    @apply p-2  border-2
+    @apply p-2  border-2 m-1
 }
 .btn-primary{
     @apply bg-primary-600 text-white

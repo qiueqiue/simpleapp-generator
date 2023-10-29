@@ -133,7 +133,7 @@ onNuxtReady(()=>{
 <template>
     <div class="simpleapp-crudnesteddocument">    
       <h1 v-if="systemwindows" class="error-text text-center">* It is system administration screen</h1>
-      <button class="btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">New</button>
+      <Button class="btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">New</Button>
       <SimpleAppDatatable
             @row-dblclick="triggerEdit"
             v-model="recordlist"                                 
@@ -148,10 +148,10 @@ onNuxtReady(()=>{
     <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
         <SimpleAppForm :document="obj"  #default="o">     
             <div class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
-              <button class="btn-default" :disabled="disabled" @click="newData" type="button" v-if="canPerform(resourcename,'create')">New</button>
-              <button class="btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(resourcename,'update') && data.created==''">Create</button>
-              <button class="btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(resourcename,'update') && data.created!=''">Update</button>
-              <button class="btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(resourcename,'delete') && data.created!=''">Delete</button>
+              <Button class=" btn-default" :disabled="disabled" @click="newData" type="button" v-if="canPerform(resourcename,'create')">New</Button>
+              <Button class=" btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(resourcename,'update') && data.created==''">Create</Button>
+              <Button class=" btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(resourcename,'update') && data.created!=''">Update</Button>
+              <Button class=" btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(resourcename,'delete') && data.created!=''">Delete</Button>
               <ProgressSpinner v-if="disabled==true" style="width: 2rem; height: 2rem" ></ProgressSpinner>
               <ConfirmPopup></ConfirmPopup>
               
