@@ -33,9 +33,9 @@ docker network create mongoCluster
 #prepare node1
 docker run -d -p 27017:27017 --name mongo1 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo1
 #prepare node2
-docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo2
+docker run -d  -p 27018:27017 --name mongo2 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo2
 #prepare node3
-docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo3
+docker run -d  -p 27019:27017 --name mongo3 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo3
 
 # build cluster
 docker exec -it mongo1 mongosh --eval "rs.initiate({

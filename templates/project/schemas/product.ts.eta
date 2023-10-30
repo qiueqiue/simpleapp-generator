@@ -3,7 +3,7 @@ import {
   SchemaType,
   RESTMethods,
   IsolationType,
-} from "/Users/kstan/dev/lowcode/simpleapp-generator/src/type";
+} from '/usr/local/lib/node_modules/@simitgroup/simpleapp-generator/src/type';
 export const product: SchemaType = {
   type: "object",
   "x-simpleapp-config": {
