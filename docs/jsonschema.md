@@ -94,6 +94,8 @@ simpleapp support [ajv](https://ajv.js.org/guide/formats.html#string-formats`), 
 # Compulsory schema properties 
 to allow data traceable and isolated properly, there is compulsory property in highest level
 ```json
+{
+...
 _id:{type:'string'},
 created:{type:'string'},
 updated:{type:'string'},
@@ -102,6 +104,9 @@ updatedby:{type:'string'},
 tenantId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"tenant" },
 orgId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"organization" },
 branchId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"branch" },
+...
+}
+
 ```
 
 
