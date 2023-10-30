@@ -7,7 +7,7 @@
  * author: Ks Tan
  */
 <% let skipcolumns = ['_id','createdby','created','updatedby','updated','orgId','branchId','tenantId','doctype'] %>  
-  import {InputTableColumnType,InputTableColumn} from "@simitgroup/simpleapp-vue-component/src/type";
+  import {InputTableColumnType,InputTableColumn} from "~/components/type";
   import Column from "primevue/column";
   const {$<%= it.typename %>Doc } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()

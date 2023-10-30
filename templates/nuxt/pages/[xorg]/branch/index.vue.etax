@@ -7,10 +7,7 @@
  * author: Ks Tan
  */
 
-import {
-  InputTableColumnType,
-  InputTableColumn,
-} from "@simitgroup/simpleapp-vue-component/src/type";
+
 import Column from "primevue/column";
 const { $BranchDoc } = useNuxtApp();
 const doc = $BranchDoc();

@@ -37,6 +37,7 @@ docker run -d  -p 27018:27017 --name mongo2 --network mongoCluster mongo:6 mongo
 #prepare node3
 docker run -d  -p 27019:27017 --name mongo3 --network mongoCluster mongo:6 mongod --replSet myReplicaSet --bind_ip localhost,mongo3
 
+
 # build cluster
 docker exec -it mongo1 mongosh --eval "rs.initiate({
  _id: \"myReplicaSet\",
@@ -57,6 +58,11 @@ rs.reconfig(cfg)"
 #check cluster status
 docker exec -it mongo1 mongosh --eval "rs.status()"
 
+```
+
+** you may need to append below code into your `/etc/hosts`
+```
+127.0.0.1 mongo1 mongo2 mongo3
 ```
 
 
@@ -97,7 +103,7 @@ sh build.sh frontend
 10. start frontend:
 ```sh
 cd ~/project1/frontend
-pnpm start
+pnpm dev
 ```
 
 

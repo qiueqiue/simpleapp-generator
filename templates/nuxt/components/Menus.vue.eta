@@ -27,7 +27,7 @@ const visibletenant = ref(false)
             <MenuIndex></MenuIndex>
         </Dialog>
         <Dialog v-model:visible="visibletenant" modal header="Pick Tenant" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">
-            <XorgPicker></XorgPicker>
+          
         </Dialog>
         
         <div class="flex-1">

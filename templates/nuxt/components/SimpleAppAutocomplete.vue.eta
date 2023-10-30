@@ -32,7 +32,7 @@ import AutoComplete from 'primevue/autocomplete';
 import FieldContainer from './SimpleFieldContainer.vue'
 import {prepareList} from './helper'
 import type {SimpleAppFieldSetting,ListOptionType} from './type'
-import { SimpleAppClient } from  '../generate/docs/SimpleAppClient' //'../SimpleAppClient';
+import { SimpleAppClient } from  '../simpleapp/generate/clients/SimpleAppClient'
 import type { JSONSchema7 } from 'json-schema';
 
 type autocompletetype={[key:string]:any}
