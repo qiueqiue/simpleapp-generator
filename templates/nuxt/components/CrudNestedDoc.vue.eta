@@ -69,8 +69,8 @@ const newData = () => {
   $event("newRecord")
 };
 
-const triggerEdit = (event: any) => {
-  let id = event.data._id.toString()
+const triggerEdit = (data: any) => {
+  let id = data._id.toString()
   router.push({ path: `${props.path}/${id}` })  
 };
 const editRecord = (id:string) => {  
@@ -140,6 +140,10 @@ onNuxtReady(()=>{
             :setting="{}"
             :columns="listColumns"
           >         
+          <Column header=" ">
+          <template #body="{index,data}">
+            <Button icon="pi pi-pencil" class="btn-primary" @click="triggerEdit(data)"></Button>
+          </template></Column>
         </SimpleAppDatatable>
 
       

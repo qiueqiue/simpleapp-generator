@@ -70,8 +70,8 @@ const newData = () => {
   $event("newRecord")
 };
 
-const triggerEdit = (event: any) => {
-  let id = event.data._id.toString()
+const triggerEdit = (data: any) => {
+  let id = data._id
   router.push({ path: `${props.path}/${id}` })  
 };
 const editRecord = (id:string) => {
@@ -142,12 +142,15 @@ onNuxtReady(()=>{
     <div class="simpleapp-crudsimple">    
       <h1 v-if="systemwindows" class="error-text text-center">* system administration screen</h1>      
       <Button class=" btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">New</Button>
-      <SimpleAppDatatable
-            @row-dblclick="triggerEdit"
+      <SimpleAppDatatable            
             v-model="recordlist"                                 
             :setting="{}"
             :columns="listColumns"
           >         
+          <Column header=" ">
+          <template #body="{index,data}">
+            <Button icon="pi pi-pencil" class="btn-primary" @click="triggerEdit(data)"></Button>
+          </template></Column>
         </SimpleAppDatatable>
 
       <DebugDocumentData v-model="data"/>

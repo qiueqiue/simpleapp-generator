@@ -48,7 +48,7 @@ docker exec -it mongo1 mongosh --eval "rs.initiate({
 })"
 
 # set mongod1 high priority as primary server
-docker exec -it mongo3 mongosh --eval "cfg = rs.conf()
+docker exec -it mongo` mongosh --eval "cfg = rs.conf()
 cfg.members[0].priority = 50
 cfg.members[1].priority = 1
 cfg.members[2].priority = 1

@@ -4,7 +4,7 @@ import OverlayPanel from 'primevue/overlaypanel';
 import {ref} from 'vue'
 
 const userprofileoverlay = ref();
-const toggle = (event) => {
+const toggle = (event:any) => {
     userprofileoverlay.value.toggle(event);
 }
 

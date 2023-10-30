@@ -45,6 +45,22 @@ export type PermissionListItem = {
   _id:string
   
 }
+export type DocumentMetaData =  {
+  docName:string
+  docType:string
+  page: string 
+  isolationType:string   
+  documentDate:string
+  docNumber:boolean
+}
+export type MenuData =  {
+  label: string
+  icon?: string
+  command?:Function
+  items?: MenuData[]
+  isolationType?:string
+  url?:string
+}
 
 export type DocNoFormat ={
   docNoFormatName: string

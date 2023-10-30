@@ -5,11 +5,12 @@
  * author: Ks Tan
  */
 import _ from 'lodash'
+import {MenuData} from '~/types'
 import {alldocuments} from '../simpleapp/generate/commons/documents'
 export const getDocTypes = ()=>{
   return alldocuments.filter(item=>item.page!='')
 }
-export const getMenus =()=>{
+export const getMenus =() :MenuData[]=>{
     const logout = async () => {
         const { signOut } = useAuth();
         const { data } = await <any>useFetch('/api/auth/logout');
@@ -31,7 +32,7 @@ export const getMenus =()=>{
     // if(m.label)
    
     if($userstore.haveAccess(keyword)){
-      const m = {label: keyword, to:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
+      const m:MenuData = {label: keyword, url:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
       allowmenus.push(m)
     }     
   }
