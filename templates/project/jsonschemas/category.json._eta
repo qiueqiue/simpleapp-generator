@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "x-simpleapp-config": {
+    "documentType": "cat",
+    "documentName": "category",
+    "isolationType": "org",
+    "uniqueKey": "categoryCode",
+    "documentTitle": "categoryName",
+    "pageType": "crud"
+  },
+  "properties": {
+    "_id": { "type": "string" },
+    "created": { "type": "string" },
+    "updated": { "type": "string" },
+    "createdby": { "type": "string" },
+    "updatedby": { "type": "string" },
+    "tenantId": { "type": "integer", "default": 1, "minimum": 1 },
+    "orgId": { "type": "integer", "default": 1, "minimum": 1 },
+    "branchId": { "type": "integer", "default": 1, "minimum": 1 },
+    "categoryCode": { "type": "string", "examples": ["TUITION"] },
+    "categoryName": { "type": "string", "examples": ["Tuition Service"] },
+    "active": { "type": "boolean", "default": true, "examples": [true] },
+    "categoryType": {
+      "type": "string",
+      "enum": ["class", "charge"],
+      "examples": ["class"]
+    },
+    "description": {
+      "type": "string",
+      "format": "text",
+      "examples": ["Maths Tuition primary 1"]
+    }
+  }
+}

@@ -88,7 +88,10 @@ tailwindcss: {
       "./src/**/*.{vue,js,ts,jsx,tsx}",
       "./node_modules/primevue/**/*.{vue,js,ts,jsx,tsx}"
   ],
-  css: [ path.resolve(__dirname,'./assets/css/style.css')],
+  css: [ 
+    'primeicons/primeicons.css',
+    path.resolve(__dirname,'./assets/css/style.css')
+    ],
 
   // devtools: { enabled: true },
   // build: {

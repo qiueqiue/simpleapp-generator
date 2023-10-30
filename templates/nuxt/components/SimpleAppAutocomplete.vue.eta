@@ -122,10 +122,3 @@ const capitalizeFirstLetter = (str: string) => {
   return res;
 };
 </script>
-<style scoped>
-.simpleapp-autocomplete{
-  @apply w-auto ;
-  line-height: 1rem;
-}
-
-</style>

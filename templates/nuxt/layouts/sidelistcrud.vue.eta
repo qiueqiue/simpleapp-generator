@@ -25,7 +25,7 @@ const selectItem=(item:any)=>{
 <template>
     <div>
 
-        <Menus />
+        <HeaderBar />
         <Invitation/>
         <div class="grid grid-cols-4">
             <div class="col col-span-1  ">
