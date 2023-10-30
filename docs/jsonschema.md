@@ -96,14 +96,14 @@ to allow data traceable and isolated properly, there is compulsory property in h
 ```json
 {
 ...
-_id:{type:'string'},
-created:{type:'string'},
-updated:{type:'string'},
-createdby:{type:'string'},
-updatedby:{type:'string'},
-tenantId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"tenant" },
-orgId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"organization" },
-branchId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"branch" },
+"_id": { "type": "string" },
+"created": { "type": "string" },
+"updated": { "type": "string" },
+"createdby": { "type": "string" },
+"updatedby": { "type": "string" },
+"tenantId": { "type": "integer", "default": 1, "minimum": 1 },
+"orgId": { "type": "integer", "default": 1, "minimum": 1 },
+"branchId": { "type": "integer", "default": 1, "minimum": 1 },
 ...
 }
 
