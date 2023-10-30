@@ -43,6 +43,7 @@ tailwindcss: {
     }, 
     components: {
       include: '*',      
+      exclude: ['chart']
     }, 
     directives: {
       include: ['Ripple', 'Tooltip']
