@@ -1,0 +1,5 @@
+export type  ListItem = {
+    name: string
+    code: string
+    data: any
+}
