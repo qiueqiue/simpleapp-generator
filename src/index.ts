@@ -82,7 +82,7 @@ if(continueexecute){
   const reGenFrontend = async()=>{
     fw.setConfiguration(configs)
     generate.run(configs,['nuxt'],()=>{
-      // fw.prettyNuxt()                                      
+      fw.prettyNuxt()                                      
     })  
   }
   const reGenBackend = async()=>{
