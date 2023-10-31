@@ -29,18 +29,26 @@ export class SimpleAppExceptionFilter implements ExceptionFilter {
       const session:ClientSession = request['sessionuser'].getDBSession()
       if(session.inTransaction())session.abortTransaction()      
     }
-    
+    console.log('exceptionexception',typeof exception,Object.keys(exception),exception)
+    let errordata
+    let finalstatus
+    let msg
+    if(Object.keys(exception).length>0){
+      msg = exception.message      
+      errordata = (exception.response && exception.response.options) ? exception.response.options : exception.options
+      finalstatus = ( exception.response &&  exception.response.status) ? exception.response.status : exception.status
+    }else{
+      msg = String(exception)      
+      finalstatus = 500
+    }
 
     const responseBody = {
-      message:exception.message,
+      message: msg,
       timestamp: new Date().toISOString(),      
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      error: exception.response.options?? exception.options
+      error:errordata
     };
-    // console.log("exception properties", Object.getOwnPropertyNames(exception),exception.options)
-   
-    // console.log("exception.responseexception.response",exception)
-    const finalstatus =  exception.response.status??exception.status
+    
     const eventObj = request['eventObj']
     if(eventObj){    
       eventObj.statusCode=finalstatus

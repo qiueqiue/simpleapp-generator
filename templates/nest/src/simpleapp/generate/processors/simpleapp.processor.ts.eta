@@ -6,7 +6,7 @@
  */
 import { Injectable, Logger,Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as jsonpath from 'jsonpath'
+import jsonpath from 'jsonpath'
 import {  uniq } from 'lodash';
 import { AuditTrail } from '../commons/audittrail.service';
 import {foreignkeys} from '../commons/dicts/foreignkeys'
@@ -104,7 +104,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.data = { ...newdata };
     return this;
   };
-  reCalculate() {}
+  reCalculateValue(data:T) {}
   getIsolationFilter = (appuser:UserContext,) => {
     let isolationFilter = {};
     switch (this.isolationtype) {
@@ -290,14 +290,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.logger.debug("Create data before isolation",'SimpleAppService')
     this.logger.debug(data,'SimpleAppService')
     Object.assign(data, isolationFilter);
-    
+    this.reCalculateValue(data)
     await this.validateData(appuser,data);
     this.logger.debug("Create record",'SimpleAppService')
     this.logger.debug(data,'SimpleAppService')
 
     this.applyNestedDateTime(appuser,data,'create')
     const newdoc = new this.doc(data);
-    
+    await this.identifyUniqueKeys(appuser,data)
     try{
       result = await newdoc.save({session:dbsession})
     }catch(err){
@@ -464,7 +464,9 @@ export class SimpleAppService<T extends { _id?: string }> {
     // try {
     Object.assign(data, appuser.getUpdateFilter());
     Object.assign(existingdata, data);
-    delete existingdata['_id']
+    delete data['_id']
+
+    this.reCalculateValue(data)
     // existingdata['_id']=''
     // console.log("newdata",data)
     await this.validateData(appuser,data);
@@ -508,7 +510,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         const collection = this.doc.db.collection(collectionname);
         //single schema may have multiple foreign key link here, loop all
         for (let j = 0; j < fobjs.length; j++) {
-          const fkey = fobjs[j] + '._id';
+          const fkey = fobjs[j] 
           let filter = {}
           filter[fkey] = id;
          
@@ -579,23 +581,26 @@ export class SimpleAppService<T extends { _id?: string }> {
 
      //get all foreign keys catalogue
      const collections = Object.getOwnPropertyNames(this.foreignkeys)
- 
+    
      //obtain exists data in according foreign key
      const pipelines :PipelineStage[] =[ {$match:{_id:false}}] //exclude data from current collection
-     const vdata = data['_doc']
+     const vdata = data//['_doc']
      const keystore = {}
      collections.forEach((collectionname)=>{
        const fks:string[] = this.foreignkeys[collectionname]
        let  results:string[] = []
        fks.forEach(fieldpath=>{        
+          // console.log("fieldpath:",fieldpath,"vdata",data,vdata)
          const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
+        //  console.log("tmp",tmp)
+         
          results = results.concat(tmp)        
        })
        
        
  
        if(results.length>0){  
-         console.log(results)
+         console.log('tmp',results)
          if(results.length>1){
            results = uniq<string>(results)   
          }
@@ -609,22 +614,24 @@ export class SimpleAppService<T extends { _id?: string }> {
          pipelines.push(stagefilter)
        }            
      })
- 
+     this.logger.debug(pipelines,'identifyUniqueKeys')
      // this.doc.db.collection(collectionname);
      const unionresult = await this.doc.aggregate(pipelines)
      
      if(!unionresult){
+      this.logger.error("foreign key control failed ",'identifyUniqueKeys')
        throw new InternalServerErrorException("Foreignkey check execution error",pipelines as HttpExceptionOptions)
      }else{
        let searchresult:any = {}
        unionresult.forEach(item=>{
+        console.log("111")
          if(searchresult[item.collection]){
            searchresult[item.collection].push(item._id)
          }else{
            searchresult[item.collection] = [item._id]
          }
        })
- 
+       
        //search is it all foreign key exists in db
        for(let i=0; i<collections.length; i++){
          const collectionname = collections[i]
@@ -634,19 +641,21 @@ export class SimpleAppService<T extends { _id?: string }> {
          }
          for(let k=0;k<keys.length; k++){
            const key = keys[k]
-           if(!searchresult[collectionname].includes(key)){
-             console.log(`Foreignkey ${key} at collection ${collectionname} does not exist`)
-             throw new BadRequestException(`Foreignkey ${key} at collection ${collectionname} does not exist`)
-           }
+           if(searchresult[collectionname] && searchresult[collectionname].includes(key)){
+            this.logger.debug(`foreignkey ${collectionname}->${key} exists`)
+          }
            else{
-            //  console.log(`${collectionname} - ${key} found`)      
+            this.logger.warn(`Foreignkey ${key} at collection ${collectionname} does not exist`,'identifyUniqueKeys')
+            const errordata = {key:key,collection:collectionname}
+            throw new BadRequestException(`Foreignkey ${key} at collection ${collectionname} does not exist`,JSON.stringify(errordata))
+
            }
          }
  
        }      
        
      }    
-     
+     console.log("666")
   }
 
 

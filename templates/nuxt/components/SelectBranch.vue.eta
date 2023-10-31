@@ -3,8 +3,10 @@ import _ from 'lodash'
 import {ref} from 'vue'
 
 const selectedbranch = ref(getUserProfile().currentxorg)
+const currentTenant=ref(getUserProfile().tenantId)
+console.log("currentTenant",currentTenant.value)
 type Org = {orgId:number, label:string,_id:string}
-const branches = getUserProfile().branches
+const branches = getUserProfile().branches.filter((item:any)=>{return item.branch.tenantId == currentTenant.value})
 const orgList:Org[] = _.uniqBy(branches,'branch.orgId').map((item)=>({
     _id:item['branch']['organization']['_id'],
     orgId:item['branch']['orgId'],

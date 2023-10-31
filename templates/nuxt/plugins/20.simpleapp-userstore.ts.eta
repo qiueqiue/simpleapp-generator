@@ -68,11 +68,16 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               return Promise.resolve(true)
                 // return true
             }).catch((err:any)=>{
-              if(err.response.status==401){
+              if(err.response=== undefined){
+                // console.error("no backend server")
+                const errdata = createError({statusCode:503,statusMessage:"Backend server timeout, verify it is up and running!"})
+                return Promise.reject(errdata)
+              }
+              else if(err.response && err.response.status==401){
                 console.error("Unauthorise(plugin-userstore)")
-                //logout()
               }else{
-                console.error("Unknown error,", err.response)
+                const errdata = createError({statusCode:500,statusMessage:"Unknown error"})                
+                return Promise.reject(errdata)
               }
             })            
           },
@@ -154,8 +159,9 @@ export default defineNuxtPlugin( async(nuxtApp) => {
         }        
       })
 
-      const route = useRoute();
-      if(route.path!='/login'){
+      const route = useRoute();      
+      
+      if(route.meta.auth !==false){
         await useUserStore().loadRemoteUserInfo()
       }
     
