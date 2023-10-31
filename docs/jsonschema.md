@@ -17,7 +17,15 @@ refer below example `product.json`:
     "documentTitle": "productName",
     "isolationType": "org",
     "pageType": "crud",
-    "additionalAutoCompleteFields": ["defaultprice"]
+    "additionalAutoCompleteFields": ["defaultprice"],
+    "additionalApis":[{
+        "action":"hello",
+        "entrypoint":"/hello/:id",
+        "requiredrole":["User"],
+        "method":'get', 
+        "execute":"ping",
+        "description":"say hello"
+        } ],
   },
   "properties": {
     ...
