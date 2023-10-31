@@ -66,7 +66,7 @@ It tell code generator what it need to do with this schema such as:
 | documentDate | string | no | define which field name of date. like invoiceDate, orderDate. it allow frontend know how to filter current month record.  |
 | generateDocumentNumber | boolean | no | it tell code generator whether current schema have document numbering control|
 | pageType | string | usually yes| define 'crud' to generate template page, else no auto create page|
-|additionalAutoCompleteFields| array of string| no | define what others field you want to put in autocomplete. such as product always like to include `defaultprice`, `uom`
+|additionalAutoCompleteFields| array of string| no | define what others field you want to put into autocomplete, from this schema. such as product always like to include `defaultprice`, `uom`
 | formula | array | no | define array of formula which will apply in fields. target field define with `jsonpath` format. formula usually define in sharelibs |
 |additionalApis| array | no | define additional api for current schema. use case such as `suspend`, `confirm`, `reschedule`. We can define which customized function here
 | collectionName | string | no | default value same with documentName. Avoid define it, it reserve for special situation which we want multiple document store in same collection
