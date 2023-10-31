@@ -12,13 +12,14 @@ It is tiny class for developer customize the behavior of every document. Most of
 
 # Understand how to change service class
 Example better than 100 words, you may refer:
-1. `src/simpleapp/services/branch.service`:
-   a. it define autorunning number into `branchId` before create new record
-   b. after new branch created, it auto generate suitable document number formats. which use own customize executable `generateDefaultDocNumbers`
-   c. `appuser` is compulsory parameter which store current user context, we always carry this variable in backend. we can obtain current user, currentXorg, database transactions and etc from this context
-2. `src/simpleapp/services/docno.service`:
-    a. there is manual defined execution `listDocFormats`. 
-    b. System maintain jsonschema `Docnoformat`, defined below api setting bind to `listDocFormats`
+1. ***src/simpleapp/services/branch.service***:
+* it define autorunning number into `branchId` before create new record
+* after new branch created, it auto generate suitable document number formats. which use own customize executable `generateDefaultDocNumbers`
+*`appuser` is compulsory parameter which store current user context, we always carry this variable in backend. we can obtain current user, currentXorg, database transactions and etc from this context
+
+2. ***src/simpleapp/services/docno.service***:
+* there is manual defined execution `listDocFormats`. 
+* System maintain jsonschema `Docnoformat`, defined below api setting bind to `listDocFormats`
 
 ``` typescript 
 {
@@ -36,14 +37,15 @@ Example better than 100 words, you may refer:
 }
 ```
 
-    c. Once `additionalApis` properties defined properly, the controller, and frontend client automatically support the api.
-    d. Controller expect parameter `doctype` exists in this methods, cause entrypoint declare that
-    e. `appuser` always first parameter, and 2nd parameter will base on entrypoint.
+* Once `additionalApis` properties defined properly, the controller, and frontend client automatically support the api.
+* Controller expect parameter `doctype` exists in this methods, cause entrypoint declare that
+* `appuser` always first parameter, and 2nd parameter will base on entrypoint.
 
-3. `src/simpleapp/services/user.service`:
-    a. after specifc user deleted, it will remove all existing user permission in that tenant
-4. `src/simpleapp/services/autoinc.service`:
-    a. it provide autoincreament number for tenantId/orgId/branchId with execution `generateNextNo`
+3. ***src/simpleapp/services/user.service***:
+* after specifc user deleted, it will remove all existing user permission in that tenant
+  
+4. ***src/simpleapp/services/autoinc.service***:
+*it provide autoincreament number for tenantId/orgId/branchId with execution `generateNextNo`
 
 ``` typescript
 {
@@ -60,7 +62,7 @@ Example better than 100 words, you may refer:
 }
 ```
 
-    b. same as `docno`, there is api bind to it. however there is 2 parameters in `entrypoint`. mean we will have 3 parameters in executions `appuser`, `collection`, `field`
+* same as `docno`, there is api bind to it. however there is 2 parameters in `entrypoint`. mean we will have 3 parameters in executions `appuser`, `collection`, `field`
 
 # About Nestjs
 Backend build on top of nestjs, if you role is backend developer you may spend time to learn nestjs from official website. Such as
