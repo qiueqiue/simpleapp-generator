@@ -22,7 +22,7 @@ refer below example `product.json`:
         "action":"hello",
         "entrypoint":"/hello/:id",
         "requiredrole":["User"],
-        "method":'get', 
+        "method":"get", 
         "execute":"ping",
         "description":"say hello"
         } ],
