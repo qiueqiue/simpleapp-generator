@@ -264,7 +264,7 @@ export class SimpleAppService<T extends { _id?: string }> {
 
 
   async create(appuser:UserContext, data:T) {
-    this.audittrail.addEvent(data)
+    
     let result;
     if(!data._id){
       data._id = crypto.randomUUID()
@@ -279,7 +279,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     if(this.withDocNumberFormat && !data[this.documentIdentityCode]){
       await this.genNewDocNo(appuser,data)
     }
-    console.log("DATA for create",data)
+    
     await this.hook(appuser,HookType.beforeCreate, data);
     
     let isolationFilter:any =  {...appuser.getCreateFilter()}    
@@ -297,9 +297,10 @@ export class SimpleAppService<T extends { _id?: string }> {
 
     this.applyNestedDateTime(appuser,data,'create')
     const newdoc = new this.doc(data);
-    await this.identifyUniqueKeys(appuser,data)
+    await this.identifyForeignKeys(appuser,data)
     try{
       result = await newdoc.save({session:dbsession})
+      appuser.addInsertedRecordId(this.documentName, result._id)
     }catch(err){
       this.logger.error(err)
       throw new InternalServerErrorException(err)
@@ -429,6 +430,8 @@ export class SimpleAppService<T extends { _id?: string }> {
         filterIsolation['_id'] =  id;
         this.logger.debug('delete filter', filterIsolation);
         const result = await this.doc.deleteOne(filterIsolation).session(dbsession);
+
+        appuser.addUpdatedRecordId(this.documentName, id)
         const deleteresult = {result:result, data: deletedata}
         this.logger.debug(deleteresult, " delete result" +this.doc.collection.name,)
         // this.doc.findByIdAndDelete(id)
@@ -478,6 +481,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.applyNestedDateTime(appuser,data,'update')
     try{
       const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(dbsession);
+      appuser.addUpdatedRecordId(this.documentName, data._id)
       await this.hook(appuser,HookType.afterUpdate, data);
       return result;        
     } catch (err) {
@@ -571,7 +575,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
 
 
-  async identifyUniqueKeys(appuser:UserContext,data:T){
+  async identifyForeignKeys(appuser:UserContext,data:T){
      /**
      * 1. looping schemas identify what foreign key exists
      * 2. loop through record obtain all foreign key value 
@@ -590,9 +594,9 @@ export class SimpleAppService<T extends { _id?: string }> {
        const fks:string[] = this.foreignkeys[collectionname]
        let  results:string[] = []
        fks.forEach(fieldpath=>{        
-          // console.log("fieldpath:",fieldpath,"vdata",data,vdata)
+          console.log("fieldpath:",fieldpath,"vdata",data,vdata)
          const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
-        //  console.log("tmp",tmp)
+         console.log("tmp",tmp)
          
          results = results.concat(tmp)        
        })
@@ -600,12 +604,12 @@ export class SimpleAppService<T extends { _id?: string }> {
        
  
        if(results.length>0){  
-         console.log('tmp',results)
          if(results.length>1){
            results = uniq<string>(results)   
          }
          
          keystore[collectionname]= results   
+         console.log("keystorekeystore",keystore)
          let addfield={$addFields:{collection:collectionname}}        
          
          const stagefilter:PipelineStage =  {
@@ -614,23 +618,23 @@ export class SimpleAppService<T extends { _id?: string }> {
          pipelines.push(stagefilter)
        }            
      })
-     this.logger.debug(pipelines,'identifyUniqueKeys')
+     this.logger.log(pipelines,'identifyForeignKeys pipelines')
      // this.doc.db.collection(collectionname);
      const unionresult = await this.doc.aggregate(pipelines)
      
      if(!unionresult){
-      this.logger.error("foreign key control failed ",'identifyUniqueKeys')
+      this.logger.error("foreign key control failed ",'identifyForeignKeys')
        throw new InternalServerErrorException("Foreignkey check execution error",pipelines as HttpExceptionOptions)
      }else{
        let searchresult:any = {}
        unionresult.forEach(item=>{
-        console.log("111")
          if(searchresult[item.collection]){
            searchresult[item.collection].push(item._id)
          }else{
            searchresult[item.collection] = [item._id]
          }
        })
+       this.logger.log(unionresult,this.documentType+" search Result")
        
        //search is it all foreign key exists in db
        for(let i=0; i<collections.length; i++){
@@ -643,11 +647,15 @@ export class SimpleAppService<T extends { _id?: string }> {
            const key = keys[k]
            if(searchresult[collectionname] && searchresult[collectionname].includes(key)){
             this.logger.debug(`foreignkey ${collectionname}->${key} exists`)
-          }
+           }
+           else if(appuser.searchInsertedRecordId(collectionname,key)){
+            this.logger.debug(`foreignkey ${collectionname} exists in user context which not yet commited`)
+           }
            else{
-            this.logger.warn(`Foreignkey ${key} at collection ${collectionname} does not exist`,'identifyUniqueKeys')
+            this.logger.warn(`${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,'identifyForeignKeys')
+            this.logger.log(appuser.getModifieds,"appuser.getModifieds")
             const errordata = {key:key,collection:collectionname}
-            throw new BadRequestException(`Foreignkey ${key} at collection ${collectionname} does not exist`,JSON.stringify(errordata))
+            throw new BadRequestException(`${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,JSON.stringify(errordata))
 
            }
          }
@@ -655,7 +663,6 @@ export class SimpleAppService<T extends { _id?: string }> {
        }      
        
      }    
-     console.log("666")
   }
 
 

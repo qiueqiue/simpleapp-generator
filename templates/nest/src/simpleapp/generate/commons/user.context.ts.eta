@@ -6,6 +6,7 @@
  */
 import { Injectable, Scope,Inject,Logger, BadRequestException } from '@nestjs/common';
 import { Model, model, connect, PipelineStage } from 'mongoose';
+import {ModifiedCollection,ModifiedRecords} from '../types'
 import _ from 'lodash'
 import { Module } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -43,7 +44,7 @@ export class UserContext {
   protected branches: any[] = []
   protected invites: any[] = []  //User + field tenant:Tenant[]
   protected roles: string[] = [];
-  
+  protected modifiedRecords:ModifiedRecords = {createds:{},updateds:{},deleteds:{}}
 
   constructor(
     private readonly usermodel:Model<User>,
@@ -53,7 +54,6 @@ export class UserContext {
     
   }
   getDBSession = ():ClientSession => this.dbsession
-
   getId = () => this._id;
   getUid = () => this.uid;
   getUname = () => this.uname;
@@ -64,6 +64,7 @@ export class UserContext {
   getEmail = () => this.email;
   getGroup = () => this.group;
   getRoles = () => this.roles;
+  getModifieds = () => this.modifiedRecords
   getBranches = ():ProfileUserBranch[] => {
     this.branches;
     const data:ProfileUserBranch[] = []
@@ -199,7 +200,7 @@ export class UserContext {
       this.orgCode = userinfo['orgCode'] ?? ''
       this.orgName = userinfo['orgName'] ?? ''
       this.group = userinfo['group'] ?? ''
-      this.roles = userinfo['roles'] ?? [Role.Everyone,Role.User]
+      this.roles = userinfo['roles'] ?? [Role.Everyone,Role.User,Role.SuperAdmin]
     }else{
       this.logger.debug(`Set unknown id of current user`,'setUserToken' )   
       // this.group = ''
@@ -395,5 +396,33 @@ export class UserContext {
       return false
     }
     
+  }
+
+
+  searchInsertedRecordId(collection:string,_id:string){
+    return this.modifiedRecords.createds[collection].find((item)=>item===_id)
+  }
+  addInsertedRecordId(collection:string,_id:string){
+    if(this.modifiedRecords.createds[collection]){
+      this.modifiedRecords.createds[collection].push(_id)
+    }else{
+      this.modifiedRecords.createds[collection] = [_id]
+    }
+  }
+  addUpdatedRecordId(collection:string,_id:string){
+    if(this.modifiedRecords.updateds[collection]){
+      this.modifiedRecords.updateds[collection].push(_id)
+    }else{
+      this.modifiedRecords.updateds[collection] = [_id]
+    }
+
+  }
+  addDeletedRecordId(collection:string,_id:string){
+    if(this.modifiedRecords.deleteds[collection]){
+      this.modifiedRecords.deleteds[collection].push(_id)
+    }else{
+      this.modifiedRecords.deleteds[collection] = [_id]
+    }
+
   }
 }

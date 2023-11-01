@@ -8,6 +8,14 @@ export type ForeignKey = {
     _id: string
     label: string
 }
+export type ModifiedCollection = {
+    [key:string]:string[]
+}
+export type ModifiedRecords = {
+    createds: ModifiedCollection
+    updateds: ModifiedCollection
+    deleteds: ModifiedCollection
+}
 export type DocNumberFormatResult = {
     formatId: string
     formatName: string 

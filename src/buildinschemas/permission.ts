@@ -21,11 +21,11 @@ export const permission:SchemaType ={
         updated:{type:'string'},
         createdby:{type:'string'},
         updatedby:{type:'string'},
-        tenantId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"tenant" },
-        orgId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"organization" },
-        branchId: {type:'integer',default:1,minimum:0 ,"x-foreignkey":"branch" },
+        tenantId: {type:'integer',default:1,minimum:0},
+        orgId: {type:'integer',default:1,minimum:0 },
+        branchId: {type:'integer',default:1,minimum:0 },
         group: {"type": "string"},
-        uid: {"type": "string","x-foreignkey":"user"},
-        user_id : {"type":"string"}
+        uid: {"type": "string",},
+        user_id : {"type":"string","x-foreignkey":"user"}
       }
 }
