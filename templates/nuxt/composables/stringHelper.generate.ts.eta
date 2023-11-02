@@ -1,5 +1,9 @@
+import {Md5} from 'ts-md5'
 export const camelCaseToWords = (s: string) =>{
     const result = s.replace(/([A-Z])/g, ' $1');
     return result.charAt(0).toUpperCase() + result.slice(1);
   }
   
+
+export const md5=(s:string)=>  new Md5().appendStr(s).end()
+

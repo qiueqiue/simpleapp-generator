@@ -35,17 +35,19 @@ export default defineNuxtPlugin( async(nuxtApp) => {
         
         actions:{    
           async loadRemoteUserInfo(){
-            console.log('loadRemoteUserInfo')
+            // console.log('loadRemoteUserInfo')
+            
             const {$axios} = useNuxtApp()
             const route = useRoute();
-            let xorg = route.params.xorg
+            let xorg = this.getCurrentXorg()            
+            console.log("xorgxorgxorg",xorg, typeof xorg)
             let apiurl=''
             if(xorg===undefined){
               apiurl = `${useRuntimeConfig().public.APP_URL}/api`
             }else{
               apiurl = `${useRuntimeConfig().public.APP_URL}/api/${xorg}`
             }
-            
+            console.log(apiurl)
             return await new PROFILEApi(undefined,apiurl,$axios).getProfile().then((res:AxiosResponse)=>{            
               if(!res){
                 return
@@ -84,11 +86,11 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             })            
           },
           getAvatarLink(size:number){
-            return `https://i.pravatar.cc/${size}`
+            return `https://api.simbiz.cloud/cloudapi/avatar/${md5(this.email)}?size=${size}`
+            
           },
           getCurrentXorg(){
-            const currentxorg:string = String(useRoute().params.xorg)
-            return currentxorg //_.find(this.branches,{xorg:currentxorg})
+            return  (useRoute().params.xorg) ? String(useRoute().params.xorg) : undefined            
           },
           async decideInvitation(id:string,decision:string){
             const apiurl = `${useRuntimeConfig().public.APP_URL}/api`
