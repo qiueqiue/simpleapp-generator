@@ -21,13 +21,12 @@ const selectMenu = (menu:MenuData) =>{
     </button>
 
      <Dialog v-model:visible="visible" modal header="Pick Document" >
-      <div class="desktop-shortcut-link">
-          
-          <Button v-for="menu in menus[1].items" @click="selectMenu(menu)">
-            <div v-if="menu.isolationType == 'none'" class="adminmenu">
+      <div class="">
+          <Button v-for="menu in menus" @click="selectMenu(menu)">
+            <div v-if="menu.isolationType == 'none'" class="">
               * {{ camelCaseToWords(menu.label) }}
             </div>
-            <div v-else class="usermenu">{{ camelCaseToWords(menu.label) }}</div>
+            <div v-else class="">{{ camelCaseToWords(menu.label) }}</div>
           </Button>
         </div>
     </Dialog>
@@ -37,19 +36,5 @@ const selectMenu = (menu:MenuData) =>{
   </div>
 </template>
 <style scoped>
-.desktop-shortcut-link {
-  @apply m-2 p-2 space-x-2 rounded-sm text-center grid grid-cols-4 gap-4;
-}
-.desktop-shortcut-link .adminmenu {
-  @apply bg-red-300 p-2;
-}
-.desktop-shortcut-link .adminmenu:hover {
-  @apply bg-red-600 p-2;
-}
-.desktop-shortcut-link .usermenu {
-  @apply bg-teal-300 p-2;
-}
-.desktop-shortcut-link .usermenu:hover {
-  @apply bg-teal-600 p-2;
-}
+
 </style>

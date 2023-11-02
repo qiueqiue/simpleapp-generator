@@ -5,7 +5,12 @@ import {ref} from 'vue'
 
 const userprofileoverlay = ref();
 const toggle = (event:any) => {
-    userprofileoverlay.value.toggle(event);
+    userprofileoverlay.value.toggle(event);   
+}
+const toProfile = ()=>{    
+    userprofileoverlay.value.toggle();   
+
+    navigateTo(`/${getUserStore().getCurrentXorg()}/profile`)
 }
 
 </script>
@@ -38,7 +43,7 @@ const toggle = (event:any) => {
             
             
             <div class="flex flex-row gap-2 border">
-                <Button class="border">
+                <Button class="border" @click="toProfile">
                     <i class="pi pi-user"></i>profile
                 </Button>    
                 <Button class="border" @click="logout()">

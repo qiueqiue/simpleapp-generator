@@ -10,44 +10,48 @@ import {alldocuments} from '../simpleapp/generate/commons/documents'
 export const getDocTypes = ()=>{
   return alldocuments.filter(item=>item.page!='')
 }
+
+export const getPublicResource = () : MenuData[] => {
+  const xorg = getUserStore().getCurrentXorg()
+  const menus:MenuData[] = [
+    {label: 'Home',icon: 'pi pi-fw pi-home', url:`/${xorg}`},
+    {label: "Profile", url:`/profile`, isolationType:'none', icon:''},
+    {label: "Profile", url:`/${xorg}/profile`, isolationType:'none', icon:''},
+    {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
+    {label: 'Signin',icon: 'pi pi-fw pi-home', 'url':'/login'},
+  ]
+  return menus
+}
 export const getMenus =() :MenuData[]=>{
-    const logout = async () => {
-        const { signOut } = useAuth();
-        const { data } = await <any>useFetch('/api/auth/logout');
-        const addPath = encodeURIComponent("/login");
-        signOut({ redirect: false });
-        window.location.href = data?.value?.path + addPath;
-    };
-  const {$userstore}=useNuxtApp()
-  const route = useRoute();
-  const xorg = route.params.xorg
-  let data =[];
-  //sss
+//     const logout = async () => {
+//         const { signOut } = useAuth();
+//         const { data } = await <any>useFetch('/api/auth/logout');
+//         const addPath = encodeURIComponent("/login");
+//         signOut({ redirect: false });
+//         window.location.href = data?.value?.path + addPath;
+//     };
+  
+//   const route = useRoute();
+  const xorg = getUserStore().getCurrentXorg()
+//   let data:MenuData[] =[];
+//   //sss
   let allmenus = alldocuments.filter(item=>item.page!='')
 
- const roles = $userstore.getUserInfo().roles
+ const roles = getUserProfile().roles
   let allowmenus=[]
   for(let i=0; i< allmenus.length;i++){
     const keyword = allmenus[i].docName
     // if(m.label)
    
-    if($userstore.haveAccess(keyword)){
+    if(getUserStore().haveAccess(keyword)){
       const m:MenuData = {label: keyword, url:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
       allowmenus.push(m)
     }     
   }
-
-  if(xorg){
-    data =[
-      {label: 'Home',icon: 'pi pi-fw pi-home', url:'/'},
-      {label: 'Cruds',icon: 'pi pi-fw pi-pencil',items:allowmenus},      
-      {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
-    ]
-  }else{
-    data= [
-      {label: 'Home',icon: 'pi pi-fw pi-home', url:'/'},
-      {label: 'Signout',icon: 'pi pi-fw pi-home', command: () => logout()},
-      ]
-  }
-  return data
+//   data = publicMenus()
+//   if(xorg){
+//     data.push({label: 'Cruds',icon: 'pi pi-fw pi-pencil',items:allowmenus})
+//   }
+//   console.log('data',data)
+  return allowmenus
 }

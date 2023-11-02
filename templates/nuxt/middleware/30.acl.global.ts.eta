@@ -5,11 +5,14 @@
  * Author: Ks Tan
  */
 import { getUserProfile } from './../composables/getUserStore.generate';
+import  {MenuData} from '~/types'
 export default defineNuxtRouteMiddleware((to, from) => {  
   
   const userprofile = getUserProfile()
   
-  if(to.fullPath=='/login'){        
+
+  //is public resource
+  if( getPublicResource().filter((item:MenuData)=>to.fullPath === item.url)){        
     return true
   }// no permission control needed yet    
     else if(!to.params['xorg']){

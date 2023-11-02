@@ -1,0 +1,59 @@
+<template>
+    <div class="p-4">
+        <div class="px-4 sm:px-0">
+            <h3 class="text-base font-semibold leading-7 text-gray-900">User Information</h3>
+        </div>
+        <div class="mt-6 border-t border-gray-100">
+            <dl class="divide-y divide-gray-100">
+            <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt class="text-sm font-medium leading-6 text-gray-900">Full name</dt>
+                <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0"> {{ getUserProfile().fullName }}</dd>
+            </div>
+            <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt class="text-sm font-medium leading-6 text-gray-900">Group</dt>
+                <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{getUserProfile().group}}</dd>
+            </div>
+            <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt class="text-sm font-medium leading-6 text-gray-900">Email address</dt>
+                <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ getUserProfile().email }}</dd>
+            </div>      
+            
+            <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                <dt class="text-sm font-medium leading-6 text-gray-900">Branch Access</dt>
+                <dd class="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                <ul role="list" class="divide-y divide-gray-100 rounded-md border border-gray-200">
+                    <li class="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6" v-for="b in getUserProfile().branches">
+                        <NuxtLink :href="`/${b.xOrg}`" :external="true">
+                            <div class="flex w-0 flex-1 items-center">
+                                <i class="pi pi-sitemap"></i>
+                                <div class="ml-4 flex min-w-0 flex-1 gap-2">
+                                <span class="truncate font-medium"> {{b.branch.branchName}} </span>
+                                <span class="flex-shrink-0 text-gray-400">{{b.branch.branchCode}}</span>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <p href="#" class="font-medium text-indigo-600 hover:text-indigo-500">{{b.group  }}</p>
+                            </div>
+                        </NuxtLink>
+                    </li>
+                    
+                </ul>
+                </dd>
+            </div>
+
+            <div v-if="useRuntimeConfig().public.DEBUGDATA=='1'" class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0 bg-warning-100">
+                <dt class="text-sm font-medium leading-6 text-gray-900">
+                    Current Branch Access Rights 
+                    <p class="text-danger-600">only appear in debug mode</p>
+                    <p class="text-danger-600">{{ getUserProfile().sessionId }}</p>
+                </dt>
+                <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ getUserProfile().roles }}</dd>
+            </div>    
+            </dl>
+    </div>
+ 
+</div>
+
+
+    
+</template>
