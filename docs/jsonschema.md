@@ -62,6 +62,7 @@ It tell code generator what it need to do with this schema such as:
 | documentName | string | yes | default name of mongodb collection, also act as long unique identity of resources, most of the place will use this name as as resource name, or prefix of resource name. Example invoice,purchaseorder
 | isolationType | string | yes | data isolation rules. `none`: shall all tenant, `tenant`: shall all organization in same tenant, `org`: shall to all branch under same org. `branch`: only share within same branch
 | uniqueKey | string | usually yes | declare unique key field name, such as itemCode, documentNo, studentCode. auto generate document running number shall use field name declare here too. it auto appear in autocomplete. it will auto index in mongodb
+| uniqueKeys | string[][] | no | define special single or compound unique keys like `[['orgId','createdby'],['recordId']]`
 | documentTitle | string | usually yes | label or title of this record. such as itemName, categoryName, customerName, invoiceTitle. it auto appear in autocomplete
 | documentDate | string | no | define which field name of date. like invoiceDate, orderDate. it allow frontend know how to filter current month record.  |
 | generateDocumentNumber | boolean | no | it tell code generator whether current schema have document numbering control|

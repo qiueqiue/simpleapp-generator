@@ -1,0 +1,9 @@
+
+
+export const goTo = (document:string,id?:string)=>{
+    let path = `/${getCurrentXorg()}/${document}`
+    if(id){
+        path = path + '/'+id
+    }
+    navigateTo(path)   
+}

@@ -11,8 +11,8 @@ export const getDocTypes = ()=>{
   return alldocuments.filter(item=>item.page!='')
 }
 
-export const getPublicResource = () : MenuData[] => {
-  const xorg = getUserStore().getCurrentXorg()
+export const getPublicResource = (xorg:string) : MenuData[] => {
+  // const xorg = getUserStore().getCurrentXorg()
   const menus:MenuData[] = [
     {label: 'Home',icon: 'pi pi-fw pi-home', url:`/${xorg}`},
     {label: "Profile", url:`/profile`, isolationType:'none', icon:''},

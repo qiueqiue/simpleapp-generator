@@ -9,7 +9,8 @@
 <template>
   <div>
     <NuxtLayout>      
-      <EventMonitor/>
+      <EventDecision/>
+      <EventNotification/>
       <NuxtPage />
     </NuxtLayout>
     </div>

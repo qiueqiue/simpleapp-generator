@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   
 
   //is public resource
-  if( getPublicResource().filter((item:MenuData)=>to.fullPath === item.url)){        
+  if( getPublicResource(String(to.params['xorg'])).filter((item:MenuData)=>to.fullPath === item.url)){        
     return true
   }// no permission control needed yet    
     else if(!to.params['xorg']){

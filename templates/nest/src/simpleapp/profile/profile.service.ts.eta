@@ -72,9 +72,13 @@ export class ProfileService {
       fullname: appuser.getFullname(),
       email: appuser.getEmail(),
       active: true,
-      doctype: 'user',
+      doctype: 'user',      
     } as User;
-
+    if(appuser.getTenantId()==0){
+      data.tenantId=0
+      data.orgId=0
+      data.branchId=0
+    }
     const createresult = await this.usersvc.create(appuser, data);
     const userinfo = await appuser.getUserInfo();
     userinfo._id = createresult._id;
@@ -161,7 +165,7 @@ export class ProfileService {
       orgId: orgResult.orgId,
       branchId: branchResult.branchId,
       uid: appuser.getUid(),
-      user_id: appuser.getId(),
+      userId: userRecordId,
       group: 'admin',
     };
     this.logger.log(permdata, 'create Permission data');
@@ -196,5 +200,9 @@ export class ProfileService {
    */
   async decideInvitation(appuser: UserContext, id: string, decision: string) {
     return await appuser.decideInvitation(id, decision);
+  }
+
+  async getAllTenants(appuser: UserContext) {
+    return await appuser.getAllTenants();
   }
 }

@@ -8,6 +8,7 @@ export const user:SchemaType ={
         pageType:'crud',
         isolationType:IsolationType.tenant,
         uniqueKey:'email',
+        uniqueKeys:[['tenantId','uid']],
         documentTitle:'fullname',
         requiredRoles:["SuperUser"],    
         additionalAutoCompleteFields:['uid']      
@@ -24,6 +25,8 @@ export const user:SchemaType ={
         uid: {type: "string",},
         fullname: {type: "string",minLength:3},
         email: {type: "string",minLength:10,format: "email"},
-        active: {type: "boolean",default:true}   
+        active: {type: "boolean",default:true},
+        description: {type:"string"},
+        lastActivity: {type: "string",description:"capture ISO8601 last api call"}
       }
 }

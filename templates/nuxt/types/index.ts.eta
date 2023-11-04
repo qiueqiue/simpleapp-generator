@@ -4,83 +4,9 @@
  * last change 2023-10-28
  * Author: Ks Tan
  */
-export type UserListItem = {
-  _id: string
-  uid?:string
-  fullName: string
-  email: string
-  group:string
-  active:boolean
-  orgId: number
-  branchId: number
-  tenantId: number
-}
-export type OrgListItem = {
-  orgId: number
-  _Id: string
-  orgCode: string
-  orgName: string
-}
-export type BranchListItem = {
-  _id:string
-  tenantId:number
-  orgId: number
-  branchId: number
-  branchName: string
-  branchCode: string
-  group:string
-  active:boolean
-}
 
-
-export type PermissionListItem = {
-  branchId: number  
-  email:string
-  fullName:string
-  group:string
-  active:boolean
-  orgId: number
-  tenantId:number
-  uid:string
-  _id:string
-  
-}
-export type DocumentMetaData =  {
-  docName:string
-  docType:string
-  page: string 
-  isolationType:string   
-  documentDate:string
-  docNumber:boolean
-}
-export type MenuData =  {
-  label: string
-  icon?: string
-  command?:Function
-  items?: MenuData[]
-  isolationType?:string
-  url?:string
-}
-
-export type DocNoFormat ={
-  docNoFormatName: string
-  docNoFormatNo:string
-  docNoPattern:string
-  active: boolean
-  sample:string
-  }
-
-export type ForeignKey = {
-  _id : string
-  label: string
-}
-
-
-export type SearchBody = {
-    
-    filter?:Object;
-    
-    fields?: any[];
-    
-    sorts?: any[];
-}
+export * from  './listview'
+export * from  './notifications'
+export * from './events'
+export * from  './others'
+export * from  './user'

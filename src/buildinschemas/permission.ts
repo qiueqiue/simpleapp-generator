@@ -26,6 +26,6 @@ export const permission:SchemaType ={
         branchId: {type:'integer',default:1,minimum:0 },
         group: {"type": "string"},
         uid: {"type": "string",},
-        user_id : {"type":"string","x-foreignkey":"user"}
+        userId : {"type":"string","x-foreignkey":"user", minLength:10 }
       }
 }

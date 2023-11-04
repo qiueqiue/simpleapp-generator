@@ -24,7 +24,7 @@ const showbranchfrom = ref(false);
 const getBranchList = () => {
   branchdoc
     .getApi()
-    .runSearch({ orgId: data.value.orgId })
+    .runSearch({ filter:{orgId: data.value.orgId }})
     .then((res) => {
       branchlist.value = res.data;
     });
@@ -117,7 +117,7 @@ const saveBranch = async () => {
             :columns="['branchId', 'branchCode', 'branchName', 'active']"
           >
             <template #header>
-              <Button class=" btn-primary" @click="editBranch('')" type="button">
+              <Button class="btn-primary" @click="editBranch('')" type="button">
                 <span class="font font-normal">Add Branch</span>
               </Button>
             </template>
@@ -125,7 +125,7 @@ const saveBranch = async () => {
               <template #body="{ index, data }">
                 <Button
                   type="button"
-                  class=" btn-primary"
+                  class="btn-primary"
                   @click="editBranch(data._id)"
                 >
                   Edit
@@ -157,7 +157,7 @@ const saveBranch = async () => {
               :setting="o.getField('#/properties/description')"
             />
             <!-- <SimpleAppNumber :readonly="true" v-model="branchdata.orgId" :setting="o.getField('#/properties/orgId')"/> -->
-            <Button class=" btn-primary" type="button" @click="saveBranch">
+            <Button class="btn-primary" type="button" @click="saveBranch">
               Save
             </Button>
           </SimpleAppForm>

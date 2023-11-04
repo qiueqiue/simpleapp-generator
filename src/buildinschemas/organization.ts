@@ -8,6 +8,7 @@ export const organization:SchemaType ={
         documentName:'organization',
         pageType:"crud", 
         uniqueKey:'orgCode',
+        uniqueKeys:[ ['orgId'] ],
         documentTitle:'orgName',
         additionalAutoCompleteFields: ['orgId']
     },    

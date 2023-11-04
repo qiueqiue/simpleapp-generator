@@ -10,7 +10,12 @@ export const reloadUserStore = async () =>{
 export const getUserProfile =  () =>{
     return getUserStore().getUserInfo()
 }
-
+export const getCurrentXorg = () =>{
+    return getUserStore().getCurrentXorg()
+}
+export const getPageBaseUrl = (resourcename:string) =>{
+    return `/${getCurrentXorg()}/${resourcename}`;
+}
 /**
  * verify current user can perform specific action base on backend RBAC
  * @param resource:string upper case first letter document name

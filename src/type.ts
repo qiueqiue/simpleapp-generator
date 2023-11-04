@@ -135,6 +135,7 @@ export type SchemaConfig = {
   requiredRoles?:string[]
   pageType?: string  
   uniqueKey?:string  
+  uniqueKeys?:string[][]
   documentTitle?:string 
   generateDocumentNumber?:boolean
   documentDate?:string

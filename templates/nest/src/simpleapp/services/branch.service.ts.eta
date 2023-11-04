@@ -9,19 +9,19 @@ import { Model } from 'mongoose';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BranchProcessor } from '../generate/processors/branch.processor';
 import { Branch } from '../generate/types/branch.type';
-import {alldocuments} from '../generate/commons/dicts/documents'
+import { alldocuments } from '../generate/commons/dicts/documents';
 export { Branch } from '../generate/types/branch.type';
 import { AutoincreamentService } from './autoinc.service';
 import { UserContext } from '../generate/commons/user.context';
-import { Docnoformat,DocnoformatService } from './docno.service';
+import { Docnoformat, DocnoformatService } from './docno.service';
 // import { Docnoformat } from '../generate/types/docno.type';
 @Injectable()
 export class BranchService extends BranchProcessor {
   protected strictIsolation = false;
   constructor(
     @InjectModel('Branch') mydoc: Model<Branch>,
-    private increament: AutoincreamentService,    
-    private docnoservice:DocnoformatService
+    private increament: AutoincreamentService,
+    private docnoservice: DocnoformatService,
   ) {
     super(mydoc);
   }
@@ -46,9 +46,9 @@ export class BranchService extends BranchProcessor {
         );
         data.branchId = searchresult.nextno;
         break;
-              case 'afterCreate':
-                await this.generateDefaultDocNumbers(appuser,data);
-              break;
+      case 'afterCreate':
+        await this.generateDefaultDocNumbers(appuser, data);
+        break;
       //         case 'beforeUpdate':
       //         break;
       //         case 'afterUpdate':
@@ -67,40 +67,41 @@ export class BranchService extends BranchProcessor {
     return true;
   };
 
-  generateDefaultDocNumbers =async (appuser,data) => {
-    const branchName = data.branchName
-    const branchCode = data.branchCode
-    const recordId = data._id
-    const branchId= data.branchId
-    const orgId = data.orgId
-    const tenantId = data.tenantId
-    const docformats = alldocuments.filter((item)=>item.docNumber)
-    for(let i=0; i< docformats.length; i++){
-      const doc = docformats[i]
-      const pattern = `${doc.docType}-${branchCode}-[00000]`
-      const formatdata:Docnoformat = {
-        _id:crypto.randomUUID(),
-        docNoFormatNo:'Default',
-        docNoFormatName:'Default',        
+  generateDefaultDocNumbers = async (appuser, data) => {
+    const branchName = data.branchName;
+    const branchCode = data.branchCode;
+    const recordId = data._id;
+    const branchId = data.branchId;
+    const orgId = data.orgId;
+    const tenantId = data.tenantId;
+    const docformats = alldocuments.filter((item) => item.docNumber);
+    for (let i = 0; i < docformats.length; i++) {
+      const doc = docformats[i];
+      const pattern = `${doc.docType}-${branchCode}-[00000]`;
+      const formatdata: Docnoformat = {
+        _id: crypto.randomUUID(),
+        docNoFormatNo: doc.docType,
+        docNoFormatName: `Default ${doc.docType}`,
         docNoType: doc.docType,
-        docNoPattern:  pattern,
-        branch:{_id:recordId,branchId:branchId,label:branchName},
-        branchId:branchId,
-        orgId:orgId,
-        tenantId:tenantId,
-        nextNumber:1,              
-      } as Docnoformat
-      try{
-        const result = await this.docnoservice.create(appuser,formatdata)
-        if(!result){
-          throw new InternalServerErrorException(`Generate default document number for "${branchCode}" failed. Pattern: ${pattern}`,'generateDefaultDocNumbers')
+        docNoPattern: pattern,
+        branch: { _id: recordId, branchId: branchId, label: branchName },
+        branchId: branchId,
+        orgId: orgId,
+        tenantId: tenantId,
+        nextNumber: 1,
+      } as Docnoformat;
+      try {
+        const result = await this.docnoservice.create(appuser, formatdata);
+        if (!result) {
+          throw new InternalServerErrorException(
+            `Generate default document number for "${branchCode}" failed. Pattern: ${pattern}`,
+            'generateDefaultDocNumbers',
+          );
         }
-
-      }catch(err){
-        this.logger.error(err)
-        throw new InternalServerErrorException(err)
+      } catch (err) {
+        this.logger.error(err);
+        throw new InternalServerErrorException(err);
       }
-            
-    }    
-  }
+    }
+  };
 }

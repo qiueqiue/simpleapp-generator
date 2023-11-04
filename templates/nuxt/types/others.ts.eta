@@ -1,0 +1,40 @@
+
+  export type DocumentMetaData =  {
+    docName:string
+    docType:string
+    page: string 
+    isolationType:string   
+    documentDate:string
+    docNumber:boolean
+  }
+  export type MenuData =  {
+    label: string
+    icon?: string
+    command?:Function
+    items?: MenuData[]
+    isolationType?:string
+    url?:string
+  }
+  
+  export type DocNoFormat ={
+    docNoFormatName: string
+    docNoFormatNo:string
+    docNoPattern:string
+    active: boolean
+    sample:string
+    }
+  
+  export type ForeignKey = {
+    _id : string
+    label: string
+  }
+  
+  
+  export type SearchBody = {
+      
+      filter?:Object;
+      
+      fields?: any[];
+      
+      sorts?: any[];
+  }

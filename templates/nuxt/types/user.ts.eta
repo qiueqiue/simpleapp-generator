@@ -1,0 +1,44 @@
+export type UserListItem = {
+    _id: string
+    uid?:string
+    fullName: string
+    email: string
+    group:string
+    active:boolean
+    orgId: number
+    branchId: number
+    tenantId: number
+  }
+  export type OrgListItem = {
+    orgId: number
+    _Id: string
+    orgCode: string
+    orgName: string
+  }
+  export type BranchListItem = {
+    _id:string
+    tenantId:number
+    orgId: number
+    branchId: number
+    branchName: string
+    branchCode: string
+    group:string
+    active:boolean
+  }
+  
+  
+  export type PermissionListItem = {
+    branchId: number  
+    email:string
+    fullName:string
+    group:string
+    active:boolean
+    orgId: number
+    tenantId:number
+    userId:string
+    _id:string
+    
+  }
+
+
+  

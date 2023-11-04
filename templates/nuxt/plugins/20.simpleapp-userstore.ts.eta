@@ -40,7 +40,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
             const {$axios} = useNuxtApp()
             const route = useRoute();
             let xorg = this.getCurrentXorg()            
-            console.log("xorgxorgxorg",xorg, typeof xorg)
+            
             let apiurl=''
             if(xorg===undefined){
               apiurl = `${useRuntimeConfig().public.APP_URL}/api`
@@ -84,11 +84,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
                 return Promise.reject(errdata)
               }
             })            
-          },
-          getAvatarLink(size:number){
-            return `https://api.simbiz.cloud/cloudapi/avatar/${md5(this.email)}?size=${size}`
-            
-          },
+          },         
           getCurrentXorg(){
             return  (useRoute().params.xorg) ? String(useRoute().params.xorg) : undefined            
           },
@@ -156,7 +152,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               roles:this.roles,
               group:this.group,
               time:this.time,
-              currentxorg: this.getCurrentXorg()
+              
   
               
             }

@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import {ref} from 'vue'
 
-const selectedbranch = ref(getUserProfile().currentxorg)
+const selectedbranch = ref(getCurrentXorg())
 const currentTenant=ref(getUserProfile().tenantId)
 console.log("currentTenant",currentTenant.value)
 type Org = {orgId:number, label:string,_id:string}
@@ -23,10 +23,13 @@ const getBranchesForOrg = (org:Org)=>{
 const switchXorg = ()=>{
     navigateTo(`/${selectedbranch.value}`,{external:true})    
 }
+
+console.log("selectedbranch",selectedbranch.value)
 </script>
 <template>
     <div>        
-        <select v-model="selectedbranch" class="  text-right" @change="switchXorg()">
+        
+        <select v-if="selectedbranch" v-model="selectedbranch" class="  text-right" @change="switchXorg()">
                     <optgroup v-for="o in orgList" :label="o.label">
                         <option v-for="b in getBranchesForOrg(o)" :value="b['xOrg']">{{ b['branch']['branchCode']}} </option>
                     </optgroup>

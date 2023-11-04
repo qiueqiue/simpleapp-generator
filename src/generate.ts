@@ -255,14 +255,19 @@ const generateSchema = ( docname: string,
             }
           }
           const mapfiles = {
+            'pages.index.vue.eta': { 
+              to:`pages/[xorg]/${docname}`, 
+              as:'index.vue',
+              validate: validateWritePage
+            },
             'pages.[id].vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
               as:'[id].vue',
               validate: validateWritePage
             },
             'pages.crud.vue.eta': { 
-              to:`pages/[xorg]/${docname}`, 
-              as:'index.vue',
+              to:`pages/[xorg]`, 
+              as:`${docname}.vue`,
               validate: validateWritePage
             },            
             'simpleapp.doc.ts.eta': { 

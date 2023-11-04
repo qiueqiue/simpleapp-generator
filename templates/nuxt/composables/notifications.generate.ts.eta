@@ -1,0 +1,21 @@
+import {NotificationStatus} from '~/types'
+export const getStatusColor = (status:NotificationStatus) => {
+    console.log("get status color",status)
+    switch(status){
+        case NotificationStatus.error:
+            return 'bg bg-danger-600 text-white';
+        break;
+        case NotificationStatus.warn:
+            return 'bg bg-warning-600 text-white';
+        break;
+        case NotificationStatus.info:
+            return 'bg bg-secondary-600 text-white';
+        break;        
+        case NotificationStatus.success:
+        default:    
+            return 'bg bg-primary-600 text-white';
+        break;
+
+    }
+
+}

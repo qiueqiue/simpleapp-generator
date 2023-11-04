@@ -7,3 +7,7 @@ export const camelCaseToWords = (s: string) =>{
 
 export const md5=(s:string)=>  new Md5().appendStr(s).end()
 
+export const getAvatarLink = (email:string, size:number):string=>{
+  return `https://api.simbiz.cloud/cloudapi/avatar/${md5(email)}?size=${size}`
+  
+}

@@ -1,0 +1,75 @@
+<template>
+    <card>
+        <template #header>
+            <h1 class="font font-bold text text-gray-700">{{ tenant.tenantName }}</h1>
+        </template>
+        <template #content>   
+            
+            <ul >
+                <li v-for="o in orglist">
+                    <h1>{{ o.orgName }}</h1>
+                    <ul role="list" class="divide-y divide-gray-100 rounded-md border border-gray-200">
+                        <li v-for="b in branchlist"   class="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+                            <NuxtLink :href="`/${b.xOrg }`"  v-if="o.orgId==b.orgId" :external="true" class="hover:bg-primary-100">                    
+                                <div class="flex w-full flex-1 items-center ">
+                                    <!-- <i class="pi pi-sitemap"></i> -->
+                                    <p class="flex-1 flex-shrink-0 font-bold text-primary-600 ">
+                                        {{ b.branchCode }}
+                                    </p>
+                                    <p class=" text-right min-w-0 flex-1 gap-2">
+                                        <span href="#" class="font-medium text-gray-600 ">{{ b.group }}</span>    
+                                    </p>
+                                </div>
+                                <div class=" flex-shrink-0">
+                                    
+                                    <span class=" font-medium text-gray-400">{{useRuntimeConfig().public.APP_URL}}/{{b.xOrg }}</span>
+                                    
+                                </div>
+                                    
+                                </NuxtLink>
+                            </li>
+                    </ul>
+
+                </li>
+            </ul>
+            
+           <!-- <ul>
+            <li v-for="b in branches" class="border border-b-1">
+                <NuxtLink :href="`/${b.xOrg }`" :external="true">
+
+                    <div class="flex flex-col">
+                        <div class="flex">
+                            <p class="flex-1">{{b.branch.branchCode}}</p>
+                            <p class="flex-1 text-right">{{b.group }}</p>
+                        </div>
+                        
+                        
+                        <p class="text-gray-500">{{useRuntimeConfig().public.APP_URL}}/{{b.xOrg }}</p>
+                        
+                    </div>
+                    
+                </NuxtLink>
+            </li>
+           </ul> -->
+        </template>
+    </card>
+</template>
+
+<script setup lang="ts">
+import _ from 'lodash'
+const props = defineProps<{
+   tenant:any
+}>()
+const branchlist = computed(()=>props.tenant.permissions)
+
+
+const orglist = computed(()=>_.uniqBy(branchlist.value,'orgId')
+        .map((item:any)=>({ orgId:item.orgId,orgCode:item.orgCode,orgName:item.orgName}) ) )
+
+
+
+onMounted(()=>{
+
+})
+
+</script>

@@ -5,29 +5,25 @@ import Tailwind from "primevue/passthrough/tailwind";
 const CustomTailwind = usePassThrough(
     Tailwind,
     {
-        button:{
-            root:{
-                class:['p-2 m-2 border']
-            }
+        card:{root:{class:'shadow p-4'}},       
+        tabpanel:{headerTitle:{class:'m-3 p-3 bg bg-text-300'},},
+        selectbutton:{
+            root:{class:'flex flex-row gap-1'},
+            button: ({ context }) => ({
+                class: ['text-center border rounded  p-2 cursor-pointer hover:bg-primary-400 hover:text-white', context.active ? 'bg-primary-600 text-white' : '']
+            }),
+            label:{class: 'text-sm'},
         },
-        dialog:{
-            root:{
-               class:['bg-white border p-2' ]
-            }
+        button:{root:{class: 'focus:outline-none transition duration-150 ease-in-out rounded px-8 py-2 m-1 border'}},
+        dialog:{root:{class:['border p-2']}},
+        sidebar:{
+            root:{class:'w-1/2 bg-white border p-2 h-full'}
         },
         panel: {
-            root:{
-                class:['border']
-            },
-            title: {
-                class: ['leading-none font-light text-2xl']
-            },
-            header:{
-                class:['bg bg-gray-200 h-10 content-middle']
-            },
-            content:{
-                class:['']
-            }
+            root:{class:['border']},
+            title: {class: ['leading-none font-light text-2xl']},
+            header:{class:['bg bg-gray-200 h-10 content-middle']},
+            content:{class:['']}
         }
     },
 );

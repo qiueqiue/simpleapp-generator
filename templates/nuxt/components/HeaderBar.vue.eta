@@ -8,7 +8,7 @@ import ButtonProfile from './ButtonProfile.vue';
 <template>
     <!-- <header>       -->
         <!-- <MegaMenu :model="getMenus()" orientation="horizontal" />               -->
-    <div class="bg-white border-b-2 border-b-gray-300  h-10 flex flex-row">
+    <div class="bg-white  border-b-gray-300  h-10 flex flex-row">
         
         
         <div class="flex-1 flex flex-row gap-2 p-2">
@@ -17,7 +17,7 @@ import ButtonProfile from './ButtonProfile.vue';
                 
             </div>            
             <div class="">
-                <ButtonHome @click="navigateTo(`/${getUserProfile().currentxorg}`)"/>                
+                <ButtonHome/>                
             </div>
             
         </div>

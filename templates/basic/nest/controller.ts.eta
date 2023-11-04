@@ -17,7 +17,8 @@ import {
   Type,
   Res,
   Req,
-  HttpStatus
+  HttpStatus,
+  HttpCode
 } from '@nestjs/common';
 import { SimpleAppAbstractController } from './simpleapp.controller';
 import { <%= it.typename %>Service } from '../../services/<%= it.doctype %>.service';
@@ -101,6 +102,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   }
 
   @Post('/search')
+  @HttpCode(200)
   <%if(superadmindoctype.includes(it.doctype)){%>
   @Roles(Role.SuperAdmin,Role.<%= `${it.typename}_search`%>)
   <%}else{%>

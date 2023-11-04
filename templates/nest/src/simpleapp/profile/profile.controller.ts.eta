@@ -67,6 +67,31 @@ export class ProfileController {
     }
   }
 
+  @Get('/tenants')
+  @Roles(Role.Everyone, Role.User)
+  @ApiOperation({
+    operationId: 'getAllTenants',
+    description: 'Get all tenants',
+  })
+  @ApiResponse({
+    status: 200,
+    type: () => [MyProfileApiSchema],
+    description: 'Success',
+  })
+  @ApiResponse({ status: 401, type: Object, description: 'Undefine profile' })
+  async getAllTenants(@AppUser() appuser: UserContext) {
+    this.logger.debug(
+      `access getAllTenants API by ${appuser.getUid()},(${appuser.getId()})`,
+    );
+    const result = await this.profileservice.getAllTenants(appuser);
+    this.logger.debug('getProfile result is:');
+    this.logger.debug(result);
+    if (result) {
+      return result;
+    } else {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
 
   @Post('/tenant')
   @Roles(Role.Everyone)
@@ -106,10 +131,8 @@ export class ProfileController {
       decision,
     );
     if (result) {
-      console.log('result', result);
       return result;
     } else {
-      console.log('throw error');
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
   }

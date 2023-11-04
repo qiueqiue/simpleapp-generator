@@ -1,20 +1,18 @@
 <template>
     
   <div>        
-        <Button
-              class="btn-primary pi pi-question"
-              @click="previewPermission"
-            >          
-        </Button>
+        <button class="" @click="previewPermission">
+            <i class="pi pi-question-circle" ></i>
+        </button>
         <Sidebar
                 v-model:visible="showpermissioninfo"
-                modal
+                modal                
                 :header="permissiontitle"
                 position="right"
             >
             <SelectButton v-model="selectedgroup"  @change="selectGroup" :options="grouplist" option-label="label" option-value="value"></SelectButton>                                          
             <div v-if="selectedgroup">
-                    <div  v-if="useRuntimeConfig().public.DEBUGDATA" class="flex flex-row gap-2 p-2">
+                    <div  v-if="useRuntimeConfig().public.DEBUGDATA" class="flex flex-row gap-2 p-2 ">
                         <div class="flex align-items-center">
                             <RadioButton v-model="mode" inputId="modepreview" name="pizza" value="preview" />
                             <label for="modepreview" class="ml-2">Preview</label>

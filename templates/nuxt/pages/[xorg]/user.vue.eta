@@ -1,0 +1,198 @@
+<script setup lang="ts">
+/**
+ * invite user into current tenant (put user into user catalogue)
+ * 1. user accept then have uid
+ * 2. no uid user will put at invite place
+ *
+ */
+// import userchild from './userchild.vue'
+import Menu from "primevue/menu";
+import Dialog from "primevue/dialog";
+import { SearchBody,EventType } from "~/types";
+import _ from "lodash";
+import Panel from "primevue/panel";
+import { ref } from "vue";
+import {
+  UserListItem,
+  BranchListItem,
+  OrgListItem,
+  PermissionListItem,
+} from "~/types";
+import SelectButton from "primevue/selectbutton";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import Card from "primevue/card";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import { Permission, User } from "~/simpleapp/generate/openapi/api";
+import BlockUI from "primevue/blockui";
+
+//initialize api
+const {
+  $listen,
+  $PermissionDoc,
+  $OrganizationDoc,
+  $BranchDoc,
+  $UserDoc,
+  // $InvitationDoc,
+} = useNuxtApp();
+
+const permdoc = $PermissionDoc();
+const orgdoc = $OrganizationDoc();
+const branchdoc = $BranchDoc();
+// const invitedoc = $InvitationDoc();
+const userdoc = $UserDoc();
+const userdata = userdoc.getReactiveData();
+//initialize require list in UI
+const permlist = ref<PermissionListItem[]>([]);
+const userlist = ref<UserListItem[]>([]);
+const orglist = ref<OrgListItem[]>([]);
+const branchlist = ref<BranchListItem[]>([]);
+const currentpermissions = ref<Permission[]>([]);
+const grouplist = getAllGroups().map((item) => {
+  return { value: item, label: _.capitalize(item) };
+});
+
+//initialize some runtime variable
+const blockscreen = ref(false);
+const inviteemail = ref("");
+const selected = ref("");
+const activeuser = ref("");
+const showpermissioninfo = ref(false);
+const permissionselected = ref();
+
+/**
+ * 1. get all users from this tenant
+ * @param resetpage after reload, will it reset user interface or remain as current
+ */
+const refreshList = async (resetpage: boolean = true) => {
+  const items: any[] = [];
+  const searchbody: SearchBody = {
+    fields: [
+      "uid",
+      "email",
+      "created",
+      "fullname",
+      "active",
+      "lastActivity",
+      "description",
+    ],
+  };
+  userlist.value = await userdoc.search(searchbody);
+  //listUser();
+  // userlist.value = _.uniqBy(permlist.value, "uid");
+  if (resetpage) {
+    selected.value = "";
+    activeuser.value = "";
+  }
+  blockscreen.value = false;
+  // console.log("userlist", userlist.value);
+};
+
+/**
+ * identity branch object under org
+ * @param org object of org
+ * @param branch object of branch
+ */
+
+/**
+ * generate dialog for view each user group have what permission
+ */
+const previewPermission = () => {
+  showpermissioninfo.value = true;
+};
+
+/***** send or remove invitation  ******/
+
+const invite = async () => {
+  // const invitedata:User = {}
+  const currentuser = getUserProfile();
+  const inviteuserdoc = $UserDoc();
+  inviteuserdoc.setNew();
+  const newuserdata = inviteuserdoc.getReactiveData();
+  newuserdata.value.email = inviteemail.value;
+  newuserdata.value.fullname = inviteemail.value.split("@")[0];
+  newuserdata.value.active = true;
+  newuserdata.value.tenantId = currentuser.tenantId;
+  newuserdata.value.orgId = currentuser.orgId;
+  newuserdata.value.branchId = currentuser.branchId;
+
+  const invitedata = await inviteuserdoc.create();
+  inviteemail.value = "";
+  await refreshList();
+  // onSelectUser(invitedata);
+};
+
+
+$listen('RefreshUser', () => {
+  refreshList();
+});
+onMounted(() => {
+  refreshList();
+});
+</script>
+<template>
+  <div class="grid grid-cols-4">
+    <div v-if="userlist" class="m-2 p-2 border-r-2">
+      <TabView>
+        <TabPanel header="Active">
+          <ul role="list" class="divide-y divide-gray-100">
+            <li v-for="item in userlist" :key="item.email">
+              <NuxtLink
+                v-if="item.uid && item.active"
+                :to="`${getPageBaseUrl('user')}/${item._id}`"
+              >
+                <UserProfileListItem :data="item"></UserProfileListItem>
+              </NuxtLink>
+            </li>
+          </ul>
+        </TabPanel>
+        <TabPanel header="Inactive">
+          <ul role="list" class="divide-y divide-gray-100">
+            <li v-for="item in userlist" :key="item.email">
+              <NuxtLink
+                v-if="item.uid && !item.active"
+                :to="`${getPageBaseUrl('user')}/${item._id}`"
+              >
+                <UserProfileListItem :data="item"></UserProfileListItem>
+              </NuxtLink>
+            </li>
+          </ul>
+        </TabPanel>
+        <TabPanel header="Invite">
+          <div class="padding p-2">
+            <form @submit.prevent="true" class="w-full">
+              <div class="p-inputgroup flex-1">
+                <InputText
+                  type="email"
+                  placeholder="email"
+                  v-model="inviteemail"
+                />
+                <Button
+                  label="Search"
+                  class="hover:bg-primary-400 bg-primary-600 text-white"
+                  @click="invite"
+                >
+                  Invite
+                </Button>
+              </div>
+            </form>
+          </div>
+          <ul role="list" class="divide-y divide-gray-100">
+            <li v-for="item in userlist" :key="item.email">
+              <NuxtLink
+                v-if="!item.uid"
+                :to="`${getPageBaseUrl('user')}/${item._id}`"
+              >
+                <UserProfileListItem :data="item"></UserProfileListItem>
+              </NuxtLink>
+            </li>
+          </ul>
+        </TabPanel>
+      </TabView>
+    </div>
+    <div class="col-span-3 p-2">
+      <NuxtPage />
+    </div>
+  </div>
+</template>

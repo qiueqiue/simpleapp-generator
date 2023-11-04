@@ -44,6 +44,7 @@ export class UserContext {
   protected orgCode: string = '';
   protected orgName: string = '';  
   protected branches: any[] = []
+  protected lastActivity : string = new Date().toISOString()
   protected invites: any[] = []  //User + field tenant:Tenant[]
   protected roles: string[] = [];
   protected modifiedRecords:ModifiedRecords = {createds:{},updateds:{},deleteds:{}}
@@ -122,21 +123,19 @@ export class UserContext {
    */
   obtainProfileFromDb = async () : Promise<User|undefined>=>{
     const filter = { $match:{uid:this.uid,tenantId:this.tenantId} }
-    
-    
-
 
     const joinpermission:PipelineStage = {$lookup: {
       from : 'permission',
-      localField : 'uid',
-      foreignField : 'uid',
+      localField : '_id',
+      foreignField : 'userId',
       as : 'permissions',
       pipeline:[
-          { $match:{
-            uid:this.uid,
-            tenantId:this.tenantId,
-            orgId:this.orgId,
-            branchId:this.branchId,            
+          { 
+            $match:{
+              // userId:this.getId(),
+              tenantId:this.tenantId,
+              orgId:this.orgId,
+              branchId:this.branchId,            
           }},
           {$lookup:{from: 'branch',localField: 'branchId',foreignField:'branchId',as: 'currentbranch'}},
           {$lookup:{from: 'organization',localField: 'orgId',foreignField:'orgId',as: 'currentorg'}}
@@ -157,7 +156,7 @@ export class UserContext {
     // console.log("obtainProfileFromDbobtainProfileFromDb ",users)
     if(users && users.length>0){
       const userinfo = users[0]
-      // console.log("userinfouserinfouserinfouserinfouserinfouserinfo ",userinfo)
+      console.log("userinfouserinfouserinfouserinfouserinfouserinfo ",userinfo)
 
       if(this.tenantId>0){
         const myperm=userinfo.permissions[0]
@@ -168,11 +167,27 @@ export class UserContext {
           userinfo.branchName = myperm.currentbranch[0].branchName          
           userinfo.orgCode = myperm.currentorg[0].orgCode
           userinfo.orgName = myperm.currentorg[0].orgName
+          
         }    
       }else{        
         userinfo.group = '' 
       }
+      console.log('userinfouserinfouserinfouserinfo',userinfo)
+      const currentitme = new Date(this.lastActivity).getTime()
+      console.log(" userinfo.lastactivity  userinfo.lastactivity  userinfo.lastactivity ", userinfo.lastActivity )
+      const dblastactivity = userinfo.lastActivity ?? '2000-01-01T00:00:00Z' 
+      const lastvisit = new Date( dblastactivity).getTime() ?? 0
+      // if(currentitme - lastvisit)
+      console.log(`${userinfo._id}:  ${this.lastActivity}: ${currentitme} -  ${dblastactivity}:${lastvisit} = ${currentitme - lastvisit}`)
+
+      //update last activtity dont too frequent
+      if(!dblastactivity || currentitme - lastvisit > 5000 ){         
+        const newusermodel = await this.usermodel.findById(userinfo._id)      
+        newusermodel.lastActivity= this.lastActivity        
+        const result = await newusermodel.save()
+      }
       
+      // const result =  await this.usermodel.findOneAndUpdate({_id: userinfo._id},{lastActivity: new Date().toISOString})
       return userinfo  
     }else{
       return undefined
@@ -314,14 +329,17 @@ export class UserContext {
 
     if(this.getId()!=''){
       this.logger.debug(userinfo,"obtain permissions and invitations")
-      const filter:PipelineStage ={ $match:{uid:this.uid }} as PipelineStage
+      const filter:PipelineStage ={ $match:{
+        uid:this.uid,
+        tenantId :this.tenantId
+       }} as PipelineStage
       const permission:PipelineStage = {$lookup: {
       from : 'permission',
-      localField : 'uid',
-      foreignField : 'uid',
+      localField : '_id',
+      foreignField : 'userId',
       as : 'permissions',
       pipeline:[
-        {$match:{uid: this.uid,},},
+        // {$match:{userId: this.getId(),},},
         {$lookup:{from : 'branch',localField : 'branchId',foreignField : 'branchId',as : 'branch',}},
       ]
     }}
@@ -344,6 +362,7 @@ export class UserContext {
     this.logger.debug(pipeline,"getUserInfo")
     // // // const users = await usermodel.find(filter)
     const users = await this.usermodel.aggregate(pipeline)
+    this.logger.debug(users,'users from aggregate')
 
     
     this.invites = users[0].invites
@@ -430,5 +449,85 @@ export class UserContext {
       this.modifiedRecords.deleteds[collection] = [_id]
     }
 
+  }
+
+
+  async getAllTenants (){
+    const results = []
+    if(this.getId()!=''){
+        const filteruser:PipelineStage ={ $match:{
+          uid:this.uid,
+          tenantId :{'$gt':0}
+        }} as PipelineStage
+
+        const getTenantData:PipelineStage = { $lookup:{
+          from : 'tenant',
+          localField : 'tenantId',
+          foreignField : 'tenantId',
+          as : 'tenant',}}
+
+        const permission:PipelineStage = {$lookup: {
+        from : 'permission',
+        localField : '_id',
+        foreignField : 'userId',
+        as : 'permissions',
+        pipeline:[
+          
+          {$lookup:{from : 'organization',localField : 'orgId',foreignField : 'orgId',as : 'org',}},
+          {$lookup:{from : 'branch',localField : 'branchId',foreignField : 'branchId',as : 'branch',}},
+        ]
+      }}
+      
+      const pipelines:PipelineStage[] =[filteruser,getTenantData,permission]
+      // const users=[]
+      this.logger.warn(pipelines,"pipelines")
+      const users = await this.usermodel.aggregate(pipelines)    
+      
+      if(users){
+
+        
+        const activeusers = users.filter((u)=>{
+          // console.log(u.active,'===',true, ' && ',u.tenant[0].active,'===',true)
+          return u.active===true && u.tenant[0].active===true
+        })
+        // return activeusers
+        activeusers.forEach((u)=>{
+
+          const permissions = u.permissions.filter((item:any)=>{
+            return item.org[0].active && item.branch[0].active
+           })
+           .map((item:any)=>{
+  
+            return {
+              _id: item._id,
+              orgId: item.orgId,
+              branchId: item.branchId,
+              group: item.group,
+              orgCode: item.org[0].orgCode,
+              orgName: item.org[0].orgName,
+              branchCode: item.branch[0].branchCode,
+              branchName: item.branch[0].branchName,
+              xOrg: this.generateXorg(u.tenantId,item.orgId,item.branchId)
+            }
+           })
+  
+  
+  
+            
+           results.push({
+            _id: u._id,
+            fullname : u.fullname,
+            tenantId: u.tenantId,
+            tenantName: u.tenant[0].tenantName,
+            permissions: permissions
+           })
+        })
+        
+      }
+
+
+      
+    }
+    return results
   }
 }

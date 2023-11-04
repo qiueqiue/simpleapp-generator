@@ -8,6 +8,7 @@ export const branch:SchemaType ={
         documentName:'branch',
         // pageType:"crud", 
         uniqueKey:'branchCode',
+        uniqueKeys:[['branchId']],
         documentTitle:'branchName',
         additionalAutoCompleteFields: ['branchId']
     },

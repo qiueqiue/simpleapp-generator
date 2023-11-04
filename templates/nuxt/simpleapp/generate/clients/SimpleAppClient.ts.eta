@@ -10,7 +10,7 @@ import addErrors from 'ajv-errors';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import type { AxiosResponse } from 'axios';
-import {SearchBody} from '~/types'
+import {SearchBody,Notification,NotificationStatus} from '~/types'
 // import { useToast, } from 'primevue/usetoast';
 // import type {  ToastMessageOptions } from 'primevue/toast';
 // const toast = useToast();
@@ -61,63 +61,115 @@ export class SimpleAppClient<
   async getById(id: string) {
     return await this.docapi.runFindOne(id,{timeout:this.defaultTimeOut})
     .then((res: AxiosResponse) => {
-      if(this.event){this.event('info:getById',res.data)}
+      // if(this.event){this.event('info:getById',res.data)}
       Object.assign(this.data.value, res.data);
       return res;
     }).catch((res:any)=>{
-      if(this.event){this.event('error:getById',res)}
+      // if(this.event){this.event('error:getById',res)}
       return Promise.reject(res)
     });
   }
+
   async create() {
     const errors = this.validateFailed();
+    const {$event} =useNuxtApp()
     if (errors) {
-      if(this.event){this.event('error:create',errors)}      
+      $event('Notification',{
+        documentName:this.getDocName(),
+        summary:'Record create failed',
+        status:NotificationStatus.error,
+        data:errors
+      })
+      // this.event('error:create',errors)
       return await Promise.reject(errors);
     } else {
       return await this.docapi
         .runCreate(this.data.value,{timeout:this.defaultTimeOut})
         .then((res: AxiosResponse) => {
-          if(this.event){this.event('success:create',res.data);return res.data}
+          // if(this.event){this.event('success:create',res.data);return res.data}
+          // console.log(this.getDocName(), "ok")
+          $event('Notification',{
+            documentName:this.getDocName(),
+            summary:'Record create successfully',
+            status:NotificationStatus.success
+          })
           this.data.value = { ...res.data };
           return res;
-        }).catch((errors:any)=>{
-          if(this.event){
-            this.event('error:create',errors.response.data.data)}
+        }).catch((errors:any)=>{   
+          // console.log(this.getDocName(),"-----failed")
+            $event('Notification',{
+              documentName:this.getDocName(),
+              summary:'Record create failed',
+              status:NotificationStatus.error,
+              data:errors.response.data.data
+            })
             console.error('error:create',errors.response.data.data)
           return Promise.reject(errors)
         });
     }
   }
+
   async update() {
+    const {$event} =useNuxtApp()
     const recordid: string = this.data.value._id ?? '';
     const errors = this.validateFailed();
     if (errors) {
-      if(this.event){this.event('error:update',errors)}
-      console.error(errors)
+      // if(this.event){this.event('error:update',errors)}
+      $event('Notification',{
+        documentName:this.getDocName(),
+        summary:'Record update failed',
+        status:NotificationStatus.error,
+        data:errors
+      })
+      console.error('update errors',errors)
       return await Promise.reject(errors);
     } else {
       return await this.docapi
         .runUpdate(recordid, this.data.value,{timeout:this.defaultTimeOut})
         .then((res: AxiosResponse) => {
-          if(this.event){this.event('success:update',res.data)}
+          // if(this.event){this.event('success:update',res.data)}
+          $event('Notification',{
+            documentName:this.getDocName(),
+            summary:'Record update success',
+            status:NotificationStatus.success,
+            data:errors
+          })
           return res.data;
         }).catch((errors:any)=>{
+          $event('Notification',{
+            documentName:this.getDocName(),
+            summary:'Record update failed',
+            status:NotificationStatus.error,
+            data:errors.response.data.data
+          })
           // console.error('error:update---',errors,",---",errors.message)
-          if(this.event){
-          this.event('error:update',errors.response.data.data)}
+          // if(this.event){
+          // this.event('error:update',errors.response.data.data)}
           console.error('error:update',errors.response.data.data)
           return Promise.reject(errors)
         });
     }
   }
   async delete(id: string) {
+    const {$event} =useNuxtApp()
     return await this.docapi.runDelete(id,{timeout:this.defaultTimeOut})
       .then((res:AxiosResponse)=>{
-        if(this.event){this.event('success:delete',res.data)}
+        // if(this.event){this.event('success:delete',res.data)}
+        $event('Notification',{
+          documentName:this.getDocName(),
+          summary:'Record deleted successfully',
+          status:NotificationStatus.success,
+          data:res.data
+        })
         return Promise.resolve(res.data)
       }).catch((errors:any)=>{
-        if(this.event){this.event('error:delete',errors.response.data.data)}
+        // if(this.event){this.event('error:delete',errors.response.data.data)}
+        $event('Notification',{
+          documentName:this.getDocName(),
+          summary:'Record delete failed',
+          status:NotificationStatus.error,
+          data:errors.response.data.data
+        })
         console.error(errors.response.data.data)
         return Promise.reject(errors)
       });
@@ -125,10 +177,10 @@ export class SimpleAppClient<
   async search(searchbody:SearchBody) {
     return await this.docapi.runSearch(searchbody,{timeout:this.defaultTimeOut})
         .then((res:AxiosResponse)=>{
-          if(this.event){this.event('info:listready',res.data);}
+          // if(this.event){this.event('info:listready',res.data);}
           return res.data
         }).catch((errors:any)=>{
-          if(this.event){this.event('error:list',errors.response.data.data)}
+          // if(this.event){this.event('error:list',errors.response.data.data)}
           return Promise.reject(errors)
         });
   }
