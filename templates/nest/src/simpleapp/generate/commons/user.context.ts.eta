@@ -156,7 +156,7 @@ export class UserContext {
     // console.log("obtainProfileFromDbobtainProfileFromDb ",users)
     if(users && users.length>0){
       const userinfo = users[0]
-      console.log("userinfouserinfouserinfouserinfouserinfouserinfo ",userinfo)
+
 
       if(this.tenantId>0){
         const myperm=userinfo.permissions[0]
@@ -172,13 +172,13 @@ export class UserContext {
       }else{        
         userinfo.group = '' 
       }
-      console.log('userinfouserinfouserinfouserinfo',userinfo)
+      
       const currentitme = new Date(this.lastActivity).getTime()
-      console.log(" userinfo.lastactivity  userinfo.lastactivity  userinfo.lastactivity ", userinfo.lastActivity )
+      
       const dblastactivity = userinfo.lastActivity ?? '2000-01-01T00:00:00Z' 
       const lastvisit = new Date( dblastactivity).getTime() ?? 0
       // if(currentitme - lastvisit)
-      console.log(`${userinfo._id}:  ${this.lastActivity}: ${currentitme} -  ${dblastactivity}:${lastvisit} = ${currentitme - lastvisit}`)
+   
 
       //update last activtity dont too frequent
       if(!dblastactivity || currentitme - lastvisit > 5000 ){         
