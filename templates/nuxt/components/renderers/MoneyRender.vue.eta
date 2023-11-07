@@ -1,0 +1,7 @@
+
+<template>
+    <span>{{ modelValue }}</span>
+</template>
+<script lang="ts" setup>
+const props = defineProps(['modelValue'])
+</script>

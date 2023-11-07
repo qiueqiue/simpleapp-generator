@@ -1,7 +1,36 @@
-<template>
-    <DataTable v-bind="$attrs" class="simpleapp-datatable" stripedRows :value="valueModel">
+<!-- <template>
+    <DataTable v-bind="$attrs" 
+    stripedRows 
+    dataKey="_id"
+    :pt="{
+             bodyRow:{class:'bg-blue-200'},
+             wrapper:{class:'bg-red-100'},
+            
+             root:{class:'bg-green-100'},
+             header:{class:'bg-blue-600'},
+             pagebutton:{class:'bg-red-800'},
+
+             tfoot:{class:'bg-red-800  boder round m-4 gap-4'},  
+    }"
+
+    :value="valueModel" 
+    :filters="filters"
+    :paginator="true" :rows="20"
+    :rowsPerPageOptions="[20,40,60,100]"
+    filterDisplay="row"
+    >
+
         <template #empty> <div class="text-center">No record found.</div> </template>
-        <template #header><slot name="header"></slot></template>
+        <template #header><slot name="header">
+            <div class="flex flex-wrap gap-2 align-items-center justify-content-between">
+                <h4 class="m-0 flex-1">Records</h4>
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search" />
+                    <InputText v-model="filters['global'].value" placeholder="Search..." />
+                </span>    
+            </div>
+            
+        </slot></template>
         <Column v-for="(col,index) in columns" :field="col" :header="camelCaseToWords(col)"></Column>                        
         <slot >
 
@@ -9,11 +38,128 @@
     </DataTable>
 </template>
 <script setup lang="ts">
+import { FilterMatchMode } from 'primevue/api';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import {camelCaseToWords} from './helper'
-const props = defineProps<{columns:string[]}>()
+const props = defineProps<{columns:string[]|string[][]}>()
 const valueModel = defineModel<Object[]>()
+    const filters = ref({
+    'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+});
+
+</script> -->
+<template>
+    <DataTable v-bind="$attrs" 
+            stripedRows 
+            dataKey="_id"
+            :showGridlines="true"
+            :pt="{
+                // header:{ class:'border bg-gray-100'},
+                headerRow:{ class:'border bg-gray-200'},                                
+            }"
+            :value="value" 
+            :filters="filters"
+            :paginator="true" :rows="20"
+            :rowsPerPageOptions="[20,40,60,100]"            
+            >
+            <!-- header -->
+            <template #header>
+                <div class=" flex flex-row w-full text-right justify-content-end">
+                    <div class="flex-1">
+                        <slot name="toolbar"></slot>
+                    </div>
+                    <div class="flex-1">
+                        <slot name="title">
+                            <h1 class="text text-2xl pt-2 text-center">{{ title }}</h1>
+                        </slot>
+                        
+                    </div>                    
+                    <span class="p-input-icon-left flex-1">                        
+                        <i class="pi pi-search  mt-4 ml-2 text-gray-400 absolute" />
+                        <InputText type ="search" v-model="filters['global'].value" class="text-right" placeholder="Keyword Search" />                        
+                    </span>
+                </div>
+            </template>
+            <!-- no data found -->
+            <template #empty>
+                <div class="text-center ">
+                    <div class="text-3xl   text-gray-400 pi pi-exclamation-circle"></div>
+                    <div class="text-3xl text-gray-400">no data found</div>
+                    
+                </div>
+            </template>
+
+            <Column v-for="(col,index) in columns"  :field="typeof col == 'string' ? col : col.field">
+                <template v-if="typeof col == 'string'" #header>            
+                    <p >{{ col }}</p>
+                </template>               
+                <template v-else-if="typeof col =='object'" #header>            
+                    <span>{{ col.title }} </span>
+                </template>
+                <template v-else #header>
+                    <span class="text-danger-600">unknown</span>
+                </template>
+                
+                <template v-if="typeof col == 'string'" #body="{index,data}">            
+                    <p >{{ data[col] }}</p>
+                </template>                
+                <template v-else-if="typeof col =='object'" #body="{index,data}">            
+                    <div v-if="col.component && col.field=='*'">
+                        <component  :is="col.component" :value="data" :fields="col.moreFields" :class="col.cssClass" :setting="col.componentSetting"></component>                        
+                    </div>
+                    <div v-else-if="col.component && col.field!='*'">                        
+                        <component :is="col.component" v-model="data[col.field]" :moreFields="col.moreFields" :class="col.cssClass" :setting="col.componentSetting" ></component>                    
+                    </div>
+                    <div v-else class="flex flex-col">                                
+                        <div :class="col.class">{{ data[col.field] }}</div>
+                        <div v-for="(f,findex) in col.moreFields" class="flex flex-col">
+                            <!-- additional field define as string -->
+                            <div v-if="typeof f == 'string'" :class="'text-gray-400 text-sm' + f.cssClass??'' ">{{ data[f] }}</div>
+                            <!-- additional field define as object -->
+                            <div v-else>                                
+                                <div v-if="f.component && f.field=='*'">
+                                    <component  :is="f.component" :value="data"  :class="f.cssClass" :setting="f.componentSetting"></component>                        
+                                </div>
+                                <div v-else-if="f.component && f.field!='*'">              
+                                    <component :is="f.component" v-model="data[f.field]" :class="f.cssClass" :setting="f.componentSetting" ></component>                    
+                                </div>
+                                <div v-else>                                    
+                                    <div :class="f.cssClass">{{ data[f.field] }}</div>
+                                </div>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>                    
+                </template>
+                <template v-else #body>
+                    <span class="text-danger-600">unknown col {{ col }}</span>
+                </template>
+            </Column>            
+            <slot>
+
+            </slot>
+    </Datatable>
+</template>
+<script setup lang="ts">
+import {SearchBody,CellSetting} from '~/types'
+import { FilterMatchMode } from 'primevue/api';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+
+const props = defineProps<{
+    value:any[]
+    columns: CellSetting[]
+    title:string
+    
+    
+}>()
+
+const filters = ref({
+    'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+});
 
 
 </script>
+

@@ -11,3 +11,5 @@ export const getAvatarLink = (email:string, size:number):string=>{
   return `https://api.simbiz.cloud/cloudapi/avatar/${md5(email)}?size=${size}`
   
 }
+
+export const toLocalDate = (dateiso8601:string)=> new Date(String(dateiso8601)).toLocaleDateString()

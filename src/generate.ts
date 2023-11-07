@@ -266,8 +266,8 @@ const generateSchema = ( docname: string,
               validate: validateWritePage
             },
             'pages.crud.vue.eta': { 
-              to:`pages/[xorg]`, 
-              as:`${docname}.vue`,
+              to:`pages/[xorg]/${docname}`, 
+              as:`/../${docname}.vue`,
               validate: validateWritePage
             },            
             'simpleapp.doc.ts.eta': { 

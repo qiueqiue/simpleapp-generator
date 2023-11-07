@@ -236,7 +236,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       await this.hook(appuser,HookType.beforeSearch, newfilters);
       // console.log("before _find",newfilters)
       // console.log("this.doc",this.doc)
-      const products = await this.doc.find(newfilters,projection).sort(sort);
+      const products = await this.doc.find(newfilters,projection,{session:appuser.getDBSession()}).sort(sort);
       // console.log("after search",products)
       const productlist = products.map((p: T) => {
         return p;

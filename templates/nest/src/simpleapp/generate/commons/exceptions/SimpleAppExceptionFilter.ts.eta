@@ -29,7 +29,7 @@ export class SimpleAppExceptionFilter implements ExceptionFilter {
       const session:ClientSession = request['sessionuser'].getDBSession()
       if(session.inTransaction())session.abortTransaction()      
     }
-    console.log('exceptionexception',typeof exception,Object.keys(exception),exception)
+    // console.log('exceptionexception',typeof exception,Object.keys(exception),exception)
     let errordata
     let finalstatus
     let msg

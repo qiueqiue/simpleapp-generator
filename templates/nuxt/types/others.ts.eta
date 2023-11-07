@@ -1,4 +1,4 @@
-
+import {SimpleAppClient} from '~/simpleapp/generate/clients/SimpleAppClient'
   export type DocumentMetaData =  {
     docName:string
     docType:string
@@ -6,6 +6,8 @@
     isolationType:string   
     documentDate:string
     docNumber:boolean
+    docClass: SimpleAppClient<any,any>
+    
   }
   export type MenuData =  {
     label: string

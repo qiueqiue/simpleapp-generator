@@ -1,0 +1,11 @@
+
+<template>
+    <p v-for="(f,index) in fields" >
+        <span v-if="index==0">{{ value[f] }}</span>
+        <span v-else class="text-gray-400 text-sm">{{ value[f] }}</span>
+    </p>
+</template>
+<script lang="ts" setup>
+const props = defineProps(['value','fields'])
+
+</script>

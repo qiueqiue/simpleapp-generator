@@ -58,8 +58,8 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
     type: String //[<%= it.fullApiSchemaName%>]
   })
   @ApiResponse({ status: 500, description: 'Internal error' })
-  @ApiOperation({ operationId: 'runList', description:"Say hello only" })
-  async list(@AppUser() appuser: UserContext) {
+  @ApiOperation({ operationId: 'runHello', description:"Say hello only" })
+  async hello(@AppUser() appuser: UserContext) {
     return `Hello, welcome to ${ this.service.getDocumentName()}`//this._list(appuser);
   }
   //autocomplete shall above :id

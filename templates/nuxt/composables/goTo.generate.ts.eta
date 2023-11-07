@@ -1,9 +1,15 @@
-
-
-export const goTo = (document:string,id?:string)=>{
+export const getDocumentUrl = (document:string,id?:string,querystr?:string)=>{
     let path = `/${getCurrentXorg()}/${document}`
     if(id){
         path = path + '/'+id
     }
-    navigateTo(path)   
+    if(querystr){
+        path=path+'?'+querystr
+    }
+    return path
+}
+
+
+export const goTo = (document:string,id?:string,querystr?:string)=>{    
+    navigateTo(getDocumentUrl(document,id,querystr))   
 }

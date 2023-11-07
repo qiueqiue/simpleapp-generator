@@ -72,12 +72,12 @@ export class ProfileService {
       fullname: appuser.getFullname(),
       email: appuser.getEmail(),
       active: true,
-      doctype: 'user',      
+      doctype: 'user',
     } as User;
-    if(appuser.getTenantId()==0){
-      data.tenantId=0
-      data.orgId=0
-      data.branchId=0
+    if (appuser.getTenantId() == 0) {
+      data.tenantId = 0;
+      data.orgId = 0;
+      data.branchId = 0;
     }
     const createresult = await this.usersvc.create(appuser, data);
     const userinfo = await appuser.getUserInfo();
@@ -176,6 +176,16 @@ export class ProfileService {
 
     this.logger.log(permResult, 'create Permission result');
 
+
+    //tenant owner shall map to userId for that tenant
+    
+    const tenantUpdateData = await this.tenantsvc.findById(appuser,tenantResult._id)
+    this.logger.log(tenantUpdateData, `update tenant owner(${tenantResult._id})`);
+    tenantUpdateData.owner._id = userRecordId    
+    const updateTenantOwnerResult = await this.tenantsvc.findIdThenUpdate(appuser,tenantResult._id,tenantUpdateData)
+    if (!updateTenantOwnerResult) {
+      throw new BadRequestException('Update tenant owner failed');
+    }
     const xorg: string = Base64URL.encodeText(
       `${tenantResult.tenantId}-${orgResult.orgId}-${branchResult.branchId}`,
     );

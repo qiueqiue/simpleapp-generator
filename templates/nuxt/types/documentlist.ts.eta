@@ -1,0 +1,9 @@
+export type CellSetting  = {
+    title: string
+    field: string
+    cssClass?:string
+    moreFields: string[]
+    component ?: any
+    componentSetting ?:any
+ } | string 
+

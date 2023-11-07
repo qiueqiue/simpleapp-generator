@@ -6,9 +6,9 @@
  */
 import _ from 'lodash'
 import {MenuData} from '~/types'
-import {alldocuments} from '../simpleapp/generate/commons/documents'
+import {getAllDocuments} from '../simpleapp/generate/commons/documents'
 export const getDocTypes = ()=>{
-  return alldocuments.filter(item=>item.page!='')
+  return getAllDocuments().filter(item=>item.page!='')
 }
 
 export const getPublicResource = (xorg:string) : MenuData[] => {
@@ -35,7 +35,7 @@ export const getMenus =() :MenuData[]=>{
   const xorg = getUserStore().getCurrentXorg()
 //   let data:MenuData[] =[];
 //   //sss
-  let allmenus = alldocuments.filter(item=>item.page!='')
+  let allmenus = getAllDocuments().filter(item=>item.page!='')
 
  const roles = getUserProfile().roles
   let allowmenus=[]

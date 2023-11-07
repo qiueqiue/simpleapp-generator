@@ -1,0 +1,6 @@
+<template >
+    <span>{{ toLocalDate(modelValue) }}</span>
+</template>
+<script lang="ts" setup>
+    const modelValue = defineModel()    
+</script>

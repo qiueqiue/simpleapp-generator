@@ -207,6 +207,7 @@ const saveUser = async () => {
 };
 
 const onSelectUser = async (userId: string) => {
+  console.log('onSelectUser',userId)
   // .addRoute()
   // const user: UserListItem = { ...menuitem };
   const orgsearchbody: SearchBody = {
@@ -293,8 +294,9 @@ const getPermssionData = (userId: string, branchId: number) => {
   return pm;
 };
 
-// onMounted(()=>{
-const id = String(useRoute().params.id);
-onSelectUser(id);
-// })
+onMounted(() => {
+  const id = String(useRoute().params.id);
+  console.log("id",id)
+  onSelectUser(id);
+});
 </script>

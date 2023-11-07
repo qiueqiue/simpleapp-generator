@@ -8,7 +8,7 @@
 // import userchild from './userchild.vue'
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
-import { SearchBody,EventType } from "~/types";
+import { SearchBody, EventType } from "~/types";
 import _ from "lodash";
 import Panel from "primevue/panel";
 import { ref } from "vue";
@@ -123,11 +123,10 @@ const invite = async () => {
   // onSelectUser(invitedata);
 };
 
-
-$listen('RefreshUser', () => {
+$listen("RefreshUser", () => {
   refreshList();
 });
-onMounted(() => {
+onMounted(() => {  
   refreshList();
 });
 </script>

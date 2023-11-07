@@ -5,7 +5,10 @@
  * Author: Ks Tan
  */
 import {Notification} from './notifications'
-
+export type RefreshDocumentList ={
+    documentName : string,
+    data?:any
+}
 export type EventType ={
     'Notification' :Notification
     'Decision' :Notification
@@ -13,4 +16,5 @@ export type EventType ={
     'InvitationAccepted' :string
     'InvitationRejected' :string
     'RefreshUser' :string
+    'RefreshDocumentList': RefreshDocumentList
 }

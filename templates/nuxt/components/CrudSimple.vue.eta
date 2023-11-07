@@ -156,7 +156,7 @@ onNuxtReady(()=>{
       <DebugDocumentData v-model="data"/>
     </div>
 
-    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :style="{zIndex:100, width: '80vw' }">        
+    <Dialog v-model:visible="visible" modal :header="popuptitle" class="crudsimple-dialog" :autoZIndex="false" :pt="{root:{class:'h-full w-full bg-white'}}">        
         <SimpleAppForm :document="obj"  #default="o">     
             <div class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
               <Button class=" btn-default" :disabled="disabled" @click="newData" type="button" v-if="canPerform(resourcename,'create')">New</Button>
