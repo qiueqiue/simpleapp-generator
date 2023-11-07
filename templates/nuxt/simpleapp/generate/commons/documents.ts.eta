@@ -7,7 +7,7 @@
 import { DocumentMetaData } from "~/types"
 
 
-export const getAllDocuments = ():DocumentMetaData[] =>[
+export const getAllDocuments=():DocumentMetaData[]  => [
  
     <%for(let i=0; i<it.modules.length;i++){ %>
       <% const d = it.modules[i] %>      

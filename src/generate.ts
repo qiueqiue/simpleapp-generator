@@ -255,9 +255,9 @@ const generateSchema = ( docname: string,
             }
           }
           const mapfiles = {
-            'pages.index.vue.eta': { 
+            'pages.crud.vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
-              as:'index.vue',
+              as:'crud.vue',
               validate: validateWritePage
             },
             'pages.[id].vue.eta': { 
@@ -265,9 +265,9 @@ const generateSchema = ( docname: string,
               as:'[id].vue',
               validate: validateWritePage
             },
-            'pages.crud.vue.eta': { 
+            'pages.landing.vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
-              as:`/../${docname}.vue`,
+              as:`../${docname}.vue`,
               validate: validateWritePage
             },            
             'simpleapp.doc.ts.eta': { 
@@ -295,14 +295,17 @@ const generateSchema = ( docname: string,
             const target = mapfiles[filename]            
             const targetfolder = `${generateTypes[foldertype]}/${target.to}`
             const targetfile = `${targetfolder}/${target.as}`
-            const isexists = existsSync(targetfile)
-            const iswrite:boolean = target.validate(targetfolder,isexists)
-            log.info("process: ",targetfile)
-            if(iswrite && !existsSync(targetfolder)){
+
+            if(jsonschemas[docname][X_SIMPLEAPP_CONFIG]['pageType'] && !existsSync(targetfolder)){
               mkdirSync(targetfolder,{recursive:true})
               writeFileSync(`${targetfolder}/delete-me.txt`,"delete this file for keep modified page");
             }
-           
+
+
+            const isexists = existsSync(targetfile)
+            const iswrite:boolean = target.validate(targetfolder,isexists)
+            log.info("process: ",targetfile)
+            
             if(iswrite){
               const filecontent = eta.render(templatepath, variables)     
               writeFileSync(targetfile,filecontent);

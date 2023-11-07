@@ -6,8 +6,8 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import Index from './index.vue'
+import Crud from './crud.vue'
 </script>
 <template>
-    <Index/>
+    <Crud/>
 </template>
