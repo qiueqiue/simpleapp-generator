@@ -10,6 +10,9 @@ import {getAllDocuments} from '../simpleapp/generate/commons/documents'
 export const getDocTypes = ()=>{
   return getAllDocuments().filter(item=>item.page!='')
 }
+export const getAllDocFormats = ()=>{
+  return getAllDocuments().filter(item=>item.docNumber)
+}
 
 export const getPublicResource = (xorg:string) : MenuData[] => {
   // const xorg = getUserStore().getCurrentXorg()

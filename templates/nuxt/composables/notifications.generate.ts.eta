@@ -1,6 +1,6 @@
 import {NotificationStatus} from '~/types'
 export const getStatusColor = (status:NotificationStatus) => {
-    console.log("get status color",status)
+    //console.log("get status color",status)
     switch(status){
         case NotificationStatus.error:
             return 'bg bg-danger-600 text-white';

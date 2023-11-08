@@ -6,6 +6,7 @@
             v-model="modelValue"    
             :path="setting.instancepath"
             :pt="{input:{class:'text-right w-full'}}"                          
+            :readonly="isReadonly"
          ></InputNumber>
     </FieldContainer>
 </template>
@@ -20,11 +21,21 @@ const props = withDefaults(defineProps<{
     error?:string,
     instancepath?:string,
     hidelabel?:boolean
+    readonly?:boolean
 }>(),{
     hidelabel:false
 })
 const emit = defineEmits(['change'])
 const modelValue =defineModel()
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
 watch(modelValue,()=>{
     // props.setting.document.validateFailed()
     emit('change',modelValue)

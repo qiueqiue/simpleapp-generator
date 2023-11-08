@@ -186,7 +186,7 @@ export class SimpleAppClient<
   }
   
   hook(type: string, data: TData) {
-    console.log('internal save hook');
+    //console.log('internal save hook');
     return true;
   }
   validateFailed() {

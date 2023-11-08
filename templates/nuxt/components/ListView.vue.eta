@@ -1,36 +1,41 @@
 <template>
-    <div v-if="withFilter">
-        <input 
-        autofocus
-            placeholder="search" 
-            v-model="searchvalue"                    
-            class="w-full border  p-2" 
-            type="search" />
-    </div>
-    <div class="max-h-screen overflow-auto">
-        <ul >            
-            <li v-for="item in filterlist">                    
-                <div  :class="getSelectedCSS(item)">
-                    <NuxtLink :to="`${url}/${item._id}`">
-                        <div class="mr-2">{{item[titleField]  }}</div>
-                        <div class="font font-bold text-right">{{item[subTitleField]}}</div>
-                    </NuxtLink>
-                </div>
-            
-            </li>
-        </ul>
+    <div>
+        <div v-if="withFilter">
+            <input 
+                autofocus
+                placeholder="search" 
+                v-model="searchvalue"                    
+                class="w-full border  p-2" 
+                type="search" />
+        </div>
+        <div class="max-h-screen overflow-auto">
+            <ul >            
+                <li v-for="item in filterlist">                    
+                    <div  :class="getSelectedCSS(item)">
+                        <NuxtLink :to="`${url}/${item[idField]}`">
+                            <div class="mr-2">{{item[titleField]  }}</div>
+                            <div class="font font-bold text-right">{{item[subTitleField]}}</div>
+                        </NuxtLink>
+                    </div>
+                
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
 import {ref} from 'vue'
 import {ListItem} from '~/types/listview'
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     list:any[],
     url:string,
-    titleField:string,
+    titleField:string
+    idField?:string
     subTitleField:string
     withFilter?:boolean
-}>()
+}>(),{
+    idField:'_id'
+})
 const emit = defineEmits(['clickitem'])
 const searchvalue = ref('')
 const selecteditem =ref('')

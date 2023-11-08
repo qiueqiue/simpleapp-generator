@@ -9,6 +9,7 @@
             v-model="modelValue"
             :path="setting.instancepath"
             :type="type"
+            :readonly="isReadonly"
          ></InputText>         
          <InputText v-else
             class="simpleapp-inputfield"
@@ -16,6 +17,7 @@
             v-model="modelValue"
             :path="setting.instancepath"
             :type="type"
+            :readonly="isReadonly"
          ></InputText>  
     </FieldContainer>
 </template>
@@ -32,11 +34,20 @@ const props = withDefaults( defineProps<{
     type?:string,
     instancepath?:string,
     hidelabel?: boolean
+    readonly?: boolean
 }>(),{type:'text'})
 
 // const modelValue = defineModel<{modelValue?:string}>()
 // console.log(modelValue.value)
-
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
 const emits = defineEmits(['change'])
 // const onchange=(e:any)=>{    
 //     emits('update:modelValue',e.target.value)

@@ -9,6 +9,7 @@
         optionLabel="label"
         :path="setting.instancepath"
         :options="options"
+        :readonly="isReadonly"
           />        
     </FieldContainer>
 </template>
@@ -29,10 +30,19 @@ const props = defineProps<{
     optionValue?:string,
     instancepath?:string,
     options?:any[]
+    readonly?:boolean
 }>()
 
 const optionValue = props.optionValue ?? 'value' 
 const optionLabel  = props.optionLabel ?? 'label' 
 const options = prepareList('oneOf',props.setting.fieldsetting,optionLabel,optionValue,props.options,)
-
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
 </script>

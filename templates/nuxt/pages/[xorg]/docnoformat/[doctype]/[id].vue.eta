@@ -6,12 +6,9 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import Index from "./index.vue";
-definePageMeta({
-  layout: 'sidelistcrud',
-});
+import Crud from "./new.vue";
 
 </script>
 <template>
-  <Index />
+  <Crud/>
 </template>

@@ -20,7 +20,7 @@ let resmsg:ToastMessageOptions = {} as ToastMessageOptions
 
 $listen("Notification",(data:Notification)=>{
     // $listen('*',(type:key of EventType,data:any)=>{ 
-    console.log("Event type",'data',data)
+    
     const type:NotificationStatus = data.status
     // let arrupdate = type.split(':')
     // let eventdata = data

@@ -15,7 +15,7 @@ const orgdoc = $OrganizationDoc();
 const doc = $BranchDoc();
 const data = doc.getReactiveData();
 const bid = ref(String(useRoute().params.bid ?? ""));
-
+const isReadOnly=ref(true)
 const fetchRecord = async (id: string) => {
   await doc.getById(id);
 };
@@ -29,7 +29,7 @@ const createData = async () => {
     .create()
     .then((res) => {
       refresh();
-      goBranch( res.data._id);
+      goBranch(res.data._id);
     })
     .catch((err) => {
       console.error(err);
@@ -56,6 +56,7 @@ const deleteData = (event: Event) => {
       // disabled.value=true
       doc.delete(data.value._id ?? "").then((res) => {
         refresh();
+        
         goTo(doc.getDocName());
       });
     },
@@ -67,38 +68,31 @@ const deleteData = (event: Event) => {
 
 const refresh = () => {
   $event("RefreshDocumentList", { documentName: doc.getDocName() });
+  isReadOnly.value=true
 };
 
-if (bid.value) {
-  console.log("bid value", bid.value);
+if (bid.value) {    
   fetchRecord(bid.value);
 } else {
   // const orgRecordid = ref(String(useRoute().params.id));
   // const orgdata = (await orgdoc.getById(orgRecordid.value)).data;
   doc.setNew();
+  isReadOnly.value=false
   data.value.tenantId = getUserProfile().tenantId;
   data.value.orgId = getUserProfile().orgId;
   data.value.organization._id = getUserProfile().orgRecordId;
-  data.value.organization.label =   getUserProfile().orgName
+  data.value.organization.label = getUserProfile().orgName;
   data.value.organization.orgId = getUserProfile().orgId;
-  data.value.organization.code =  getUserProfile().orgCode
+  data.value.organization.code = getUserProfile().orgCode;
 }
 </script>
 <template>
   <div class="grid grid-cols2">
-    <SimpleAppForm :document="doc" #default="o">
-      <div class="simpleapp-tool-bar col-span-4 text-left gap-4">
-        <!-- <Button
-                class=""
-                :disabled="disabled"
-                @click="newData"
-                type="button"
-                v-if="canPerform(doc.getDocName(), 'create')"
-                >New</Button
-              > -->
+    <SimpleAppForm :document="doc" #default="o" :readonly="isReadOnly">
+      <div v-if="!isReadOnly" class="col-span-4 text-left gap-4">
         <Button
           class="bg-primary-600 hover:bg-primary-400 text-white"
-          :disabled="disabled"
+          :isReadOnly="isReadOnly"
           @click="createData"
           type="button"
           v-if="canPerform(doc.getDocName(), 'create') && doc.isNew()"
@@ -106,27 +100,29 @@ if (bid.value) {
         >
         <Button
           class="bg-primary-600 hover:bg-primary-400 text-white"
-          :disabled="disabled"
+          
           @click="updateData"
           type="button"
           v-if="canPerform(doc.getDocName(), 'update') && !doc.isNew()"
           >Update</Button
         >
         <Button
-          class="bg-danger-600 hover:bg-danger-400 text-white"
-          :disabled="disabled"
+          class="bg-danger-600 hover:bg-danger-400 text-white"            
           @click="deleteData($event)"
           type="button"
           v-if="canPerform(doc.getDocName(), 'delete') && !doc.isNew()"
           >Delete</Button
         >
-
-        <ProgressSpinner
-          v-if="disabled == true"
-          style="width: 2rem; height: 2rem"
-        ></ProgressSpinner>
+        
         <ConfirmPopup></ConfirmPopup>
       </div>
+      <div v-else class="col-span-4 text-left gap-4">
+        <Button 
+                class="bg-primary-600 hover:bg-primary-400 text-white"
+                @click="isReadOnly=false" type="button" >Edit</Button
+              > 
+      </div>
+
       <SimpleAppText
         v-model="data.branchCode"
         :setting="o.getField('#/properties/branchCode')"

@@ -1,3 +1,7 @@
 .router-link-exact-active{
     @apply  bg-primary-100 block
 }
+
+[readonly]{
+    @apply bg-gray-300
+}

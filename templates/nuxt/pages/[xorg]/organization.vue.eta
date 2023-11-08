@@ -15,13 +15,10 @@ const doc = $OrganizationDoc();
 const brancdoc = $BranchDoc();
 const data = doc.getReactiveData();
 const branchlist = ref([]);
-
-const getCurrentOrg = async () =>{
-    // const org = (await doc.search({filter:{orgId:getUserProfile().orgId}}))[0];  
-    // console.log("orgorgorgorg",org)
-    await doc.getById( getUserProfile().orgRecordId)
-    // doc.getById()
-}
+const isReadOnly=ref(true)
+const getCurrentOrg = async () => {
+  await doc.getById(getUserProfile().orgRecordId);
+};
 const fetchRecord = async (id: string) => {
   await doc.getById(id);
   branchlist.value = await brancdoc.search({
@@ -30,24 +27,17 @@ const fetchRecord = async (id: string) => {
 };
 
 const id = computed((): string => String(useRoute().params.id ?? ""));
-
-const disabled = computed(() => {
-  return false;
-});
-
-
 const updateData = async () => {
   doc
     .update()
     .then(() => {
-      // visible.value=false
       refresh();
+      isReadOnly.value=true
     })
     .catch((err) => {
       console.error(err);
     });
 };
-
 
 const refresh = () => {
   $event("RefreshDocumentList", { documentName: doc.getDocName() });
@@ -65,38 +55,31 @@ if (id) {
   fetchRecord(id.value);
 }
 
-getCurrentOrg()
+getCurrentOrg();
 </script>
 <template>
   <div class="grid grid-cols-3">
-    <div class="">        
+    <div class="">
       <Card>
         <template #content>
-          <SimpleAppForm #default="o" :document="doc">
-            <div class="simpleapp-tool-bar col-span-4 text-left gap-4">             
-             
-              <Button
+          <SimpleAppForm #default="o" :document="doc"  :readonly="isReadOnly">
+            <div class="simpleapp-tool-bar col-span-4 text-left gap-4" v-if="canPerform(doc.getDocName(), 'update')">
+              <Button  v-if="isReadOnly"
                 class="bg-primary-600 hover:bg-primary-400 text-white"
-                :disabled="disabled"
-                @click="updateData"
-                type="button"
-                v-if="canPerform(doc.getDocName(), 'update') && !doc.isNew()"
-                >Update</Button
-              >
-             
-
-              <ProgressSpinner
-                v-if="disabled == true"
-                style="width: 2rem; height: 2rem"
-              ></ProgressSpinner>
+                @click="isReadOnly=false" type="button">Edit</Button>
+              <Button  v-else            
+                class="bg-primary-600 hover:bg-primary-400 text-white"
+                @click="updateData" type="button" >Update</Button
+              >              
               <ConfirmPopup></ConfirmPopup>
             </div>
             <div class="flex flex-col">
               <div class="flex flex-row gap-4">
                 <SimpleAppText
-                  autofocus
+                  autofocus                  
                   v-model="data.orgCode"
                   :setting="o.getField('#/properties/orgCode')"
+                  
                 />
                 <SimpleAppText
                   v-model="data.orgName"
@@ -119,22 +102,21 @@ getCurrentOrg()
           </SimpleAppForm>
         </template>
       </Card>
-
     </div>
     <div>
-        <Card>
+      <Card>
         <template #header>
           <!-- <h1 class="text-2xl font-bold">{{ data.orgName }}</h1> -->
         </template>
         <template #content>
           <div class="">
             <h1>Branches</h1>
-            <Button @click="goBranch( 'new')">New</Button>
+            <Button @click="goBranch('new')">New</Button>
             <ListView
               :list="branchlist"
               title-field="branchName"
               sub-title-field="branchCode"
-              :url="getDocumentUrl('organization', id) "
+              :url="getDocumentUrl('organization', id)"
             >
             </ListView>
           </div>

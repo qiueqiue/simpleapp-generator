@@ -2,6 +2,7 @@
   <FieldContainer :hidelabel="hidelabel" v-model="modelValue" :label="label" :description="description" :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">        
      
   <div v-if="componentErr!=''" class="input-error">{{componentErr}}</div>
+  <span v-else-if="isReadonly" readonly class="readonly-input">{{ selecteditem[optionLabel] }}</span>
   <AutoComplete v-else 
       class="simpleapp-inputfield simpleapp-autocomplete flex flex-row "    
       :inputId="slotprops.uuid"   
@@ -14,6 +15,7 @@
       @complete="getListFromAutocompleteApi"
       :suggestions="list"
       forceSelection
+      
       :dropdown="dropdown"
       :pt="{
         // root:{class: 'w-full' },
@@ -121,4 +123,14 @@ const capitalizeFirstLetter = (str: string) => {
   // const res = str;
   return res;
 };
+
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
 </script>

@@ -140,7 +140,7 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
 
   
   reCalculateValue(){
-    console.log('trigger new recalculate')
+    //console.log('trigger new recalculate')
     const data = this.getData()
     
     <% if(it.jsonschema['x-simpleapp-config']['formulas']){ %>

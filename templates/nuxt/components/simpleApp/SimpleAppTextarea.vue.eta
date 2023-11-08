@@ -8,6 +8,7 @@
             v-bind="$attrs"
             :autoResize="autoResize"
             :path="setting.instancepath"
+            :readonly="isReadonly"
          ></Textarea>         
     </FieldContainer>
 </template>
@@ -25,6 +26,16 @@ const props = defineProps<{
     setting:any,
     autoResize?:boolean,
     instancepath?:string,
-}>()
+    readonly?:boolean
 
+}>()
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
 </script>
