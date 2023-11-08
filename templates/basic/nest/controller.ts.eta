@@ -126,17 +126,17 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
 
 <% for(let i=0;i<it.apiSettings.length;i++){%>
 <% let api = it.apiSettings[i] %>
-<%~ `@${capitalizeFirstLetter(api.method)}('${api.entrypoint}')`%>
+<%~ `@${capitalizeFirstLetter(api.method)}('${api.entryPoint}')`%>
   <%if(superadmindoctype.includes(it.doctype)){%>
   @Roles(Role.SuperAdmin,Role.<%= `${it.typename}_${api.action}`%>,
-    <%if(api.requiredrole && api.requiredrole.length>0) { %>
-        <% for(let r=0;r<api.requiredrole.length;r++){%>Role.<%=api.requiredrole[r]%>,<%}%>
+    <%if(api.requiredRole && api.requiredRole.length>0) { %>
+        <% for(let r=0;r<api.requiredRole.length;r++){%>Role.<%=api.requiredRole[r]%>,<%}%>
       <%}%>
   )
   <%}else{%>
   @Roles(Role.SuperAdmin,Role.SuperUser,Role.<%= `${it.typename}_${api.action}`%>,
-      <%if(api.requiredrole && api.requiredrole.length>0) { %>
-        <% for(let r=0;r<api.requiredrole.length;r++){%>Role.<%=api.requiredrole[r]%>,<%}%>
+      <%if(api.requiredRole && api.requiredRole.length>0) { %>
+        <% for(let r=0;r<api.requiredRole.length;r++){%>Role.<%=api.requiredRole[r]%>,<%}%>
       <%}%>
       )
   <%}%>
@@ -144,13 +144,13 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })
   @ApiResponse({status: 418,description: 'undefine bpmn,setDocumentStatus or bpmn'})
   @ApiOperation({ operationId: '<%=api.execute ??api.action%>' })
-  <% if(api.querypara && api.querypara.length>0) {%>
-      <%for(let q=0;q<api.querypara.length; q++){%>
-        @ApiQuery({name: "<%=api['querypara'][q]%>",required: false,type: String})
+  <% if(api.queryPara && api.queryPara.length>0) {%>
+      <%for(let q=0;q<api.queryPara.length; q++){%>
+        @ApiQuery({name: "<%=api['queryPara'][q]%>",required: false,type: String})
       <%}%>
   <%}%>  
-  async <%=api.execute??api.action %>(@AppUser() appuser: UserContext,@Res() res:Response,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
-          <%let subpath = api.entrypoint.split('/')%>
+  async <%=api.execute??api.action %>(@AppUser() appuser: UserContext,@Res() res:Response,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+          <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
             <%if(partstr.includes(':')){%>
@@ -159,16 +159,16 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
             <%}%>    
           <%}%>  
         <%}%>
-        <% if(api.querypara && api.querypara.length>0) {%>
-            <%for(let q=0;q<api.querypara.length; q++){%>
-              <% const qp = api['querypara'][q] %>
+        <% if(api.queryPara && api.queryPara.length>0) {%>
+            <%for(let q=0;q<api.queryPara.length; q++){%>
+              <% const qp = api['queryPara'][q] %>
               @Query('<%=qp%>') <%=qp%>: string,
             <%}%>
         <%}%>
          ){
     <%if(api.execute){%>
-      const result =  await this.service.<%=api.execute%>(appuser,<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
-          <%let subpath = api.entrypoint.split('/')%>
+      const result =  await this.service.<%=api.execute%>(appuser,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+          <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
             <%if(partstr.includes(':')){%>
@@ -177,9 +177,9 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
             <%}%>    
           <%}%>  
         <%}%>
-        <% if(api.querypara && api.querypara.length>0) {%>
-            <%for(let q=0;q<api.querypara.length; q++){%>
-              <%= api['querypara'][q] %>,              
+        <% if(api.queryPara && api.queryPara.length>0) {%>
+            <%for(let q=0;q<api.queryPara.length; q++){%>
+              <%= api['queryPara'][q] %>,              
             <%}%>
         <%}%>
         )

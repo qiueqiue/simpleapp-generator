@@ -19,8 +19,10 @@ export default defineNuxtPlugin( async(nuxtApp) => {
           tenantId:ref(0),
           orgId:ref(0),
           branchId:ref(0),
+          branchRecordId:ref(''),
           branchCode:ref(''),
           branchName:ref(''),
+          orgRecordId:ref(''),
           orgCode:ref(''),
           orgName:ref(''),
           uid: ref(''),
@@ -55,7 +57,9 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               this.sessionId = res.data.sessionId
               this.tenantId = res.data.tenantId              
               this.orgId = res.data.orgId
+              this.orgRecordId = res.data.orgRecordId
               this.branchId = res.data.branchId
+              this.branchRecordId = res.data.branchRecordId
               this.branchCode = res.data.branchCode
               this.branchName = res.data.branchName
               this.orgCode = res.data.orgCode
@@ -140,6 +144,8 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               tenantId : this.tenantId,
               orgId : this.orgId,
               branchId : this.branchId,
+              orgRecordId: this.orgRecordId,
+              branchRecordId: this.branchRecordId,
               uid : this.uid,
               email : this.email,
               branchCode: this.branchCode,

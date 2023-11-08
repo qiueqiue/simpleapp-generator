@@ -40,7 +40,7 @@ export class ResponseInterceptor implements NestInterceptor {
       _id: logid,
       created: starttime.toISOString(),
       duration : 0,
-      createdby: usersession.getUid(),
+      createdBy: usersession.getUid(),
       path: url,
       method: method,
       headers: headers,

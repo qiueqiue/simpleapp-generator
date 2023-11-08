@@ -15,9 +15,7 @@ import {
   ChildModels,
   SchemaModel,
   TypeForeignKey,
-  TypeForeignKeyCatalogue,
-  DocSetting,
-  
+  TypeForeignKeyCatalogue,  
 } from '../type';
 const log: Logger<ILogObj> = new Logger();
 const configname =  "x-simpleapp-config"
@@ -25,8 +23,8 @@ const FOREIGNKEY_PROPERTY = 'x-foreignkey'
 const COMPULSORYFIELDS={  _id:{type:'string'},
   created:{type:'string'},
   updated:{type:'string'},
-  createdby:{type:'string'},
-  updatedby:{type:'string'},
+  createdBy:{type:'string'},
+  updatedBy:{type:'string'},
   tenantId: {type:'integer',default:1,minimum:1 },
   orgId: {type:'integer',default:1,minimum:1 },
   branchId: {type:'integer',default:1,minimum:1 },
@@ -212,11 +210,11 @@ const genSchema = async (
         if(!childprops['updated']){
           childprops['updated']={type:'string',description:'iso8601 or empty'}
         }
-        if(!childprops['createdby']){
-          childprops['createdby']={type:'string'}
+        if(!childprops['createdBy']){
+          childprops['createdBy']={type:'string'}
         }
-        if(!childprops['updatedby']){
-          childprops['updatedby']={type:'string'}
+        if(!childprops['updatedBy']){
+          childprops['updatedBy']={type:'string'}
         }
         if(!childprops['_id']){
           childprops['_id']={type:'string'}

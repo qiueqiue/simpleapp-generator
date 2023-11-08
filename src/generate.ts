@@ -255,9 +255,9 @@ const generateSchema = ( docname: string,
             }
           }
           const mapfiles = {
-            'pages.crud.vue.eta': { 
+            'pages.new.vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
-              as:'crud.vue',
+              as:'new.vue',
               validate: validateWritePage
             },
             'pages.[id].vue.eta': { 

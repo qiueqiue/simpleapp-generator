@@ -93,19 +93,19 @@ foreignkeys: MyForeignKey
 
 }
 
-export type DocSetting = {
-  docName:string,
-  docType:string,
-  colDocNo:string,
-  colDocLabel:string,
-  collectionName:string,
-  autocompleteFields:string[],
-  docStatusSettings:DocumentStatus[],
-  apiSettings:DocumentApi[],
-  // requireautocomplete:boolean
-  isolationtype:string
-  foreignkeys: MyForeignKey
-}
+// export type DocSetting = {
+//   docName:string,
+//   docType:string,
+//   colDocNo:string,
+//   colDocLabel:string,
+//   collectionName:string,
+//   autoCompleteFields:string[],
+//   docStatusSettings:DocumentStatus[],
+//   apiSettings:DocumentApi[],
+//   // requireautocomplete:boolean
+//   isolationType:string
+//   foreignKeys: MyForeignKey
+// }
 
 export type DocumentStatus = {
   status:string  //'CO', 'V', 'CL', 'D' and etc
@@ -116,9 +116,9 @@ export type DocumentStatus = {
 export enum RESTMethods {'post'='post','get'='get', 'delete'='delete','put'='put', 'patch'='patch'}
 export type DocumentApi = {
   action:string   //api action name
-  entrypoint:string   //api entry point example:':id', ':id/confirm'
-  querypara?:string[]   //what query parameter wish to accept, example:  ['description','date']
-  requiredrole?: string[]   // what special user role wish to allow for this api, example: ['SuperUser']
+  entryPoint:string   //api entry point example:':id', ':id/confirm'
+  queryPara?:string[]   //what query parameter wish to accept, example:  ['description','date']
+  requiredRole?: string[]   // what special user role wish to allow for this api, example: ['SuperUser']
   method:RESTMethods
   execute:string,   //what service class method name to execute, example: 'ping','getDocumentName'
   description:string //description of api
@@ -126,8 +126,8 @@ export type DocumentApi = {
 export enum IsolationType {"none"="none" , "tenant"="tenant","org"="org", "branch"="branch"}
 // export type ImportLibs = {"lib":string,"as":string}
 export type Formula =  {
-  "jsonpath":string  //example: "$.subtotal","$.details[*]"
-  "formula":string  //example "jslib.getDocumentSubTotal(@F{$.details})"
+  jsonPath:string  //example: "$.subtotal","$.details[*]"
+  formula:string  //example "jslib.getDocumentSubTotal(@F{$.details})"
 } 
 
 export type SchemaConfig = {
@@ -158,8 +158,8 @@ export type SchemaFields = {
   branchId: SimpleAppJSONSchema7
   created: SimpleAppJSONSchema7 
   updated: SimpleAppJSONSchema7 
-  createdby: SimpleAppJSONSchema7 
-  updatedby: SimpleAppJSONSchema7 
+  createdBy: SimpleAppJSONSchema7 
+  updatedBy: SimpleAppJSONSchema7 
   [key:string]:SimpleAppJSONSchema7 | SimpleAppJSONSchema7[] | undefined
 
 }

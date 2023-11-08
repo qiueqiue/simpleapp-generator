@@ -72,7 +72,7 @@ const refreshList = async (resetpage: boolean = true) => {
       "uid",
       "email",
       "created",
-      "fullname",
+      "fullName",
       "active",
       "lastActivity",
       "description",
@@ -111,7 +111,7 @@ const invite = async () => {
   inviteuserdoc.setNew();
   const newuserdata = inviteuserdoc.getReactiveData();
   newuserdata.value.email = inviteemail.value;
-  newuserdata.value.fullname = inviteemail.value.split("@")[0];
+  newuserdata.value.fullName = inviteemail.value.split("@")[0];
   newuserdata.value.active = true;
   newuserdata.value.tenantId = currentuser.tenantId;
   newuserdata.value.orgId = currentuser.orgId;
@@ -126,7 +126,7 @@ const invite = async () => {
 $listen("RefreshUser", () => {
   refreshList();
 });
-onMounted(() => {  
+onMounted(() => {
   refreshList();
 });
 </script>

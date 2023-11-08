@@ -80,8 +80,8 @@ export class BranchService extends BranchProcessor {
       const pattern = `${doc.docType}-${branchCode}-[00000]`;
       const formatdata: Docnoformat = {
         _id: crypto.randomUUID(),
-        docNoFormatNo: doc.docType,
-        docNoFormatName: `Default ${doc.docType}`,
+        docNoFormatNo: `${doc.docType}-${branchCode}`,
+        docNoFormatName: `Default ${doc.docType} - ${branchCode}`,
         docNoType: doc.docType,
         docNoPattern: pattern,
         branch: { _id: recordId, branchId: branchId, label: branchName },

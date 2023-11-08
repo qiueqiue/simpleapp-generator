@@ -17,8 +17,8 @@ export const organization:SchemaType ={
         _id:{type:'string'},
         created:{type:'string'},
         updated:{type:'string'},
-        createdby:{type:'string'},
-        updatedby:{type:'string'},
+        createdBy:{type:'string'},
+        updatedBy:{type:'string'},
         tenantId: {type:'integer',default:1,minimum:1 },
         orgId: {type:'integer',default:1,minimum:1 },
         branchId: {type:'integer',default:1,minimum:0 },
@@ -26,7 +26,7 @@ export const organization:SchemaType ={
         orgName: {type: "string",},
         active: {type: "boolean","default":true,},
         description: {type: "string",format:"text",},
-        timezone: {"type": "string","examples": ["Asia/Kuala_Lumpur"]
+        timeZone: {"type": "string","examples": ["Asia/Kuala_Lumpur"]
         }    
     }
   }

@@ -15,9 +15,7 @@ export { Autoincreament } from '../generate/types/autoinc.type';
 
 @Injectable()
 export class AutoincreamentService extends AutoincreamentProcessor {
-  constructor(
-    @InjectModel('Autoincreament') mydoc: Model<Autoincreament>,
-    ) {
+  constructor(@InjectModel('Autoincreament') mydoc: Model<Autoincreament>) {
     super(mydoc);
   }
 
@@ -69,18 +67,23 @@ export class AutoincreamentService extends AutoincreamentProcessor {
     if (res.length > 0) {
       // console.log("FOUND RESULT------")
       const tmp = res[0];
-      const nextno = tmp.nextno;
+      const nextno = tmp.nextNo;
       data = { collectionName: collection, fieldName: field, nextno: nextno };
       this.findIdThenUpdate(appuser, tmp._id, {
         collectionName: collection,
         fieldName: field,
-        nextno: tmp.nextno + 1,
+        nextNo: tmp.nextNo + 1,
       });
     } else {
       // console.log("CREATE ROW------")
-      this.data = { collectionName: collection, fieldName: field, nextno: 2 };
+      this.data = { collectionName: collection, fieldName: field, nextNo: 2 };
       const createResult = await this.create(appuser, this.data);
-      data = { _id:crypto.randomUUID(), collectionName: collection, fieldName: field, nextno: 1 };
+      data = {
+        _id: crypto.randomUUID(),
+        collectionName: collection,
+        fieldName: field,
+        nextno: 1,
+      };
     }
 
     return data;

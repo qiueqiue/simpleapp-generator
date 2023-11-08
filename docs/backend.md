@@ -26,8 +26,8 @@ Example better than 100 words, you may refer:
   "x-simpleapp-config":{
     additionalApis:[{
         "action":"listDocFormats",
-        "entrypoint":"/listdocformats/:doctype",
-        "requiredrole":["User"],
+        "entryPoint":"/listdocformats/:doctype",
+        "requiredRole":["User"],
         "method":'get', 
         "execute":"listDocFormats",
         "description":"get list of document format for 1 doctype"

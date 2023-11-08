@@ -3,7 +3,7 @@ export type CellSetting  = {
     field: string
     cssClass?:string
     moreFields: string[]
-    component ?: any
-    componentSetting ?:any
+    rendererName ?: string
+    rendererSetting ?:any
  } | string 
 

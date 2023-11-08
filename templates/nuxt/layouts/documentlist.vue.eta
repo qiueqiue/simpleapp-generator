@@ -93,7 +93,7 @@ import {SearchBody,CellSetting} from '~/types'
         tablecolumns.value= !useRoute().meta.columns ? [] : useRoute().meta.columns as CellSetting[] 
         documentName.value = String(useRoute().meta.documentName)
         const searchbody: SearchBody = {
-            fields: tablecolumns.value.concat(['created']),
+            fields: getWantedFields(tablecolumns.value),
             sorts:  metas.sorts as string[][]
         }
         obj = getDocument(documentName.value)
@@ -118,6 +118,24 @@ import {SearchBody,CellSetting} from '~/types'
         // }
     }
 
+    const getWantedFields = (selectedCols:CellSetting[]) =>{
+        let cols:string[] = []
+        
+        selectedCols.forEach((item)=>{
+
+            if(typeof item=='string'){
+                cols.push(item)
+            }else if(typeof item =='object'){
+                if(item.field !='*'){
+                    cols.push(item.field)
+                }
+                if(item.moreFields && item.moreFields.length>0){
+                    cols = cols.concat(item.moreFields)
+                }                
+            }
+        })        
+        return cols
+    }
 watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
     refresh()
 })
@@ -131,7 +149,7 @@ watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
 
         <HeaderBar />
         <Invitation/>      
-         <SimpleAppDatatable :value="recordlist" :columns="tablecolumns" :title="String(useRoute().meta.name)"> 
+         <DocumentDatatable :value="recordlist" :columns="tablecolumns" :title="String(useRoute().meta.name)"> 
             <template #toolbar>
                 <div class="w-full text-left">
                     <slot>
@@ -143,13 +161,11 @@ watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
                 <Button class="bg-secondary-600 hover:bg-secondary-400 text-white" @click="refresh()" type="button" >Refresh</Button>                                                                            
             </template>
             <Column header=" ">
-                <template #body="{index,data}">
-                    <NuxtLink :to="getDocumentUrl(String(useRoute().meta.documentName),data._id)">
-                        <Button icon="pi pi-pencil" class="bg-primary-600 hover:bg-primary-400 text-white" >Edit</Button>
-                    </NuxtLink>            
+                <template #body="{index,data}">                    
+                        <Button @click="goTo(String(useRoute().meta.documentName),data._id)" icon="pi pi-pencil" class="bg-primary-600 hover:bg-primary-400 text-white" >Edit</Button>                    
                 </template>
             </Column>
-        </SimpleAppDatatable>  
+        </DocumentDatatable>  
         <!--      
         <DebugDocumentData v-model="data"/>
         -->

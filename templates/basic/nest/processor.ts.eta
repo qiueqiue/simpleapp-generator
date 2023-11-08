@@ -59,7 +59,7 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
           // <%~ JSON.stringify(fml) %>
           //const tmp = jsopbj.query(vdata,fieldpath).filter((item:string)=>item!='')
           
-          jsopbj.apply(data, '<%~ fml.jsonpath %>', function(value:any) { return <%~fml.formula %> });
+          jsopbj.apply(data, '<%~ fml.jsonPath %>', function(value:any) { return <%~fml.formula %> });
 
         <%}) %>
       <%} %>

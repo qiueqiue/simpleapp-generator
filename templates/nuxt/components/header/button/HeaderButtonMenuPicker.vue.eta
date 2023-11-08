@@ -1,0 +1,40 @@
+<script lang="ts" setup>
+import Dialog from 'primevue/dialog';
+import {ref} from 'vue'
+import {MenuData} from '~/types'
+const visible = ref(false)
+const menus = getMenus();
+// const emit = defineEmits(['select'])
+const selectMenu = (menu:MenuData) =>{
+  navigateTo(menu.url)
+  visible.value=false
+  // emit('select',menu)
+}
+</script>
+<template>
+  <div>
+
+    <button class="text-center border-none  cursor-pointer" v-if="useRoute().params.xorg" @click="visible=true">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
+
+     <Dialog v-model:visible="visible" modal header="Pick Document" :pt="{dialog:{ class:' bg-primary-800 ' }}">
+      <div class="">
+          <Button v-for="menu in menus" @click="selectMenu(menu)" >
+            <div v-if="menu.isolationType == 'none'" class="text-warning-600 hover:text-warning-500">
+              * {{ camelCaseToWords(menu.label) }}
+            </div>
+            <div v-else class="">{{ camelCaseToWords(menu.label) }}</div>
+          </Button>
+        </div>
+    </Dialog>
+       
+
+    
+  </div>
+</template>
+<style scoped>
+
+</style>

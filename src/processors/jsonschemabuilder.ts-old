@@ -119,8 +119,8 @@ const processObject =  (doctype: string,
     jsondata.properties['doctype'] = {type: 'string', default:doctype, examples: [doctype],description: 'Control value, dont edit it',};
     jsondata.properties['created'] = {type: 'string',description: 'Control value, dont edit it',};
     jsondata.properties['updated'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['createdby'] = {type: 'string',description: 'Control value, dont edit it',};
-    jsondata.properties['updatedby'] = {type: 'string',description: 'Control value, dont edit it',};
+    jsondata.properties['createdBy'] = {type: 'string',description: 'Control value, dont edit it',};
+    jsondata.properties['updatedBy'] = {type: 'string',description: 'Control value, dont edit it',};
 
     if(doctype !='tenant'){
       jsondata.properties['tenantId'] = {type: 'number',description: 'Control value, dont edit it',};
@@ -306,11 +306,11 @@ const genSchema = (docname: string,schematype: string,jsondata: JsonSchemaProper
       if(!childprops['updated']){
         childprops['updated']={type:'string',description:'iso8601 or empty'}
       }
-      if(!childprops['createdby']){
+      if(!childprops['createdBy']){
         childprops['createdby']={type:'string'}
       }
-      if(!childprops['updatedby']){
-        childprops['updatedby']={type:'string'}
+      if(!childprops['updatedBy']){
+        childprops['updatedBy']={type:'string'}
       }
       if(!childprops['_id']){
         childprops['_id']={type:'string'}

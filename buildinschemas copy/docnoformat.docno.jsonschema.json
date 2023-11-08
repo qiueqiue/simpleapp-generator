@@ -3,8 +3,8 @@
     "x-page-type":"crud",
     "x-document-api":[{
       "action":"listDocFormats",
-      "entrypoint":"/listdocformats/:doctype",
-      "requiredrole":["User"],
+      "entryPoint":"/listdocformats/:doctype",
+      "requiredRole":["User"],
       "method":"get", 
       "execute":"listDocFormats",
       "bpmn":"", 

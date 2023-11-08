@@ -12,7 +12,7 @@ const schemasetting = {
           created: {type: String},  
           updated: {type: String},  
           duration:{type: Number},
-          createdby: {type: String},  
+          createdBy: {type: String},  
           path:{type:String},
           ip:{type:String},
           method:{type:String},

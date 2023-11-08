@@ -3,7 +3,7 @@
     "x-page-type":"crud",
     "x-document-api":[{
           "action":"genNextNumber",
-          "entrypoint":"gennextno/:collection/:field",
+          "entryPoint":"gennextno/:collection/:field",
           "requiredrole":["User"],
           "method":"get", 
           "execute":"generateNextNo",

@@ -9,7 +9,7 @@ export type ApiEvent = {
     created: string
     updated?:string
     duration: number
-    createdby: string
+    createdBy: string
     path: string
     ip: string
     method: string

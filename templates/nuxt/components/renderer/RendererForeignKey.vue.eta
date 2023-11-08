@@ -1,0 +1,11 @@
+<template>    
+    <NuxtLink  v-if="setting?.collection" :to="getDocumentUrl(setting.collection,modelValue ? modelValue['_id']:'')" class="text-primary-700 hover:text-primary-500 cursor-pointer">        
+        {{modelValue?.label}}
+    </NuxtLink>
+    <span v-else>{{modelValue?.label || modelValue}}</span>
+</template>
+<script setup lang="ts">
+const modelValue = defineModel()
+
+const props = defineProps<{setting:any}>()
+</script>

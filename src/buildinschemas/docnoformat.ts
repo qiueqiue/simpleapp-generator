@@ -3,7 +3,7 @@ import {SchemaType,RESTMethods,IsolationType} from '../type'
 export const docnoformat:SchemaType ={
         type: "object",
         "x-simpleapp-config":{
-            isolationType:IsolationType.tenant,
+            isolationType:IsolationType.org,
             documentType:'docno',
             documentName:'docnoformat',
             pageType:"crud", 
@@ -12,8 +12,8 @@ export const docnoformat:SchemaType ={
             additionalAutoCompleteFields: ['default'],
             additionalApis:[{
                 "action":"listDocFormats",
-                "entrypoint":"/listdocformats/:doctype",
-                "requiredrole":["User"],
+                "entryPoint":"/listdocformats/:doctype",
+                "requiredRole":["User"],
                 "method":RESTMethods.get, 
                 "execute":"listDocFormats",
                 "description":"get list of document format for 1 doctype"
@@ -23,8 +23,8 @@ export const docnoformat:SchemaType ={
             _id:{type:'string'},
             created:{type:'string'},
             updated:{type:'string'},
-            createdby:{type:'string'},
-            updatedby:{type:'string'},
+            createdBy:{type:'string'},
+            updatedBy:{type:'string'},
             tenantId: {type:'integer',default:1,minimum:1 },
             orgId: {type:'integer',default:1,minimum:1 },
             branchId: {type:'integer',default:1,minimum:1 },

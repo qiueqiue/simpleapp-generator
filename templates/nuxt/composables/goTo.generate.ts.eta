@@ -13,3 +13,10 @@ export const getDocumentUrl = (document:string,id?:string,querystr?:string)=>{
 export const goTo = (document:string,id?:string,querystr?:string)=>{    
     navigateTo(getDocumentUrl(document,id,querystr))   
 }
+
+
+export const goBranch = (branchRecordId: string) => {
+    const parenturl = getDocumentUrl("organization");
+    const branchUrl = `${parenturl}/${branchRecordId}`;
+    navigateTo(branchUrl);
+  };

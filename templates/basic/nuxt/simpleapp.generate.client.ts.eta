@@ -104,8 +104,8 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
 
   <%for(let i=0;i<it.apiSettings.length;i++){%>
   <% let api = it.apiSettings[i] %>
-  async <%=api.action%>(<% if(api.entrypoint && api.entrypoint.includes(':')) {%>
-          <%let subpath = api.entrypoint.split('/')%>
+  async <%=api.action%>(<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+          <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
             <%if(partstr.includes(':')){%>
@@ -116,8 +116,8 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
         <%}%>){
     //const recordid: string = this.data.value._id ?? '';
     return await this.docapi.<%=api.action%>(
-      <% if(api.entrypoint && api.entrypoint.includes(':')) {%>
-          <%let subpath = api.entrypoint.split('/')%>
+      <% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+          <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
             <%if(partstr.includes(':')){%>
@@ -149,7 +149,7 @@ export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<
         // <%~ JSON.stringify(fml) %>
         //const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
         
-        jsonpath.apply(data, '<%~ fml.jsonpath %>', function(value) { return <%~fml.formula %> });
+        jsonpath.apply(data, '<%~ fml.jsonPath %>', function(value) { return <%~fml.formula %> });
 
       <%}) %>
     <%} %>

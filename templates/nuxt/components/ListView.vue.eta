@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="withFilter">
         <input 
         autofocus
             placeholder="search" 
@@ -8,15 +8,13 @@
             type="search" />
     </div>
     <div class="max-h-screen overflow-auto">
-        <ul >
-            
-            <li v-for="item in filterlist">
-            
+        <ul >            
+            <li v-for="item in filterlist">                    
                 <div  :class="getSelectedCSS(item)">
-                    <a class="flex flex-row " @click="clickRow(item)">
-                        <div class="mr-2">{{item.name  }}</div>
-                        <div class="font font-bold text-right">{{item.code}}</div>
-                    </a>
+                    <NuxtLink :to="`${url}/${item._id}`">
+                        <div class="mr-2">{{item[titleField]  }}</div>
+                        <div class="font font-bold text-right">{{item[subTitleField]}}</div>
+                    </NuxtLink>
                 </div>
             
             </li>
@@ -26,17 +24,26 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import {ListItem} from '~/types/listview'
-const props = defineProps<{list:any[]}>()
+const props = defineProps<{
+    list:any[],
+    url:string,
+    titleField:string,
+    subTitleField:string
+    withFilter?:boolean
+}>()
 const emit = defineEmits(['clickitem'])
 const searchvalue = ref('')
 const selecteditem =ref('')
 const clickRow=(item:ListItem)=>{
-    emit('clickitem',item)
-    selecteditem.value = item.code
+    // emit('clickitem',item)
+    // selecteditem.value = item.code
 }
 const filterlist =  computed(()=>{    
-    const newlist =props.list.filter(item=>
-            String(item.name).toLowerCase().includes(searchvalue.value.toLowerCase()))
+    const newlist =props.list.filter((item:any)=>
+    {
+     return   String(item[props.titleField]).toLowerCase().includes(searchvalue.value.toLowerCase()) ||
+            String(item[props.subTitleField]).toLowerCase().includes(searchvalue.value.toLowerCase())
+    }) 
 
     return newlist
 })

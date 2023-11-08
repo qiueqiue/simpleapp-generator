@@ -3,7 +3,7 @@ import {SchemaType,RESTMethods,IsolationType} from '../type'
 export const branch:SchemaType ={
     type: "object",
     "x-simpleapp-config":{
-        isolationType:IsolationType.tenant,
+        isolationType:IsolationType.org,
         documentType:'branch',
         documentName:'branch',
         // pageType:"crud", 
@@ -16,8 +16,8 @@ export const branch:SchemaType ={
         _id:{type:'string'},
         created:{type:'string'},
         updated:{type:'string'},
-        createdby:{type:'string'},
-        updatedby:{type:'string'},
+        createdBy:{type:'string'},
+        updatedBy:{type:'string'},
         tenantId: {type:'integer',default:1,minimum:1 },
         orgId: {type:'integer',default:1,minimum:1 },
         branchId: {type:'integer',default:1,minimum:1 },

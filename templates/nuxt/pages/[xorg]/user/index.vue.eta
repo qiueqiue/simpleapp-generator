@@ -9,8 +9,8 @@
           <div class="flex flex-col gap-2">
             <SimpleAppText
               autofocus
-              :setting="o.getField('#/properties/fullname')"
-              v-model="userdata.fullname"
+              :setting="o.getField('#/properties/fullName')"
+              v-model="userdata.fullName"
             />
 
             <SimpleAppText
@@ -64,36 +64,31 @@
           </div> -->
 
           <div class="">
-            <Card v-for="o in orglist" class="m-2">
+            <Card v-if="currentpermissions.length>0" v-for="o in orglist" class="m-2">
               <template #title>{{ o.orgName }}</template>
-              <template #content>
-                <table class="w w-full">
-                  <!-- <thead class="">
-                    <tr>
-                      <th class="text-center font-normal">Branch</th>
-                      <th class="text-left font-normal">Access Right</th>
+              <template #content>                
+                  <table class="w w-full">                  
+                    <tr v-for="(b, index) in branchlist">
+                      <td v-if="checkBranchInOrg(o, b)" class="text-center">
+                        {{ b.branchCode }}
+                      </td>
+                      <td
+                        v-if="checkBranchInOrg(o, b)"
+                        class="text-center flex flex-row"
+                      >
+                        <div>
+                           
+                          <SelectButton
+                            v-model="currentpermissions[index]['group']"  
+                            :options="grouplist"
+                            option-label="label"
+                            option-value="value"
+                            @change="applyPermission(currentpermissions[index])"
+                          ></SelectButton>
+                        </div>
+                      </td>
                     </tr>
-                  </thead> -->
-                  <tr v-for="(b, index) in branchlist">
-                    <td v-if="checkBranchInOrg(o, b)" class="text-center">
-                      {{ b.branchCode }}
-                    </td>
-                    <td
-                      v-if="checkBranchInOrg(o, b)"
-                      class="text-center flex flex-row"
-                    >
-                      <div>
-                        <SelectButton
-                          v-model="currentpermissions[index]['group']"
-                          :options="grouplist"
-                          option-label="label"
-                          option-value="value"
-                          @change="applyPermission(currentpermissions[index])"
-                        ></SelectButton>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
+                  </table>                
               </template>
             </Card>
           </div>
@@ -103,7 +98,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import Card from "primevue/card";
+// import Card from "primevue/card";
 import { Permission, User } from "../../../simpleapp/generate/openapi/api";
 import _ from "lodash";
 import SelectButton from "primevue/selectbutton";
@@ -207,7 +202,7 @@ const saveUser = async () => {
 };
 
 const onSelectUser = async (userId: string) => {
-  console.log('onSelectUser',userId)
+  console.log("onSelectUser", userId);
   // .addRoute()
   // const user: UserListItem = { ...menuitem };
   const orgsearchbody: SearchBody = {
@@ -296,7 +291,7 @@ const getPermssionData = (userId: string, branchId: number) => {
 
 onMounted(() => {
   const id = String(useRoute().params.id);
-  console.log("id",id)
+  console.log("id", id);
   onSelectUser(id);
 });
 </script>

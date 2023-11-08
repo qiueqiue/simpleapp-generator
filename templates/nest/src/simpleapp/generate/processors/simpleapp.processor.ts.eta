@@ -215,7 +215,7 @@ export class SimpleAppService<T extends { _id?: string }> {
        
 
         Object.assign(pipeline[0]['$match'],isolationFilter);
-        console.log("final agg",pipeline)
+        //console.log("final agg",pipeline)
         return await this.doc.aggregate(pipeline)
       }catch(err){
         throw new InternalServerErrorException(err);  
@@ -330,12 +330,12 @@ export class SimpleAppService<T extends { _id?: string }> {
         }
       }else if(key == 'created'){
         data['created'] = (transtype == 'create'  || !data['created']) ? new Date() .toISOString() : data['created']
-      }else if(key == 'createdby'){
-        data['createdby'] = (transtype == 'create'  || !data['createdby']) ? appuser.getUid() : data['createdby']
+      }else if(key == 'createdBy'){
+        data['createdBy'] = (transtype == 'create'  || !data['createdBy']) ? appuser.getUid() : data['createdBy']
       }else if(key == 'updated'){
         data['updated'] = new Date() .toISOString()      
-      }else if(key == 'updatedby'){
-        data['updatedby'] = appuser.getUid()
+      }else if(key == 'updatedBy'){
+        data['updatedBy'] = appuser.getUid()
       }            
     }
 
@@ -422,7 +422,7 @@ export class SimpleAppService<T extends { _id?: string }> {
       await this.hook(appuser,HookType.beforeDelete, id);
       this.logger.debug('delete record',this.documentName, id);
       dependency = await this.getRelatedRecords(id);
-      console.log('dependency', dependency);
+      //console.log('dependency', dependency);
       if (!dependency) {
         let filterIsolation = this.getIsolationFilter(appuser);
         this.polishIsolationFilter(filterIsolation)        
@@ -440,7 +440,7 @@ export class SimpleAppService<T extends { _id?: string }> {
         //this.doc.findByIdAndDelete(id);
         return deleteresult;
       } else {
-        console.log("reject query",dependency)
+        //console.log("reject query",dependency)
         
         throw new ForbiddenException('Foreignkey constraint',dependency)
       }
@@ -609,7 +609,7 @@ export class SimpleAppService<T extends { _id?: string }> {
          }
          
          keystore[collectionname]= results   
-         console.log("keystorekeystore",keystore)
+         //console.log("keystorekeystore",keystore)
          let addfield={$addFields:{collection:collectionname}}        
          
          const stagefilter:PipelineStage =  {

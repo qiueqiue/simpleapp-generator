@@ -971,9 +971,9 @@ tenantId:
 orgId:
 branchId:
 created:
-createdby:
+createdBy:
 updated:
-updatedby:
+updatedBy:
 documentStatus
 _v:
 x-document-status: [optional]array of document satus: such as:
@@ -1131,7 +1131,7 @@ no auto logout after session expired, or auto renew token
 3. multi-lingual
 6. audit trails
 7. permissions
-7. update record need replace  updated,updatedby, line item also need headache
+7. update record need replace  updated,updatedBy, line item also need headache
 
 11.frontend add parent/child ui for invoices
 
@@ -1156,7 +1156,7 @@ x8. block uniquekey
 1. remain codes after regenerate (frontend)
 x    - pages
 x    - composable  (no need )
-x6. fill in data for tenant/org/branch created,updated,createdby,updatedby
+x6. fill in data for tenant/org/branch created,updated,createdBy,updatedBy
 14. force x-document-no/name is required
 
 
@@ -1234,7 +1234,7 @@ document level property
       {"status":"V","readOnly":true,"actions":["revert"]},
     ],
     
-    //all custom api, response, paras, operation put here. variable define at entrypoint or querypara
+    //all custom api, response, paras, operation put here. variable define at entryPoint or querypara
     "allApi":[{
       "action":"confirm",
       "entrypoint":":id/confirm",
@@ -1263,10 +1263,10 @@ document level property
     // frontend apply recalculation everytime current document change
     // backend auto apply formula during create and update
     "formula": [   //apply both frontend and backend, it different with concept on change, sequence of formula important
-      {"jsonpath":"$.subtotal","formula":"jslib.getDocumentSubTotal(@F{$.details})"},  //apply formula into single field
-      {"jsonpath":"$.tags","formula":"$F{$.tags}.map(item=>item.toUppeCase())"}, //apply upper case to all item in string array
-      {"jsonpath":"$.details","loop":"jslib.calculateLineTotal(item)"}, //apply multiple calculation of subtotal, tax, amtaftertax and etc, using loop
-      {"jsonpath":"$.total","formula":"@F{$.subtotal} + @F{$.taxamt}"}, //apply simple formula here
+      {"jsonPath":"$.subtotal","formula":"jslib.getDocumentSubTotal(@F{$.details})"},  //apply formula into single field
+      {"jsonPath":"$.tags","formula":"$F{$.tags}.map(item=>item.toUppeCase())"}, //apply upper case to all item in string array
+      {"jsonPath":"$.details","loop":"jslib.calculateLineTotal(item)"}, //apply multiple calculation of subtotal, tax, amtaftertax and etc, using loop
+      {"jsonPath":"$.total","formula":"@F{$.subtotal} + @F{$.taxamt}"}, //apply simple formula here
     ],    
     
     // auto generate fields

@@ -13,3 +13,4 @@ export const getAvatarLink = (email:string, size:number):string=>{
 }
 
 export const toLocalDate = (dateiso8601:string)=> new Date(String(dateiso8601)).toLocaleDateString()
+export const t = (txt:string):string=> camelCaseToWords(txt)

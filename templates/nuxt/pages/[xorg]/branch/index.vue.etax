@@ -20,8 +20,8 @@ const columns = [
   /* skip system columns doctype*/
   /* skip system columns created*/
   /* skip system columns updated*/
-  /* skip system columns createdby*/
-  /* skip system columns updatedby*/
+  /* skip system columns createdBy*/
+  /* skip system columns updatedBy*/
   /* skip system columns tenantId*/
   /* skip system columns orgId*/
 ];

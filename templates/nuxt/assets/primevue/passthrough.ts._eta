@@ -23,7 +23,8 @@ const CustomTailwind = usePassThrough(
             label:{class: 'text-sm'},
         },
         button:{root:{class: 'focus:outline-none transition duration-150 ease-in-out rounded px-8 py-2 m-1 border'}},
-        dialog:{root:{class:['border p-2']}},
+        dialog:{root:{class:['border p-2']}},        
+        // column:{ root:{class:'p-0'},bodyCell:{class:'p-0'}},
         sidebar:{
             root:{class:'w-1/2 bg-white border p-2 h-full'}
         },

@@ -5,11 +5,11 @@ export const permission:SchemaType ={
     "x-simpleapp-config":{
         documentType:'perm',
         documentName:'permission',        
-        isolationType:IsolationType.tenant,
+        isolationType:IsolationType.org,
         additionalApis:[{
             action:"listUser",
-            entrypoint:"listuser",
-            requiredrole:["SuperAdmin"],
+            entryPoint:"listuser",
+            requiredRole:["SuperAdmin"],
             method:RESTMethods.get,
             execute:"listUser",
             description:"Get current permissionlist lookup user info"
@@ -19,8 +19,8 @@ export const permission:SchemaType ={
         _id:{type:'string'},
         created:{type:'string'},
         updated:{type:'string'},
-        createdby:{type:'string'},
-        updatedby:{type:'string'},
+        createdBy:{type:'string'},
+        updatedBy:{type:'string'},
         tenantId: {type:'integer',default:1,minimum:0},
         orgId: {type:'integer',default:1,minimum:0 },
         branchId: {type:'integer',default:1,minimum:0 },

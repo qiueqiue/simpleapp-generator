@@ -44,7 +44,7 @@ export const getMenus =() :MenuData[]=>{
     // if(m.label)
    
     if(getUserStore().haveAccess(keyword)){
-      const m:MenuData = {label: keyword, url:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
+      const m:MenuData = {label: t(keyword), url:`/${xorg}/${keyword}`, isolationType:allmenus[i].isolationType}
       allowmenus.push(m)
     }     
   }

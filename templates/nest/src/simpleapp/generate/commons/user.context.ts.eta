@@ -34,6 +34,8 @@ export class UserContext {
   protected xOrg: string = '';
   protected tenantId: number = 0;
   protected orgId: number = 0;
+  protected orgRecordId:string = ''
+  protected branchRecordId:string = ''
   protected branchId: number = 0;
   protected ssoACL: any = {};
   protected token: string = '';
@@ -157,14 +159,18 @@ export class UserContext {
     if(users && users.length>0){
       const userinfo = users[0]
 
-
+      console.log(userinfo)
       if(this.tenantId>0){
         const myperm=userinfo.permissions[0]
+        
         if(myperm && myperm.group){
           userinfo.group = myperm.group                    
           userinfo.roles = rolegroups[userinfo.group]()
+          
+          userinfo.branchRecordId = myperm.currentbranch[0].branchRecordId
           userinfo.branchCode = myperm.currentbranch[0].branchCode
           userinfo.branchName = myperm.currentbranch[0].branchName          
+          userinfo.orgRecordId = myperm.currentorg[0]._id
           userinfo.orgCode = myperm.currentorg[0].orgCode
           userinfo.orgName = myperm.currentorg[0].orgName
           
@@ -181,11 +187,11 @@ export class UserContext {
    
 
       //update last activtity dont too frequent
-      if(!dblastactivity || currentitme - lastvisit > 5000 ){         
-        const newusermodel = await this.usermodel.findById(userinfo._id)      
-        newusermodel.lastActivity= this.lastActivity        
-        const result = await newusermodel.save()
-      }
+      //if(!dblastactivity || currentitme - lastvisit > 5000 ){         
+      //  const newusermodel = await this.usermodel.findById(userinfo._id)      
+      //  newusermodel.lastActivity= this.lastActivity        
+      //  const result = await newusermodel.save()
+      //}
       
       // const result =  await this.usermodel.findOneAndUpdate({_id: userinfo._id},{lastActivity: new Date().toISOString})
       return userinfo  
@@ -217,6 +223,8 @@ export class UserContext {
       this.branchName = userinfo['branchName'] ?? ''
       this.orgCode = userinfo['orgCode'] ?? ''
       this.orgName = userinfo['orgName'] ?? ''
+      this.orgRecordId = userinfo['orgRecordId'] ?? ''
+      this.branchRecordId = userinfo['branchRecordId'] ?? ''
       this.group = userinfo['group'] ?? ''
       this.roles = userinfo['roles'] ?? [Role.Everyone,Role.User]
     }else{
@@ -271,8 +279,8 @@ export class UserContext {
       tenantId: u.tenantId,
       orgId: u.orgId,
       branchId: u.branchId,
-      createdby: u.uid,
-      updatedby: u.uid,
+      createdBy: u.uid,
+      updatedBy: u.uid,
       created: new Date().toISOString(),
       updated: new Date().toISOString()
     };
@@ -280,7 +288,7 @@ export class UserContext {
   getUpdateFilter = () => {
     const u = this;
     return {
-      updatedby: u.uid,
+      updatedBy: u.uid,
       updated: new Date().toISOString()
     };
   };  
@@ -312,6 +320,8 @@ export class UserContext {
       sessionId:this.sessionId,
       tenantId: this.getTenantId(),
       orgId: this.getOrgId(),
+      orgRecordId: this.orgRecordId ,
+      branchRecordId: this.branchRecordId,
       branchId: this.getBranchId(),
       branchCode: this.branchCode,
       branchName: this.branchName,
@@ -386,7 +396,7 @@ export class UserContext {
     // console.log("find invitation:",res)
     if(!res.uid){
       res.uid = this.getUid()
-      res.fullname = this.fullname
+      res.fullName = this.fullname
       res.active = true
       
       if(decision=='accept'){
