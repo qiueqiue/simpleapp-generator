@@ -6,7 +6,7 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import Crud from './crud.vue'
+import Crud from './new.vue'
 </script>
 <template>
     <Crud/>

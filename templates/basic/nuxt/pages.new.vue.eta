@@ -10,7 +10,7 @@
  import ConfirmPopup from 'primevue/confirmpopup';
  import { useConfirm } from "primevue/useconfirm";
  const confirm = useConfirm();
- 
+ const isReadOnly =ref(true)
  const {$<%= it.typename %>Doc,$event } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()
   const data = doc.getReactiveData();
@@ -80,8 +80,13 @@ if(id){
 
 </script>
 <template>    
-    <SimpleAppForm #default="o" :document="doc">
-    <div class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
+    <SimpleAppForm #default="o" :document="doc" :readonly="isReadOnly">
+        <div v-if="isReadOnly" class="w-full">
+            <Button
+                class="bg-primary-600 hover:bg-primary-400" @click="isReadOnly=false"
+                type="button" >Edit</Button>
+        </div>
+        <div v-else class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
               <Button class="" :disabled="disabled" @click="newData" type="button" v-if="canPerform(doc.getDocName(),'create')">New</Button>
               <Button class="bg-primary-600 hover:bg-primary-400 text-white" :disabled="disabled" @click="createData" type="button" v-if="canPerform(doc.getDocName(),'create') && doc.isNew()">Create</Button>
               <Button class="bg-primary-600 hover:bg-primary-400 text-white" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(doc.getDocName(),'update') && !doc.isNew()">Update</Button>

@@ -52,11 +52,11 @@ const exitRecord = ()=>{
     }
 
 watch(()=> useRoute().fullPath ,(newvalue,oldvalue)=>{
-  visible.value =  useRoute().params.id ? true : false
+  visible.value = useRoute().params.id || useRoute().fullPath.includes("/new") ? true : false;
 })
 
 onNuxtReady(()=>{
-  visible.value = useRoute().params.id ? true : false;
+  visible.value = useRoute().params.id ||  useRoute().fullPath.includes('/new') ? true : false;  
 })
 </script>
 <template>
