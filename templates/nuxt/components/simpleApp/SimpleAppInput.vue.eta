@@ -1,0 +1,288 @@
+<template>
+    <SimpleAppFieldContainer :hidelabel="hidelabel" v-model="modelValue" 
+                :label="label" :description="description" 
+                :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">        
+        <!-- binary input -->
+        <component :is="inputComponent" :readonly="isReadonly" :pt="pt"
+                v-if="[SimpleAppInputType.checkbox,SimpleAppInputType.switch ].includes(inputType)" 
+                :inputId="slotprops.uuid" :path="setting.instancepath"
+                v-model="modelValue" :binary="true"/>
+
+        <!-- date component -->        
+        <component :is="inputComponent" type="date" :pt="pt" 
+            v-else-if="inputType == SimpleAppInputType.date"
+            :inputId="slotprops.uuid" :path="setting.instancepath"
+            v-model="datevalue" @update:modelValue="updateDate" :readonly="isReadonly"/>
+        <!-- calendar component -->        
+        <component :is="inputComponent" type="date" :pt="pt" class="flex flex-col"
+            v-else-if="SimpleAppInputType.calendar==inputType"
+            :inputId="slotprops.uuid" :path="setting.instancepath"
+            v-model="datevalue" @update:modelValue="updateDate" :readonly="isReadonly"/>
+        
+        <!-- select/list component -->                
+        <component :is="inputComponent" v-model="modelValue"  :pt="pt"
+            v-else-if="[SimpleAppInputType.select,SimpleAppInputType.list].includes(inputType)"
+            :inputId="slotprops.uuid" :path="setting.instancepath"  
+            :readonly="isReadonly"
+                :options="getListOptions()" optionLabel="label" optionValue="value"/>
+        
+        <!-- radio component -->                
+        <div v-else-if="inputType == SimpleAppInputType.radio" >
+            <div v-for="(item,index) in getListOptions()">
+                <component :pt="pt" :is="inputComponent" v-model="modelValue" 
+                        :inputId="setting.key+'-'+index" name="smaple" :value="item.value"
+                        :readonly="isReadonly"
+                        />  {{ ' ' }}
+                <label :for="setting.key+'-'+index"> {{ item.label  }} </label>
+            </div>            
+        </div>
+        
+        <!-- autocomplete -->
+        <AutoComplete :is="inputComponent" v-model="modelValue"  
+            v-else-if="inputType==SimpleAppInputType.autocomplete"  
+                forceSelection optionLabel="label" :dropdown="true"                                
+                @item-select="pickAutoComplete"
+                @complete="getListFromAutocompleteApi"          
+                
+                :pt="{
+                    root:{class:'rounded-lg flex flex-row'},
+                    input:{class:'w-full font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-blue-900/40  rounded-lg  rounded-tr-none rounded-br-none transition-colors duration-200 appearance-none hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)]  text-base'},
+                    loadingIcon:{class:'hidden'},
+                    dropdownbutton: {
+                        root:' bg-primary-600 hover:bg-primary-400 text-white rounded flex flex-row  p-3 rounded-tl-none rounded-bl-none '
+                    }
+                }"
+                :disabled="isReadonly"
+                :suggestions="list"                                
+                @blur="onBlurAutocomplete"
+                :inputId="slotprops.uuid" :path="setting.instancepath"
+                :readonly="isReadonly"
+                 />
+                 
+        <!--  document no input-->
+        <SimpleAppDocumentNo v-else-if="inputType == SimpleAppInputType.documentno" 
+            :setting="setting" v-model="modelValue" :inputId="slotprops.uuid"
+            :readonly="isReadonly" @update:docNoFormat="triggerDocNoFormatChange"            
+             :path="setting.instancepath"/>
+           
+        
+        <!-- password -->
+        <component :is="inputComponent"
+                v-else-if="inputType == SimpleAppInputType.password" 
+                :type="type" v-model="modelValue" :pt="pt" 
+                :readonly="isReadonly" class="flex flex-col"
+                :inputId="slotprops.uuid" :path="setting.instancepath"/>
+
+        <!-- rating -->
+        <Rating v-else-if="inputType == SimpleAppInputType.rating" 
+         :is="inputComponent" :type="type" v-model="modelValue" :pt="pt" 
+                :readonly="isReadonly"                 
+                :inputId="slotprops.uuid" :path="setting.instancepath"/>
+            
+        <!-- chip -->
+        <component  v-else-if="inputType == SimpleAppInputType.chip" 
+         :is="inputComponent" :type="type" v-model="modelValue"
+                 :pt="pt" 
+                :disabled="isReadonly" 
+                
+                
+                :inputId="slotprops.uuid" :path="setting.instancepath"/>
+        <!-- simple component -->        
+        <component v-else :is="inputComponent" :type="type" v-model="modelValue" :pt="pt" 
+                :readonly="isReadonly" 
+                class="w-full flex flex-col"
+                :inputId="slotprops.uuid" :path="setting.instancepath"/>
+            
+        
+        <!-- component require special treatment -->
+        
+    </SimpleAppFieldContainer>    
+</template>
+
+<script lang="ts" setup>
+import { isNull, pick } from 'lodash';
+import {autocompletetype} from '~/types'
+import moment from 'moment'
+import AutoComplete from 'primevue/autocomplete';
+import Calendar from 'primevue/calendar';
+import Checkbox from 'primevue/checkbox';
+import Chips from 'primevue/chips';
+import SimpleAppDocumentNo from './SimpleAppDocumentNo.vue';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import InputSwitch from 'primevue/inputswitch';
+import InputText from 'primevue/inputtext';
+import Listbox from 'primevue/listbox';
+import MultiSelect from 'primevue/multiselect';
+import Password from 'primevue/password';
+import RadioButton from 'primevue/radiobutton';
+import Rating from 'primevue/rating';
+import Slider from 'primevue/slider';
+import Textarea from 'primevue/textarea';
+import {SimpleAppInputType} from '~/types'
+
+let inputComponent :Component
+const emptyautocomplete =():autocompletetype=> ({_id:'',label:''})
+const autocompleteitem = ref<autocompletetype>(emptyautocomplete())
+const datevalue = ref('')
+const modelValue = defineModel()
+const list = ref([])
+const props = withDefaults( defineProps<{
+    inputType:SimpleAppInputType,
+    label?:string,
+    description?:string,
+    error?:string,
+    setting:any,
+    type?:string,
+    instancepath?:string,
+    hidelabel?: boolean
+    readonly?: boolean
+    pt?:any
+}>(),{type:'text'})
+
+
+switch(props.inputType){
+    case SimpleAppInputType.text:
+        inputComponent = InputText
+        break;
+    case SimpleAppInputType.textarea:
+        inputComponent = Textarea
+        break;
+    case SimpleAppInputType.number:
+        inputComponent = InputNumber
+    break   
+    case SimpleAppInputType.date:
+        inputComponent = InputText
+    break;
+    case SimpleAppInputType.calendar:
+        inputComponent = Calendar
+        break;
+    case SimpleAppInputType.autocomplete: 
+        inputComponent = AutoComplete
+        break;
+    case SimpleAppInputType.autocompletemultiple: //*
+        inputComponent = AutoComplete
+        break;
+    case SimpleAppInputType.selectmultiple: //*
+        inputComponent = MultiSelect
+        break;
+    case SimpleAppInputType.listmultiple: //*
+        break;    
+    case SimpleAppInputType.radio: //*
+        inputComponent = RadioButton
+        break;
+    case SimpleAppInputType.select: //*
+        inputComponent = Dropdown
+        break;
+    case SimpleAppInputType.list: //*
+        inputComponent = Listbox
+        break;
+    case SimpleAppInputType.chip: //*
+        inputComponent = Chips
+        break;
+    case SimpleAppInputType.checkbox:
+        inputComponent = Checkbox
+        break;
+    case SimpleAppInputType.switch:
+        inputComponent = InputSwitch
+        break;    
+    case SimpleAppInputType.documentno:  //*
+        break;
+    case SimpleAppInputType.password: 
+        inputComponent = Password
+        break;    
+    case SimpleAppInputType.rating:
+        inputComponent = Rating
+        break;
+    case SimpleAppInputType.slider:
+        inputComponent = Slider
+        break;
+
+}
+const isReadonly = computed(()=>{
+    if(props.readonly){
+        return props.readonly
+    }else if(props.setting.readonly){
+        return props.setting.readonly
+    }else{
+        return false
+    }
+})
+
+const updateDate = (value:any)=>{
+    modelValue.value = moment(value).toISOString()    
+}
+
+
+const getListOptions = () =>{
+    
+    const options = []
+    if(props.setting.fieldsetting.enum){
+        for(let i=0;i<props.setting.fieldsetting.enum.length;i++){
+            const v = props.setting.fieldsetting.enum[i]
+            options.push({value:v, label: camelCaseToWords(v)})
+        }
+
+
+    }
+    return options
+}
+
+
+const emits = defineEmits(['change','update:modelValue','update:docNoFormat'])
+
+watch(modelValue ,(newvalue:any)=>{
+
+    if([SimpleAppInputType.date,SimpleAppInputType.calendar].includes(props.inputType)){
+        datevalue.value = moment(modelValue.value as string ).format('YYYY-MM-DD')
+    }else if(props.inputType==SimpleAppInputType.autocomplete){            
+            modelValue.value=autocompleteitem.value                
+    }
+
+    emits('change',modelValue.value)
+    emits('update:modelValue',modelValue.value)    
+})
+
+
+/************ start autocomplete only ***************/
+const onBlurAutocomplete = ()=>{
+    
+    if(  autocompleteitem.value === null){
+        autocompleteitem.value = emptyautocomplete()
+    }
+    if(isNull(modelValue.value )){
+        modelValue.value = autocompleteitem.value
+    }
+    else if(typeof modelValue.value =='object'){
+     
+    }else{
+        modelValue.value = autocompleteitem.value
+    }
+
+}
+const getListFromAutocompleteApi =  (event:any)=>{    
+  const keyword = event.query??''  
+  //props.setting.document.getDocType()
+  const targetDocument = props.setting.fieldsetting['x-foreignkey']
+  getDocumentApi(targetDocument).autoComplete(keyword).then((res:any)=>{
+    list.value = res.data 
+  })
+}
+const pickAutoComplete = (event:any)=>{
+  if(typeof event.value.query == 'undefined'){      
+      modelValue.value=event.value
+      autocompleteitem.value = event.value      
+  }
+}
+/************ end autocomplete only ***************/
+
+
+
+
+
+const triggerDocNoFormatChange=(formatdata:any)=>{
+    emits('update:docNoFormat',formatdata)
+}
+</script>
+<style scoped>
+</style>

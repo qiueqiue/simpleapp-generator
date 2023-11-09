@@ -148,8 +148,8 @@ watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
     <div>
 
         <HeaderBar />
-        <Invitation/>      
-         <DocumentDatatable :value="recordlist" :columns="tablecolumns" :title="String(useRoute().meta.name)"> 
+        <UserInvitation/>      
+         <TableDocuments :value="recordlist" :columns="tablecolumns" :title="String(useRoute().meta.name)"> 
             <template #toolbar>
                 <div class="w-full text-left">
                     <slot>
@@ -162,10 +162,10 @@ watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
             </template>
             <Column header=" ">
                 <template #body="{index,data}">                    
-                        <Button @click="goTo(String(useRoute().meta.documentName),data._id)" icon="pi pi-pencil" class="bg-primary-600 hover:bg-primary-400 text-white" >Edit</Button>                    
+                        <Button @click="goTo(String(useRoute().meta.documentName),data._id)" icon="pi pi-pencil" class="btn btn-primary" >Edit</Button>                    
                 </template>
             </Column>
-        </DocumentDatatable>  
+        </TableDocuments>  
         <!--      
         <DebugDocumentData v-model="data"/>
         -->

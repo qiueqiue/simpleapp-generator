@@ -1,68 +1,56 @@
 
 <template>
-    <FieldContainer :hidelabel="hidelabel" v-model="modelValue" :label="label" :description="description"  :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">
-        <div class="p-inputgroup ">
-            <InputText class="simpleapp-inputfield" 
-                :inputId="slotprops.uuid"
+    
+        <div class="p-inputgroup w-full flex flex-row">
+            <InputText class="flex-1 rounded-tr-none rounded-br-none" 
+                :readonly="readonly"
                 v-model="modelValue"    
                 :placeholder="placeholder"
-                :path="setting.instancepath"
-                :pt="{input:{class:'text-right w-full'}}"                          
             />
             <span class="p-inputgroup-addon p p-0">
-                <Button class="pi pi-angle-down"  type="button" @click="toggle"></Button>
-
-                <OverlayPanel ref="op">                    
-                    <ul>                      
-                        <li v-for="docno in docFormatlist" class="hover-list-primary " >
-                            <a class="flex-row p-2 mt-4" @click="chooseFormat(docno)">
-                                <span class="pi pi-hashtag mr-2"></span>
-                                <span class="">{{docno.docNoFormatName}}</span>
-                                <span class="ml-2 text text-green-600">{{docno.sample}}</span>
-                            </a>
-                        </li>                    
-                    </ul>
+                <button  type="button" @click="toggle" 
+                    :disabled="readonly"
+                    class="border rounded-tl-none rounded-bl-none btn btn-primary -ml-1 h-full  p-3 rounded-r-md">
+                    <i class="pi pi-angle-down"></i>
+                </button>
+                <OverlayPanel ref="op" class="p-4">           
+                    <div class="m-4">
+                        <ul>                      
+                            <li v-for="docno in docFormatlist" class="hover-list-primary p-2" >
+                                <a class="flex-row p-2 mt-4" @click="chooseFormat(docno)">
+                                    <span class="pi pi-hashtag mr-2"></span>
+                                    <span class="">{{docno.docNoFormatName}}</span>
+                                    <span class="ml-2 text text-green-600">{{docno.sample}}</span>
+                                </a>
+                            </li>                    
+                        </ul>
+                    </div>         
                 </OverlayPanel>
             </span>
             <!-- {{ Object.getOwnPropertyNames(setting) }} -->
         </div>
-    </FieldContainer>
+    
 </template>
 <script lang="ts" setup>
 import {ForeignKey} from '~/types'
 import OverlayPanel from 'primevue/overlaypanel';
-import {computed,watch,ref} from 'vue'
 import InputText from 'primevue/inputtext';
-import FieldContainer from './SimpleAppFieldContainer.vue'
 import {DocNoFormat} from "~/types"
-const selectedformat = ref()
+const props = defineProps<{
+    setting:any    
+    readonly?:boolean
+}>()
 const op = ref();
 const placeholder = ref('')
 const docFormatlist = ref()
 const modelValue = defineModel<string>()
-const docNoFormat = defineModel<ForeignKey>('docNoFormat')
-// const emit = defineEmits(['update:docNoFormat'])
+const docNoFormat = props.setting.document.getReactiveData().value.docNoFormat
+const emits = defineEmits(['update:docNoFormat'])
 
-const props = withDefaults(defineProps<{
-    // docNoFormat:object,
-    // docFormatlist?:DocNoFormat[]
-    label?:string,
-    description?:string,
-    setting:any
-    error?:string,
-    instancepath?:string,
-    hidelabel?:boolean, 
-    
-}>(),{
-    hidelabel:false
-})
 const documenttype = props.setting.document.doctype
 
-
 const toggle = async (event:any) => {
-    op.value.toggle(event);
-    
-        
+    op.value.toggle(event);            
 }
 
 const chooseFormat =  (item:any) =>{
@@ -70,6 +58,7 @@ const chooseFormat =  (item:any) =>{
     const f = item
     docNoFormat.value = { _id : f._id, label : f.docNoFormatName}
     op.value.toggle();
+    emits('update:docNoFormat',item)
 }
 
 const loadDocFormats = async () =>{
@@ -77,11 +66,9 @@ const loadDocFormats = async () =>{
     if(docFormatlist.value.length>0){
         const f = docFormatlist.value[0]
         docNoFormat.value = { _id : f._id, label : f.docNoFormatName}
-        placeholder.value = docFormatlist.value[0].sample
-        
+        placeholder.value = docFormatlist.value[0].sample        
     }
 }
-
 
 onMounted(()=>{
     loadDocFormats()

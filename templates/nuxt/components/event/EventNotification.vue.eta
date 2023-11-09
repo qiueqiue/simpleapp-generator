@@ -17,10 +17,10 @@ const toast = useToast();
 const { $event,$listen } = useNuxtApp()
 // WildcardHandler<Record<EventType, unknown>>
 let resmsg:ToastMessageOptions = {} as ToastMessageOptions
-
+const eventdata=ref()
 $listen("Notification",(data:Notification)=>{
     // $listen('*',(type:key of EventType,data:any)=>{ 
-    
+        eventdata.value= data
     const type:NotificationStatus = data.status
     // let arrupdate = type.split(':')
     // let eventdata = data
@@ -35,10 +35,10 @@ $listen("Notification",(data:Notification)=>{
         case NotificationStatus.success:
             duration = 3000
         break;
-        case NotificationStatus.danger:
+        case NotificationStatus.error:
             duration = 0
         break;
-        case NotificationStatus.warning:
+        case NotificationStatus.warn:
             duration = 5000
         break;
         case NotificationStatus.info:
@@ -95,6 +95,7 @@ const getFieldName = (path:string)=>{
 <template>
     <Toast group="default" :pt="{}">
         <template #message="p">
+            
             <div class="bg-gray-200 dark:bg-gray-900 h-full w-full border">                
                 <div class=" flex content content-end w-full">
                     <div role="alert" class="w-full bg-white dark:bg-gray-800 shadow-lg rounded flex flex-row  transition duration-150 ease-in-out" id="notification">
@@ -104,17 +105,20 @@ const getFieldName = (path:string)=>{
                             </svg>
                         </div>
                         <div class="flex flex-col justify-center  pl-4 xl:pl-1 w-96 pt-4 sm:pb-4 pb-2">
-                            <p class="text-lg text-gray-800 dark:text-gray-100 font-semibold pb-1">{{ p.message.summary }}</p>
-                            
+                            <p class="text-lg text-gray-800 dark:text-gray-100 font-semibold pb-1">{{ p.message.summary }}</p>              
                             <div v-if="p.message.detail">                            
-                                <p v-if="Array.isArray(p.message.detail)" 
-                                    v-for="item in p.message.detail"
+                                <p v-if="Array.isArray(p.message.detail)"  v-for="item in p.message.detail"
                                     class="text-sm text-gray-600 dark:text-gray-400 font-normal">
                                     <span v-if="item.instancePath">{{ item.instancePath }}&nbsp;</span>
                                     <span v-if="item.message"> {{ item.message }}&nbsp;</span>
                                     
                                 </p>
-                                <p v-else-if="typeof p.message.detail == 'string'" class="text-sm text-gray-600 dark:text-gray-400 font-normal">{{ p.message.detail }}</p>
+                                <p v-else-if="typeof p.message.detail == 'string'" class="text-sm text-gray-600 dark:text-gray-400 font-normal">
+                                    {{ p.message.detail }}
+                                </p>
+                                <p v-else-if="typeof p.message.detail == 'object'" class="text-sm text-gray-600 dark:text-gray-400 font-normal">
+                                    {{ p.message.detail.message }}
+                                </p>
                                 <p v-else></p>
                             </div>
                         </div>

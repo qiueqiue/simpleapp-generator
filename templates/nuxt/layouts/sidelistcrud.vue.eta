@@ -26,7 +26,7 @@ const selectItem=(item:any)=>{
     <div>
 
         <HeaderBar />
-        <Invitation/>
+        <UserInvitation/>
         <div class="grid grid-cols-4">
             <div class="col col-span-1  ">
                 <ListView :list="primarylist" @clickitem="selectItem"></ListView>

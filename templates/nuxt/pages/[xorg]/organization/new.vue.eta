@@ -6,6 +6,7 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
+ import { SimpleAppInputType } from "~/types";
 import ConfirmPopup from "primevue/confirmpopup";
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -15,7 +16,7 @@ const orgdoc = $OrganizationDoc();
 const doc = $BranchDoc();
 const data = doc.getReactiveData();
 const bid = ref(String(useRoute().params.bid ?? ""));
-const isReadOnly=ref(true)
+const isReadOnly = ref(true);
 const fetchRecord = async (id: string) => {
   await doc.getById(id);
 };
@@ -56,7 +57,7 @@ const deleteData = (event: Event) => {
       // disabled.value=true
       doc.delete(data.value._id ?? "").then((res) => {
         refresh();
-        
+
         goTo(doc.getDocName());
       });
     },
@@ -68,16 +69,16 @@ const deleteData = (event: Event) => {
 
 const refresh = () => {
   $event("RefreshDocumentList", { documentName: doc.getDocName() });
-  isReadOnly.value=true
+  isReadOnly.value = true;
 };
 
-if (bid.value) {    
+if (bid.value) {
   fetchRecord(bid.value);
 } else {
   // const orgRecordid = ref(String(useRoute().params.id));
   // const orgdata = (await orgdoc.getById(orgRecordid.value)).data;
   doc.setNew();
-  isReadOnly.value=false
+  isReadOnly.value = false;
   data.value.tenantId = getUserProfile().tenantId;
   data.value.orgId = getUserProfile().orgId;
   data.value.organization._id = getUserProfile().orgRecordId;
@@ -91,7 +92,7 @@ if (bid.value) {
     <SimpleAppForm :document="doc" #default="o" :readonly="isReadOnly">
       <div v-if="!isReadOnly" class="col-span-4 text-left gap-4">
         <Button
-          class="bg-primary-600 hover:bg-primary-400 text-white"
+          class="btn btn-primary"
           :isReadOnly="isReadOnly"
           @click="createData"
           type="button"
@@ -99,43 +100,48 @@ if (bid.value) {
           >Create</Button
         >
         <Button
-          class="bg-primary-600 hover:bg-primary-400 text-white"
-          
+          class="btn btn-primary"
           @click="updateData"
           type="button"
           v-if="canPerform(doc.getDocName(), 'update') && !doc.isNew()"
           >Update</Button
         >
         <Button
-          class="bg-danger-600 hover:bg-danger-400 text-white"            
+          class="btn btn-danger"
           @click="deleteData($event)"
           type="button"
           v-if="canPerform(doc.getDocName(), 'delete') && !doc.isNew()"
           >Delete</Button
         >
-        
+
         <ConfirmPopup></ConfirmPopup>
       </div>
       <div v-else class="col-span-4 text-left gap-4">
-        <Button 
-                class="bg-primary-600 hover:bg-primary-400 text-white"
-                @click="isReadOnly=false" type="button" >Edit</Button
-              > 
+        <Button
+          class="btn btn-primary"
+          @click="isReadOnly = false"
+          type="button"
+          >Edit</Button
+        >
       </div>
 
-      <SimpleAppText
+      <SimpleAppInput
+        :input-type="SimpleAppInputType.text"
         v-model="data.branchCode"
         :setting="o.getField('#/properties/branchCode')"
       />
-      <SimpleAppText
+      <SimpleAppInput
+        :input-type="SimpleAppInputType.text"
         v-model="data.branchName"
         :setting="o.getField('#/properties/branchName')"
       />
-      <SimpleAppCheckbox
+      <SimpleAppInput
+        :input-type="SimpleAppInputType.checkbox"
         v-model="data.active"
         :setting="o.getField('#/properties/active')"
       />
-      <SimpleAppTextarea
+      <SimpleAppInput
+        :input-type="SimpleAppInputType.textarea"
         v-model="data.description"
         :setting="o.getField('#/properties/description')"
       />

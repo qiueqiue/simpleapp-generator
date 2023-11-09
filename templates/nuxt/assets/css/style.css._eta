@@ -2,6 +2,34 @@
     @apply  bg-primary-100 block
 }
 
-[readonly]{
+
+[data-pc-group-section=pagebutton]{
+    @apply p-2 m-0 rounded-none border
+}
+[data-pc-section=pagebutton]{
+    @apply p-3 m-0 border
+}
+.btn {
+    @apply font-medium
+}
+
+.btn-primary {
+    @apply bg-primary-600 hover:bg-primary-400 text-white
+}
+.btn-secondary {
+    @apply bg-secondary-600 hover:bg-secondary-400 text-white
+}
+.btn-danger {
+    @apply bg-danger-600 hover:bg-danger-400 text-white
+}
+.btn-warn {
+    @apply bg-warning-600 hover:bg-warning-400 text-white
+}
+
+[disabled] ,[readonly]{
     @apply bg-gray-300
+}
+
+[aria-selected=true]{
+    @apply bg-primary-100
 }

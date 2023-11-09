@@ -61,7 +61,7 @@ onNuxtReady(()=>{
 </script>
 <template>
    <div>
-    <Button class="bg-primary-600 hover:bg-primary-400 text-white"  v-if="canPerform(String(useRoute().meta.name),'create')" @click="newData">New</Button>    
+    <Button class="btn btn-primary"  v-if="canPerform(String(useRoute().meta.name),'create')" @click="newData">New</Button>    
     <Dialog v-model:visible="visible"
                 :pt="{ root: { class: 'w-full h-full bg-white' } , headertitle:{class:'m-2 ml-6 text-2xl font-bold'}}"
                 modal :header="t(doc.getDocName())" 

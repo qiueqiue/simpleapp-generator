@@ -1,0 +1,39 @@
+export enum SimpleAppInputType  {
+    'text'='text',
+    'textarea'='textarea',
+
+    'date'='date',
+    'calendar'='calendar',
+
+
+    'autocomplete'='autocomplete',
+    'autocompletemultiple'='autocompletemultiple',
+
+    'selectmultiple'='selectmultiple',
+    'listmultiple'='listmultiple',
+
+    'radio'='radio',
+    'select'='select',
+    'list'='list',
+
+    'chip'='chip', 
+
+    'checkbox'='checkbox',
+    'switch'='switch',
+    
+    
+    'documentno'='documentno',
+    'password'='password',
+
+    'number'='number',
+    'rating'='rating',
+    'slider'='slider',
+
+}
+
+
+export type autocompletetype={
+    _id:string
+    label:string
+    [key:string]:any
+}

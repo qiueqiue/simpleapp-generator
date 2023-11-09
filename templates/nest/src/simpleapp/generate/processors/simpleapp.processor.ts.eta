@@ -166,7 +166,6 @@ export class SimpleAppService<T extends { _id?: string }> {
 
       Object.assign(filterobj, this.getIsolationFilter(appuser));
       let projections = {
-        id: `\$_id`,
         label: `\$${this.documentIdentityLabel}`,
         code: `\$${this.documentIdentityCode}`,
       };

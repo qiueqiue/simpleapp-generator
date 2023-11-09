@@ -7,8 +7,7 @@ export const user:SchemaType ={
         documentName:'user',
         pageType:'crud',
         isolationType:IsolationType.tenant,
-        uniqueKey:'email',
-        uniqueKeys:[['tenantId','uid']],
+        uniqueKey:'email',        
         documentTitle:'fullname',
         requiredRoles:["SuperUser"],    
         additionalAutoCompleteFields:['uid']      

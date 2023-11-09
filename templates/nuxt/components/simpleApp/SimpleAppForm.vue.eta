@@ -5,10 +5,10 @@
     </form>
 </template>
 <script setup lang="ts" >
-import type {SimpleAppFieldSetting} from './type'    
-import { SimpleAppClient } from  '../simpleapp/generate/clients/SimpleAppClient'
+// import type {SimpleAppFieldSetting} from '/types'    
+import { SimpleAppClient } from  '~/simpleapp/generate/clients/SimpleAppClient'
 import type { JSONSchema7,JSONSchema7Definition } from 'json-schema';
-
+import _ from 'lodash'
     const props = defineProps<{
         title?:string,
         document: SimpleAppClient<any,any>
@@ -28,6 +28,7 @@ import type { JSONSchema7,JSONSchema7Definition } from 'json-schema';
         
         return {
             path: path,
+            key: _.last(path.split('/')),
             instancepath: getInstancePath(schema,path),
             fieldsetting: fieldsetting,
             modelObject: data,
@@ -37,7 +38,7 @@ import type { JSONSchema7,JSONSchema7Definition } from 'json-schema';
             isrequired: getIsRequired(schema,path),
             errors: props.document.getErrors(),
             readonly: props.readonly
-        } as SimpleAppFieldSetting
+        } //as SimpleAppFieldSetting
     }
 
     //    "schemaPath": "#/properties/email/format",

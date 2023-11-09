@@ -14,7 +14,8 @@ export default defineNuxtPlugin( async(nuxtApp) => {
 
 
     const useUserStore = defineStore('userstore', {
-        state: ()=>({        
+        state: ()=>({      
+          _id: ref(''),  
           sessionId:ref(''),
           tenantId:ref(0),
           orgId:ref(0),
@@ -54,6 +55,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
               if(!res){
                 return
               }
+              this._id = res.data._id
               this.sessionId = res.data.sessionId
               this.tenantId = res.data.tenantId              
               this.orgId = res.data.orgId
@@ -140,6 +142,7 @@ export default defineNuxtPlugin( async(nuxtApp) => {
           },
           getUserInfo(){
             return {
+              _id : this._id,
               sessionId : this.sessionId,
               tenantId : this.tenantId,
               orgId : this.orgId,

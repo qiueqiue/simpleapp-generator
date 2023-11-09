@@ -161,19 +161,21 @@ onMounted(() => {
         <TabPanel header="Invite">
           <div class="padding p-2">
             <form @submit.prevent="true" class="w-full">
-              <div class="p-inputgroup flex-1">
+              <div class="p-inputgroup flex flex-row ">
                 <InputText
+                class="flex-1"
                   type="email"
                   placeholder="email"
                   v-model="inviteemail"
                 />
-                <Button
-                  label="Search"
-                  class="hover:bg-primary-400 bg-primary-600 text-white"
-                  @click="invite"
-                >
-                  Invite
-                </Button>
+                <div class="p-inputgroup-addon p p-0">
+                  <button label="Search" 
+                  class="border rounded-tl-none rounded-bl-none btn btn-primary -ml-1 h-full  p-3 rounded-r-md"                  
+                  @click="invite">
+                    Invite
+                  </button>
+                </div>
+                
               </div>
             </form>
           </div>

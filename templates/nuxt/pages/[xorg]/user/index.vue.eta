@@ -7,39 +7,40 @@
       <template #content>
         <SimpleAppForm :document="userdoc" #default="o">
           <div class="flex flex-col gap-2">
-            <SimpleAppText
+            <SimpleAppInput
+              :input-type="SimpleAppInputType.text"
               autofocus
               :setting="o.getField('#/properties/fullName')"
               v-model="userdata.fullName"
             />
 
-            <SimpleAppText
-              autofocus
-              type="string"
+            <SimpleAppInput
+              :input-type="SimpleAppInputType.text"
+              type="email"
               :setting="o.getField('#/properties/email')"
               v-model="userdata.email"
             />
 
-            <SimpleAppCheckbox
-              autofocus
+            <SimpleAppInput
+            :input-type="SimpleAppInputType.checkbox"
               :setting="o.getField('#/properties/active')"
               v-model="userdata.active"
             />
-            <SimpleAppTextarea
-              autofocus
+            <SimpleAppInput
+            :input-type="SimpleAppInputType.textarea"
               :setting="o.getField('#/properties/description')"
               v-model="userdata.description"
             />
             <div>
               <Button
                 @click="saveUser"
-                class="text-white hover:bg-primary-400 bg-primary-600"
+                class="btn btn-primary"
                 >Save</Button
               >
               <Button
                 v-if="canPerform('user', 'delete')"
                 @click="deleteUser"
-                class="text-white hover:bg-danger-400 bg-danger-600"
+                class="btn btn-danger"
                 >Delete</Button
               >
             </div>
@@ -53,7 +54,7 @@
         <div class="relative w-full ...">
           <h1 class="font-bold">{{ permissiontitle }}</h1>
           <div class="absolute top-0 right-0 h-16 w-16 ...">
-            <ButtonPermissionInfo></ButtonPermissionInfo>
+            <UserButtonPermissionInfo></UserButtonPermissionInfo>
           </div>
         </div>
       </template>
@@ -64,31 +65,34 @@
           </div> -->
 
           <div class="">
-            <Card v-if="currentpermissions.length>0" v-for="o in orglist" class="m-2">
+            <Card
+              v-if="currentpermissions.length > 0"
+              v-for="o in orglist"
+              class="m-2"
+            >
               <template #title>{{ o.orgName }}</template>
-              <template #content>                
-                  <table class="w w-full">                  
-                    <tr v-for="(b, index) in branchlist">
-                      <td v-if="checkBranchInOrg(o, b)" class="text-center">
-                        {{ b.branchCode }}
-                      </td>
-                      <td
-                        v-if="checkBranchInOrg(o, b)"
-                        class="text-center flex flex-row"
-                      >
-                        <div>
-                           
-                          <SelectButton
-                            v-model="currentpermissions[index]['group']"  
-                            :options="grouplist"
-                            option-label="label"
-                            option-value="value"
-                            @change="applyPermission(currentpermissions[index])"
-                          ></SelectButton>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>                
+              <template #content>
+                <table class="w w-full">
+                  <tr v-for="(b, index) in branchlist">
+                    <td v-if="checkBranchInOrg(o, b)" class="text-center">
+                      {{ b.branchCode }}
+                    </td>
+                    <td
+                      v-if="checkBranchInOrg(o, b)"
+                      class="text-center flex flex-row"
+                    >
+                      <div>
+                        <SelectButton
+                          v-model="currentpermissions[index]['group']"
+                          :options="grouplist"
+                          option-label="label"
+                          option-value="value"
+                          @change="applyPermission(currentpermissions[index])"
+                        ></SelectButton>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
               </template>
             </Card>
           </div>
@@ -99,6 +103,7 @@
 </template>
 <script setup lang="ts">
 // import Card from "primevue/card";
+import {SimpleAppInputType} from "~/types"
 import { Permission, User } from "../../../simpleapp/generate/openapi/api";
 import _ from "lodash";
 import SelectButton from "primevue/selectbutton";

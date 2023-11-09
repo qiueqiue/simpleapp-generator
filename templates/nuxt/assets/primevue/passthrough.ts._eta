@@ -5,7 +5,7 @@ import Tailwind from "primevue/passthrough/tailwind";
 const CustomTailwind = usePassThrough(
     Tailwind,
     {
-        
+
         toast:{
             root:{ class:'w-1/3 '},
             message:{},
@@ -24,7 +24,13 @@ const CustomTailwind = usePassThrough(
         },
         button:{root:{class: 'focus:outline-none transition duration-150 ease-in-out rounded px-8 py-2 m-1 border'}},
         dialog:{root:{class:['border p-2']}},        
-        // column:{ root:{class:'p-0'},bodyCell:{class:'p-0'}},
+        autocomplete:{
+            input:{class:'m-0 font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-blue-900/40  rounded-lg  rounded-tr-none rounded-br-none transition-colors duration-200 appearance-none hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] p-3 text-base flex-1'},
+            loadingIcon:{class:'animate-spin mt-4 -ml-6 mr-2'},
+            dropdownbutton: {
+                root:' bg-primary-600 hover:bg-primary-400 text-white rounded flex flex-row  p-3  -ml-6 rounded-tl-none rounded-bl-none '
+            }
+        },
         sidebar:{
             root:{class:'w-1/2 bg-white border p-2 h-full'}
         },

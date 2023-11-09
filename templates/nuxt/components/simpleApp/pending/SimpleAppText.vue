@@ -1,8 +1,6 @@
 
 <template>
     <FieldContainer :hidelabel="hidelabel" v-model="modelValue" :label="label" :description="description" :setting="setting" :instancepath="instancepath" :error="error" #default="slotprops">        
-       
-        
         <InputText v-if="slotprops.error"
             class="simpleapp-inputfield simpleapp-invalid-input"
             :id="slotprops.uuid"

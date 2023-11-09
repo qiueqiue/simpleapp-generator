@@ -97,7 +97,7 @@ if (bid.value) {
                 >New</Button
               > -->
         <Button
-          class="bg-primary-600 hover:bg-primary-400 text-white"
+          class="btn btn-primary"
           :disabled="disabled"
           @click="createData"
           type="button"
@@ -105,7 +105,7 @@ if (bid.value) {
           >Create</Button
         >
         <Button
-          class="bg-primary-600 hover:bg-primary-400 text-white"
+          class="btn btn-primary"
           :disabled="disabled"
           @click="updateData"
           type="button"
@@ -113,7 +113,7 @@ if (bid.value) {
           >Update</Button
         >
         <Button
-          class="bg-danger-600 hover:bg-danger-400 text-white"
+          class="btn btn-danger"
           :disabled="disabled"
           @click="deleteData($event)"
           type="button"

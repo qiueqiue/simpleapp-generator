@@ -8,7 +8,7 @@
         </div>
     </template>
     <slot>
-        
+        <!-- <template> -->
             
             <Column class="text-center" header="undefine columns">
                 <template #body>
@@ -18,11 +18,9 @@
             </Column> 
       
         
+            <!-- </template> -->
             
-            
-    </slot>
-            
-
+    </slot>            
     </DataTable>
 </template>
 <script setup lang="ts">
@@ -30,11 +28,13 @@
 import {ref} from 'vue'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-
+import {camelCaseToWords} from './helper'
+import type {InputTableColumn} from './type'
 const props = defineProps<{
     // columns:InputTableColumn[],
     setting:any,
-    getField:Function,    
+    getField:Function,
+    getAutocomplete:Function, readonly?:boolean
 }>()
 
 
@@ -42,6 +42,33 @@ const props = defineProps<{
 const modelValue = defineModel<any[]>()
     
     
+const fieldsetting = props.setting.fieldsetting
+
+const readonly = ref(false)
+if(props.setting.readonly!==undefined ){
+    readonly.value = props.setting.readonly
+}
+if(props.readonly!==undefined ){
+    readonly.value = props.readonly
+}
+// const columns = ref(props.columns)
+// for(let i=0;i<props.columns.length;i++){
+//     if(columns.value[i].title ===undefined){
+//         columns.value[i].title=columns.value[i].field
+//     }
+// }
+const getChildFieldSetting=(field:string)=>{
+    return props.getField(`${props.setting.path}/items/properties/${field}`)
+}
+const getInstancePath=(index:number,field:string)=>{
+    return `${props.setting.instancepath}/${index}/${field}`
+}
+
+const deleteRow=(index: number)=>{
+    if(modelValue.value){
+        modelValue.value.splice(index,1)
+    }    
+}
 const addNew = () => {
     const field = props.setting.path.split('/').at(-1)    
     props.setting.document[`add${field}`]()

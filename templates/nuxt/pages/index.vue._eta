@@ -56,7 +56,7 @@ onMounted(() => {
           something else.
         </p>
         <div class="mt-8 md:flex justify-start md:gap-4">
-          <ButtonCreateTenant></ButtonCreateTenant>
+          <UserButtonCreateTenant></UserButtonCreateTenant>
         </div>
       </div>
       <div class="pt-8 lg:pt-0">
@@ -95,7 +95,7 @@ onMounted(() => {
       </div>
     </div>
     <div  class="grid grid-cols-2">
-      <TenantPicker v-for="tenant in alltenants" :tenant="tenant" class="col col-span-1"></TenantPicker>
+      <UserTenantPicker v-for="tenant in alltenants" :tenant="tenant" class="col col-span-1"></UserTenantPicker>
     </div>
   </div>
 </template>

@@ -1,26 +1,27 @@
 <template>
     <div v-if="schema" :class="fieldcontainerclass">          
         <div v-if="hidelabel"></div>
-        <label v-else-if="error" class="error-text" :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="input-error">*</span></label>        
-        <label v-else  :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="input-error">*</span></label>        
+        <label v-else-if="error" class="text-danger-600" :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
+        <label v-else  :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
         
-        
-        <div v-if="typeof modelValue =='object' && typeof modelValue['_id']!='undefined' && typeof modelValue['label']!='undefined' &&  readonly ==true " :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue['label'] }}</div>
-        <div v-else-if="readonly==true" :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue }}</div>
-        <slot v-else name="default" :uuid="uuid" :error="error"></slot>
+        <!-- <div :uuid="uuid" >{{ modelValue }}</div> -->
+        <!-- <div v-if="typeof modelValue =='object' && typeof modelValue['_id']!='undefined' && typeof modelValue['label']!='undefined' &&  readonly ==true " :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue['label'] }}</div> -->
+        <!-- <div v-else-if="readonly==true" :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue }}</div> -->
+        <!-- <slot v-else name="default" :uuid="uuid" :error="error"></slot> -->
+        <slot name="default" :uuid="uuid" :error="error"></slot>
 
-        <small v-if="error" class="error-text">{{ error }}</small>
+        <small v-if="error" class="text-danger-600">{{ error }}</small>
         <small v-else class="input-desc">{{ fielddesc }}</small>
     </div>
     <div v-else :class="defaultcssclass">
-        <label class="error-text ">wrong path in getField()</label>
-        <div class="error-text">{{ props.setting.path }}</div>
+        <label class="etext-danger-600">wrong path in getField()</label>
+        <div class="text-danger-600">{{ props.setting.path }}</div>
     </div>
 </template>
 <script setup lang="ts">
 import SimpleAppValue from './SimpleAppValue.vue'
-import {camelCaseToWords} from './helper'
-import {computed,setBlockTracking,watch} from 'vue'
+// import {camelCaseToWords} from './helper'
+// import {computed,setBlockTracking,watch} from 'vue'
 
 import {ref} from 'vue'
 const uuid =  crypto.randomUUID();

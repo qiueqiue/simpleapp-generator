@@ -6,6 +6,7 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
+ import { SimpleAppInputType } from "~/types";
 import ConfirmPopup from "primevue/confirmpopup";
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -15,7 +16,7 @@ const doc = $OrganizationDoc();
 const brancdoc = $BranchDoc();
 const data = doc.getReactiveData();
 const branchlist = ref([]);
-const isReadOnly=ref(true)
+const isReadOnly = ref(true);
 const getCurrentOrg = async () => {
   await doc.getById(getUserProfile().orgRecordId);
 };
@@ -32,7 +33,7 @@ const updateData = async () => {
     .update()
     .then(() => {
       refresh();
-      isReadOnly.value=true
+      isReadOnly.value = true;
     })
     .catch((err) => {
       console.error(err);
@@ -61,38 +62,52 @@ getCurrentOrg();
   <div class="grid grid-cols-3">
     <div class="">
       <Card>
+        <template #header><h1 class="text-2xl">Organization</h1></template>
         <template #content>
-          <SimpleAppForm #default="o" :document="doc"  :readonly="isReadOnly">
-            <div class="simpleapp-tool-bar col-span-4 text-left gap-4" v-if="canPerform(doc.getDocName(), 'update')">
-              <Button  v-if="isReadOnly"
-                class="bg-primary-600 hover:bg-primary-400 text-white"
-                @click="isReadOnly=false" type="button">Edit</Button>
-              <Button  v-else            
-                class="bg-primary-600 hover:bg-primary-400 text-white"
-                @click="updateData" type="button" >Update</Button
-              >              
+          <SimpleAppForm #default="o" :document="doc" :readonly="isReadOnly">
+            <div
+              class="simpleapp-tool-bar col-span-4 text-left gap-4"
+              v-if="canPerform(doc.getDocName(), 'update')"
+            >
+              <Button
+                v-if="isReadOnly"
+                class="btn btn-primary"
+                @click="isReadOnly = false"
+                type="button"
+                >Edit</Button
+              >
+              <Button
+                v-else
+                class="btn btn-primary"
+                @click="updateData"
+                type="button"
+                >Update</Button
+              >
               <ConfirmPopup></ConfirmPopup>
             </div>
             <div class="flex flex-col">
               <div class="flex flex-row gap-4">
-                <SimpleAppText
-                  autofocus                  
+                <SimpleAppInput
+                  :input-type="SimpleAppInputType.text"
+                  autofocus
                   v-model="data.orgCode"
                   :setting="o.getField('#/properties/orgCode')"
-                  
                 />
-                <SimpleAppText
+                <SimpleAppInput
+                  :input-type="SimpleAppInputType.text"
                   v-model="data.orgName"
                   class=""
                   :setting="o.getField('#/properties/orgName')"
                 />
-                <SimpleAppCheckbox
+                <SimpleAppInput
+                :input-type="SimpleAppInputType.checkbox"
                   v-model="data.active"
                   :setting="o.getField('#/properties/active')"
                 />
               </div>
               <div>
-                <SimpleAppTextarea
+                <SimpleAppInput
+                  :input-type="SimpleAppInputType.textarea"
                   :setting="o.getField('#/properties/description')"
                   v-model="data.description"
                 />

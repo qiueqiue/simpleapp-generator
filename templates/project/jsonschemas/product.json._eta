@@ -15,9 +15,9 @@
     "updated": { "type": "string" },
     "createdBy": { "type": "string" },
     "updatedBy": { "type": "string" },
-    "tenantId": { "type": "integer", "default": 1, "minimum": 1 },
-    "orgId": { "type": "integer", "default": 1, "minimum": 1 },
-    "branchId": { "type": "integer", "default": 1, "minimum": 1 },
+    "tenantId": { "type": "integer", "default": 1},
+    "orgId": { "type": "integer", "default": 1},
+    "branchId": { "type": "integer", "default": 1},
     "productCode": { "type": "string", "examples": ["BK-MTHP1"] },
     "productName": { "type": "string", "examples": ["Math Primary 1 Book"] },
     "category": {

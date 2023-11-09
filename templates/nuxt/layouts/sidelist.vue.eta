@@ -48,7 +48,7 @@ refresh()
 <template>
     <div>
         <HeaderBar />
-        <Invitation/>
+        <UserInvitation/>
         <div class="grid grid-cols-3">
             <div>
                 <ListView 

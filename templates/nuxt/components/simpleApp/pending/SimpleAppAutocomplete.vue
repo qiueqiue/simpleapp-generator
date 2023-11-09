@@ -115,8 +115,7 @@ const onblur = ()=>{
   selecteditem.value={...modelValue.value}
   if(typeof selecteditem.value[labelfield]=='undefined'){
       selecteditem.value[labelfield]=''
-  }
-  // console.log("selecteditem.value",selecteditem.value)
+  }  
 }
 const capitalizeFirstLetter = (str: string) => {
   const res = str == '' ? '' : str.slice(0, 1).toUpperCase() + str.slice(1);
