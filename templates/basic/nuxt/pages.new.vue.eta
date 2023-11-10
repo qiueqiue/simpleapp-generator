@@ -141,7 +141,7 @@ if (id.value) {
                 <% } else if(obj['oneOf']){ %>
                     <% for(let f = 0; f < obj['oneOf'].length; f++){ %>
                         <%if(obj['oneOf'][f]['format']){ %>
-                            <%~ getBasicElement('text',`#/properties/${key}`,`data.${key}`,obj['anyOf'][f]['format']) %>            
+                            <%~ getBasicElement('text',`#/properties/${key}`,`data.${key}`,obj['oneOf'][f]['format']) %>            
                         <%}%>
                     <%}%>
 

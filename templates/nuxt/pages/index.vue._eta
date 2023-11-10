@@ -24,7 +24,7 @@ const orgList = ref();
 const alltenants = ref()
 
 const loadTenants = async () => {
-  const profileapi = getApi().PROFILEApi;
+  const profileapi = getAllApi().PROFILEApi;
     const axiosreturn = await new profileapi(
       undefined,
       useRuntimeConfig().public.API_URL,

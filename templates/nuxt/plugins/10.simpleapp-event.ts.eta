@@ -14,6 +14,10 @@ import mitt from 'mitt'
 // import Tooltip from 'primevue/tooltip';
 const emitter = mitt<EventType>()
 export default defineNuxtPlugin( async(nuxtApp) => {
+    //hide __NUXT__ at client side.
+    onNuxtReady(()=>{
+      window.__NUXT__ = undefined;
+    })
     //const { csrf } = useCsrf()    
     //axios.defaults.headers.common = {"CSRF-TOKEN": csrf};
     const myaxios = axios.create({timeout:5000})

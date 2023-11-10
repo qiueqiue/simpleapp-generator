@@ -39,7 +39,8 @@
       "examples": ["SI1111"],
       "format": "documentno"
     },
-    "invoiceTitle": { "type": "string", "examples": ["Sales to XYZ"] },
+    "invoiceDate": { "type": "string", "format":"date"},
+    "invoiceTitle": { "type": "string", "examples": ["Sales to XYZ"] ,"minLength":3},
     "invoiceTotal": { "type": "number", "default": 0 },
     "details": {
       "type": "array",
