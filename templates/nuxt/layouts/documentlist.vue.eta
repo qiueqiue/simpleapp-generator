@@ -149,7 +149,7 @@ watch(()=> useRoute().meta ,(newvalue,oldvalue)=>{
 
         <HeaderBar />
         <UserInvitation/>      
-         <TableDocuments :value="recordlist" :columns="tablecolumns" :title="String(useRoute().meta.name)"> 
+         <TableDocuments :value="recordlist" :columns="tablecolumns" :title="t(useRoute().meta.name as string)"> 
             <template #toolbar>
                 <div class="w-full text-left">
                     <slot>

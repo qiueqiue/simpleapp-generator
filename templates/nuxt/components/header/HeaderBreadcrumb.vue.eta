@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import OverlayPanel from 'primevue/overlaypanel';
+const op = ref()
+
+const home = ref({
+    icon: 'pi pi-home',
+    url: '/'
+
+});
+const items = computed(()=>{
+    const fullpath = useRoute().fullPath    
+    let path = fullpath
+    const params = useRoute().params
+    const name = useRoute().meta.name
+    const data = []
+    const patharr = fullpath.split('/').filter((item)=>item!='')
+    let pathurl = ''
+    for(let i=0; i< patharr.length;i++){
+        const p = patharr[i]
+        pathurl = `${pathurl}/${p}`        
+        let pathlabel = t(p)
+        if(i==0 && params['xorg']){
+            pathlabel = getUserProfile().branchName
+            data.push ({ label: pathlabel }) 
+        }else{
+            data.push ({ label: pathlabel  , url:pathurl}) 
+        }
+
+           
+    }
+    if(params['xorg']){
+    
+     path = path.replace('/'+params['xorg'],'')
+    }
+
+    return data
+})
+
+const showSwitcher=(event:any)=>{
+    op.value.toggle(event)
+}
+
+const getBranches = ()=>{
+    const orgId = getUserProfile().orgId
+    const tenantId=getUserProfile().tenantId
+    return getUserProfile().branches.filter((item:any)=>{return item.branch.tenantId == tenantId &&  item.branch.orgId == orgId})    
+}
+</script>
+<template>
+    <Breadcrumb :home="home" :model="items" class="!p-0 border-none ">
+                <template #item="{ item }">
+                        <NuxtLink :to="item.url" v-if="item.url">
+                            <span :class="item.icon"></span>{{ item.label }}
+                        </NuxtLink>
+                        <div v-else>
+                            <span class="cursor-pointer" @click="showSwitcher">{{ item.label }}</span>
+                            <OverlayPanel ref="op">
+                                <div>
+                                    <ul class="flex flex-col">
+                                        <li  v-for="b in getBranches()" class="p-1 route-link-list ">
+                                            <NuxtLink  :to="'/'+b['xOrg']" >
+                                            {{ b['branch']['branchCode']}} - {{ b['branch']['branchName']}}
+                                            </NuxtLink>          
+                                        </li>
+                                    </ul>
+                                </div>
+                            </OverlayPanel>
+                        </div>
+
+                </template>
+                <template #separator> <span class="pi pi-chevron-right"></span></template>        
+    </Breadcrumb>    
+
+</template>

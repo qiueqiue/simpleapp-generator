@@ -3,4 +3,7 @@
   </template>
   <script setup lang="ts">
   import profile from '../profile.vue'
+  definePageMeta({
+    title: 'profile'
+  })
   </script>

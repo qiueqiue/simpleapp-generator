@@ -7,7 +7,7 @@ import {SchemaType,SchemaConfig,JsonSchemaProperties} from "../type"
 // import * as schematemplates from '../schematype'
 import { Logger, ILogObj } from "tslog";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
-import {allforeignkeys} from '../storage'
+import {allforeignkeys,allfields} from '../storage'
 // import { ConflictException } from '@nestjs/common';
 import {
   FieldModel,
@@ -138,9 +138,15 @@ const genSchema = async (
     allmodels: ChildModels
   ): Promise<SchemaModel> => {
     
+    if(!allfields.includes(docname)){
+      allfields.push(docname)
+    }
     const newmodel: SchemaModel = {};
     // console.log("jsondata--->>>>",docname,jsondata)
-    Object.keys(jsondata).forEach(async (key) => {          
+    Object.keys(jsondata).forEach(async (key) => {      
+      if(!allfields.includes(key)){
+        allfields.push(key)
+      }
       //below is Object.assign use for force datatype compatibility
       const obj:JSONSchema7={}
       Object.assign(obj,jsondata[key]);
@@ -261,6 +267,10 @@ const getField = (
   obj: JSONSchema7,
   isrequired: boolean | undefined,
 ): FieldModel => {
+  if(!allfields.includes(fieldname)){
+    allfields.push(fieldname)
+  }
+  
   let datatype: Fieldtypes = obj.type as Fieldtypes
   // console.log(datatype)
   //Fieldtypes.string;

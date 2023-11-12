@@ -144,6 +144,6 @@ if (bid.value) {
         :setting="o.getField('#/properties/description')"
       />      
     </SimpleAppForm>
-    <DebugDocumentData v-model="data" label="branch" />
+    <DebugDocumentData v-model="data" :label="doc.getDocName()"/>
   </div>
 </template>

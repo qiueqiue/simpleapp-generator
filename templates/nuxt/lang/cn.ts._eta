@@ -1,0 +1,9 @@
+export default {
+    welcome:'欢迎',
+    welcomeSimpleApp: '你好,欢迎来到 SimpleApp',
+    changeHomePageMsg: '改了这面',
+    category: '类别',
+    /*manually fix from df.ts.eta*/
+}
+
+// or

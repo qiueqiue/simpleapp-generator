@@ -1,26 +1,26 @@
 
 <template>
     
-        <div class="p-inputgroup w-full flex flex-row">
-            <InputText class="flex-1 rounded-tr-none rounded-br-none" 
+        <div class="flex flex-row w-full">
+            <InputText 
                 :readonly="readonly"
                 v-model="modelValue"    
                 :placeholder="placeholder"
+                :class="'flex-1 w-full rounded-lg  '+ ( props.readonly?'':'dark:!bg-gray-700 rounded-tr-none rounded-br-none')"
             />
-            <span class="p-inputgroup-addon p p-0">
+            <span class="" v-if="!readonly">
                 <button  type="button" @click="toggle" 
-                    :disabled="readonly"
-                    class="border rounded-tl-none rounded-bl-none btn btn-primary -ml-1 h-full  p-3 rounded-r-md">
+                    class="'btn btn-primary p-3 dark:border-blue-900/40 rounded-lg rounded-tl-none rounded-bl-none">
                     <i class="pi pi-angle-down"></i>
                 </button>
                 <OverlayPanel ref="op" class="p-4">           
                     <div class="m-4">
                         <ul>                      
                             <li v-for="docno in docFormatlist" class="hover-list-primary p-2" >
-                                <a class="flex-row p-2 mt-4" @click="chooseFormat(docno)">
+                                <a class="" @click="chooseFormat(docno)">
                                     <span class="pi pi-hashtag mr-2"></span>
                                     <span class="">{{docno.docNoFormatName}}</span>
-                                    <span class="ml-2 text text-green-600">{{docno.sample}}</span>
+                                    <span class=" text text-green-600">{{docno.sample}}</span>
                                 </a>
                             </li>                    
                         </ul>

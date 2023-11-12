@@ -1,4 +1,5 @@
 import {SimpleAppClient} from '~/simpleapp/generate/clients/SimpleAppClient'
+import {CellSetting} from './documentlist'
   export type DocumentMetaData =  {
     docName:string
     docType:string
@@ -34,7 +35,7 @@ import {SimpleAppClient} from '~/simpleapp/generate/clients/SimpleAppClient'
   
   export type SearchBody = {
       
-      filter?:Object;
+      filter?:CellSetting[];
       
       fields?: any[];
       

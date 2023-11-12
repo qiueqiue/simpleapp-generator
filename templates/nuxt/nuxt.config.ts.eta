@@ -7,11 +7,11 @@
 import path from 'path'
 export default defineNuxtConfig({
   // colorMode: {}  ,  
-  runtimeConfig:{    
+  runtimeConfig:{     
     public:{
       APP_URL: process.env.APP_URL,
       API_URL: process.env.API_URL,
-      DEBUGDATA: process.env.DEBUGDATA,      
+      DEBUGDATA: process.env.DEBUGDATA,        
     }
   },
   vite: {
@@ -26,14 +26,51 @@ tailwindcss: {
     // Options
   },
   modules: [
+    // "@hebilicious/authjs-nuxt",
+    '@nuxtjs/i18n',
     '@sidebase/nuxt-auth',
     'nuxt-primevue',
     // "nuxt-security",     //temporary avoid nuxt-security cause cors
     '@vueuse/nuxt', 
     '@nuxt/ui',
     '@nuxtjs/tailwindcss',
-    '@pinia/nuxt'
+    ['@pinia/nuxt',{
+      autoImports: [
+        // automatically imports `defineStore`
+        'defineStore', // import { defineStore } from 'pinia'
+        ['defineStore', 'definePiniaStore'], // import { defineStore as definePiniaStore } from 'pinia'
+      ],
+    }],
+    '@nuxtjs/color-mode',
+    
+
   ],  
+  i18n: {
+    lazy: true,
+    langDir: "lang/",
+    strategy: "no_prefix",
+    locales: [
+      {
+        code: "df",
+        iso: "df",
+        name: "Default",
+        file: "df.ts",
+      },
+      {
+        code: "en",
+        iso: "en",
+        name: "English",
+        file: "en.ts",
+      },
+      {
+        code: "cn",
+        iso: "cn",
+        name: "Chinese",
+        file: "cn.ts",
+      },
+    ],
+    defaultLocale: "df",    
+  },
   primevue: {
     options: {
       unstyled: true,
@@ -52,13 +89,9 @@ tailwindcss: {
     
 
   },
-  pinia: {
-    autoImports: [
-      // automatically imports `defineStore`
-      'defineStore', // import { defineStore } from 'pinia'
-      ['defineStore', 'definePiniaStore'], // import { defineStore as definePiniaStore } from 'pinia'
-    ],
-  },
+  // pinia: {
+
+  // },
   auth: {
     globalAppMiddleware: true
   },
@@ -81,12 +114,12 @@ tailwindcss: {
     // },
     //csrf: true,   // been force to off csrf cash it crash with nuxt-auth
   // },
-  ssr: false,
-  content: [
-      "./index.html",
-      "./src/**/*.{vue,js,ts,jsx,tsx}",
-      "./node_modules/primevue/**/*.{vue,js,ts,jsx,tsx}"
-  ],
+  // ssr: false,
+  // content: [
+  //     "./index.html",
+  //     "./src/**/*.{vue,js,ts,jsx,tsx}",
+  //     "./node_modules/primevue/**/*.{vue,js,ts,jsx,tsx}"
+  // ],
   css: [ 
     'primeicons/primeicons.css',
     path.resolve(__dirname,'./assets/css/style.css')

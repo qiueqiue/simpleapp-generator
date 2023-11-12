@@ -129,6 +129,11 @@ $listen("RefreshUser", () => {
 onMounted(() => {
   refreshList();
 });
+
+definePageMeta({
+  name: 'user',
+  title: 'user'
+  })
 </script>
 <template>
   <div class="grid grid-cols-4">

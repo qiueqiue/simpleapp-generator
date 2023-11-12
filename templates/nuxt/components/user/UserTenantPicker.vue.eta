@@ -1,16 +1,18 @@
 <template>
-    <card>
+    <div v-if="alltenants" v-for="tenant in alltenants">
+    <card  :pt="{ header:{class:'text-xl text-gray-600'}}">
+        
         <template #header>
-            <h1 class="font font-bold text text-gray-700">{{ tenant.tenantName }}</h1>
+            {{tenant.tenantName }}
         </template>
         <template #content>   
             
             <ul >
-                <li v-for="o in orglist">
-                    <h1>{{ o.orgName }}</h1>
+                <li v-for="o in getOrglist(tenant)">
+                    <h1 class="subtitle-text">{{ o.orgName }}</h1>
                     <ul role="list" class="divide-y divide-gray-100 rounded-md border border-gray-200">
-                        <li v-for="b in branchlist"   class="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                            <NuxtLink :href="`/${b.xOrg }`"  v-if="o.orgId==b.orgId" :external="true" class="hover:bg-primary-100">                    
+                        <li v-for="b in getBranchlist(tenant)"   class="w-full items-center justify-between py-4 pl-4 pr-4  text-sm route-link-list">
+                            <NuxtLink :href="`/${b.xOrg }`"  v-if="o.orgId==b.orgId" :external="true" >                    
                                 <div class="flex w-full flex-1 items-center ">
                                     <!-- <i class="pi pi-sitemap"></i> -->
                                     <p class="flex-1 flex-shrink-0 font-bold text-primary-600 ">
@@ -53,23 +55,33 @@
            </ul> -->
         </template>
     </card>
+    </div>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash'
-const props = defineProps<{
-   tenant:any
-}>()
-const branchlist = computed(()=>props.tenant.permissions)
-
-
-const orglist = computed(()=>_.uniqBy(branchlist.value,'orgId')
-        .map((item:any)=>({ orgId:item.orgId,orgCode:item.orgCode,orgName:item.orgName}) ) )
+const profileapi = getAllApi().PROFILEApi;
+const alltenants = ref() 
 
 
 
-onMounted(()=>{
 
+const loadAllTenants = async () =>{
+    const api = new profileapi(undefined,useRuntimeConfig().public.API_URL,)
+    alltenants.value =  (await api.getAllTenants()).data
+}
+
+// const props = defineProps<{
+//    tenant:any
+// }>()
+const getBranchlist = (tenant:any)=>tenant.permissions
+
+
+const getOrglist = (tenant:any) => _.uniqBy(getBranchlist(tenant),'orgId')
+        .map((item:any)=>({ orgId:item.orgId,orgCode:item.orgCode,orgName:item.orgName}) ) 
+
+
+onNuxtReady(()=>{
+    loadAllTenants()
 })
-
 </script>

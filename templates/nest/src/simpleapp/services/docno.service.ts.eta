@@ -67,7 +67,7 @@ export class DocnoformatService extends DocnoformatProcessor {
     doctype = doctype.toUpperCase();
     const searchresult = await this.search(
       appuser,
-     { docNoType:doctype},
+     { docNoType: doctype,'branch.branchId':appuser.getBranchId() },
      undefined,
      {default:'desc'}
     );

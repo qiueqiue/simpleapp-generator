@@ -1,6 +1,6 @@
 import * as constants from './constant'
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
-import {allforeignkeys} from './storage'
+import {allforeignkeys,allfields} from './storage'
 import {TypeGenerateDocumentVariable,ChildModels,ModuleObject, SchemaType, SchemaConfig } from './type'
 import { Logger, ILogObj } from "tslog";
 const log: Logger<ILogObj> = new Logger();
@@ -54,33 +54,6 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     // console.log("=====>>>>>",schemaname,cloneschema)
     await processSchema(schemaname,cloneschema)
   }
-  // console.log('jsonschemasjsonschemasjsonschemasjsonschemas',jsonschemas)
-  // const buildinschemas = readdirSync(constants.buildinschemafolder)
-  // for(let i = 0; i< buildinschemas.length;i++){
-  //   const file = buildinschemas[i]
-  //   await processSchema(file,constants.buildinschemafolder)
-  // }
-  // load available bpmn into array
-  // const files = readdirSync(configs.jsonschemaFolder)
-  // for(let i = 0; i< files.length;i++){
-  //   const file = files[i]
-  //   await processSchema(file,constants.buildinschemafolder)
-  // }
-  // const schemapath = process.cwd()+'/'+ configs.jsonschemaFolder 
-  // console.log("dynamic import" ,schemapath)
-  // const {category} = require(schemapath)
-  // const schemas = await import('/Users/kstan/dev/products/simtrain-next/project-design/jsonschemas');
-
-  // console.log(schemas)
-  // const schemanames = Object.keys(schemas)
-  // for(let i=0; i<schemanames.length;i++){
-  //   const schemaname = schemanames[i]
-  // .forEach(async(schemaname)=>{    
-    // const cloneschema:JSONSchema7  = {...buildinschemas[schemaname]}
-    // console.log("=====>>>>>",schemaname,cloneschema)
-    // await processSchema(schemaname,cloneschema)
-  // }
-//   
   const files = readdirSync(configs.jsonschemaFolder)
   for(let j = 0; j< files.length;j++){
     const file = files[j]
@@ -108,29 +81,14 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
 // const processSchema=async (file:string,defFolder:string)=>{
 const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
   
-    // console.log(file,defFolder)
-    // const filearr = file.split('.');
-    // let rendertype = 'basic';
-    // let docname = filearr[0].toLowerCase();
-    // let doctype = filearr[1].toLowerCase();
     const config:SchemaConfig = jsondata['x-simpleapp-config']
     let doctype = config.documentType
     let docname = config.documentName
-    // const jsonstring = readFileSync(defFolder +path.sep+ file, 'utf-8');      
-    // log.warn('config',config)
-    
-    // if (file.endsWith('.ts')) {  
-    //   log.info(`Load `+clc.green(file))
-    //   const filepath =  `${defFolder}/${file.replace('.ts','')}`
-    //   console.log(filepath)
-    //   const jsondata = require(filepath)
-    //   console.log(jsondata)
-      // const jsondata = JSON.parse(jsonstring);    
+        
       const  rendertype = 'basic';
       jsonschemas[docname] = jsondata;
       const copyofjsonschema = {...jsondata}
       const allmodels:ChildModels =  await readJsonSchemaBuilder(docname, jsondata);
-      // log.error("allmodels",docname,schemaname)
       generateSchema(docname, doctype, rendertype, allmodels);        
       activatemodules.push({
         doctype:doctype,
@@ -190,9 +148,12 @@ const generateSchema = ( docname: string,
     // log.info(`- Generate ${docname}, ${doctype}, ${templatefolder}`)
     const eta = new Eta({
       views: '/',
-      functionHeader:
-        'const capitalizeFirstLetter = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);' +
-        'const initType=(str)=>{return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}',
+      functionHeader: getCodeGenHelper()
+        
+      // 'const capitalizeFirstLetter = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);' +
+      //   'const initType=(str)=>{return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;}'+
+      //   'const camelCaseToWords = (s: string) =>{const result = s.replace(/([A-Z])/g, \' $1\');return result.charAt(0).toUpperCase() + result.slice(1);}',
+      
     });
     
     const backendTargetFolder = `${backendFolder}/src/simpleapp/generate`
@@ -331,6 +292,7 @@ const finalize=(modules:ModuleObject[])=>{
     modules:modules,
     allroles:allroles,
     foreignkeys:allforeignkeys,
+    allfields:allfields
   }
   
   
@@ -339,7 +301,8 @@ const finalize=(modules:ModuleObject[])=>{
       // log.info("Generate ",foldertype)
       const frameworkfolder = `${constants.templatedir}/${foldertype}`
       const frameworkfiles = readdirSync(frameworkfolder,{recursive:true})
-      const eta = new Eta({views:frameworkfolder});
+      const eta = new Eta({views:frameworkfolder,
+                functionHeader: getCodeGenHelper()});
       
       //generate code for framework
       for(let index=0; index<frameworkfiles.length; index++){
@@ -396,3 +359,8 @@ const prepareRoles =(groupsettings) => {
   }
   return roles
 }
+
+
+const getCodeGenHelper = () => 'const capitalizeFirstLetter = (str) => str.slice(0, 1).toUpperCase() + str.slice(1);' +
+'const initType=(str)=>{return ["string","number","boolean","array","object"].includes(str) ? capitalizeFirstLetter(str) : str;};' +
+'const camelCaseToWords = (s) => {const result = s.replace(/([A-Z])/g, \' $1\');return result.charAt(0).toUpperCase() + result.slice(1);}'

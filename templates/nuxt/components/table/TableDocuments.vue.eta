@@ -5,8 +5,8 @@
             :showGridlines="true"
             size="small"
             :pt="{
-                // header:{ class:'border bg-gray-100'},
-                headerRow:{ class:'border bg-gray-200'},                                
+                header:{ class:''},
+                headerRow:{ class:' bg-gray-200'},                                
             }"
             :value="value" 
             :filters="filters"
@@ -15,7 +15,7 @@
             >
             <!-- header -->
             <template #header>
-                <div class=" flex flex-row w-full text-right justify-content-end">
+                <div class=" flex flex-row w-full text-right justify-content-end" >
                     <div class="flex-1">
                         <slot name="toolbar"></slot>
                     </div>

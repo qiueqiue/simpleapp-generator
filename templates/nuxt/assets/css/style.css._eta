@@ -1,7 +1,11 @@
-.router-link-exact-active{
-    @apply  bg-primary-100 block
+
+[disabled] ,[readonly]{
+    @apply bg-gray-300 dark:bg-gray-900
 }
 
+[aria-selected=true]{
+    @apply bg-primary-100
+}
 
 [data-pc-group-section=pagebutton]{
     @apply p-2 m-0 rounded-none border
@@ -9,27 +13,41 @@
 [data-pc-section=pagebutton]{
     @apply p-3 m-0 border
 }
+
+
+input {
+    @apply  bg-opacity-0	 bg-black
+}
+
+.route-link-list {
+ @apply hover:bg-secondary-200  dark:hover:bg-gray-800 
+}
+
+.router-link-exact-active{
+    @apply  bg-primary-100  dark:bg-gray-800  block
+}
+
+
+.title-text{
+    @apply text-xl font-bold text-gray-700
+}
+.subtitle-text{
+    @apply text-base text-gray-500
+}
+
 .btn {
-    @apply font-medium
+    @apply font-medium  text-gray-50 dark:text-gray-300 border
 }
 
 .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-400 text-white
+    @apply btn bg-primary-600 hover:bg-primary-400 dark:!bg-primary-700 dark:hover:bg-primary-800 
 }
 .btn-secondary {
-    @apply bg-secondary-600 hover:bg-secondary-400 text-white
+    @apply btn bg-secondary-600 hover:bg-secondary-400 
 }
 .btn-danger {
-    @apply bg-danger-600 hover:bg-danger-400 text-white
+    @apply btn bg-danger-600 hover:bg-danger-400  dark:bg-danger-700 dark:hover:bg-danger-800 
 }
 .btn-warn {
-    @apply bg-warning-600 hover:bg-warning-400 text-white
-}
-
-[disabled] ,[readonly]{
-    @apply bg-gray-300
-}
-
-[aria-selected=true]{
-    @apply bg-primary-100
+    @apply btn bg-warning-600 hover:bg-warning-400 
 }

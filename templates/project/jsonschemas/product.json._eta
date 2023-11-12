@@ -7,7 +7,7 @@
     "documentTitle": "productName",
     "isolationType": "org",
     "pageType": "crud",
-    "additionalAutoCompleteFields": ["defaultprice"]
+    "additionalAutoCompleteFields": ["defaultPrice"]
   },
   "properties": {
     "_id": { "type": "string" },
@@ -28,7 +28,7 @@
         "label": { "type": "string" }
       }
     },
-    "defaultprice": { "type": "number" },
+    "defaultPrice": { "type": "number" },
     "active": { "type": "boolean", "default": true },
     "description": { "type": "string" },
     "tags": {

@@ -91,15 +91,15 @@ if (id.value) {
     <SimpleAppForm #default="o" :document="doc" :readonly="isReadOnly">
         <div v-if="isReadOnly" class="w-full">
             <Button
-                class="btn btn-primary" @click="isReadOnly=false"
+                class="btn-primary" @click="isReadOnly=false"
                 type="button" >Edit</Button>
             <Button class="" :disabled="disabled" @click="newData" type="button" v-if="canPerform(doc.getDocName(),'create')">New</Button>
         </div>
         <div v-else class="simpleapp-tool-bar   col-span-4 text-left gap-4"  >
               <Button class="" :disabled="disabled" @click="newData" type="button" v-if="canPerform(doc.getDocName(),'create')">New</Button>
-              <Button class="btn btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(doc.getDocName(),'create') && doc.isNew()">Create</Button>
-              <Button class="btn btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(doc.getDocName(),'update') && !doc.isNew()">Update</Button>
-              <Button class="btn btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(doc.getDocName(),'delete') && !doc.isNew()">Delete</Button>
+              <Button class="btn-primary" :disabled="disabled" @click="createData" type="button" v-if="canPerform(doc.getDocName(),'create') && doc.isNew()">Create</Button>
+              <Button class="btn-primary" :disabled="disabled" @click="updateData" type="button" v-if="canPerform(doc.getDocName(),'update') && !doc.isNew()">Update</Button>
+              <Button class="btn-danger" :disabled="disabled" @click="deleteData($event)" type="button" v-if="canPerform(doc.getDocName(),'delete') && !doc.isNew()">Delete</Button>
 
               
               <ProgressSpinner v-if="disabled==true" style="width: 2rem; height: 2rem" ></ProgressSpinner>
@@ -218,5 +218,5 @@ if (id.value) {
       <%})%>  
       </div>
     </SimpleAppForm>
-    <DebugDocumentData v-model="data"/>
+    <DebugDocumentData v-model="data" :label="doc.getDocName()"/>
 </template>

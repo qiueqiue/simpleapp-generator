@@ -53,12 +53,12 @@
             "properties": {
               "_id": { "type": "string" },
               "label": { "type": "string" },
-              "defaultprice": { "type": "number", "default": 0 }
+              "defaultPrice": { "type": "number", "default": 0 }
             }
           },
           "quantity": { "type": "integer", "default": 1 },
-          "unitprice": { "type": "number", "default": 0 },
-          "subtotal": { "type": "number", "default": 0 }
+          "unitPrice": { "type": "number", "default": 0 },
+          "subTotal": { "type": "number", "default": 0 }
         }
       }
     },

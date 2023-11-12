@@ -1,0 +1,1 @@
+export const getAvatarColor = computed(()=>useColorMode().preference == 'dark' ? '#ffffff' : '#000000')

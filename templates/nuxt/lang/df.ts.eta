@@ -1,0 +1,18 @@
+export default {
+    welcome: 'Welcome',
+    create: 'Create',
+    profile: 'Profile',
+    logout: 'logout',
+    language: 'Language',
+    theme: 'Theme',
+    welcomeSimpleApp: 'Welcome To SimpleApp',
+    changeHomePageMsg: '{fullName}, it is product front page and by right you shall replace it with something else.',
+    realman:'Real man code with simpleapp',
+
+    //auto generate from schema
+    <% for(let i=0; i< it.allfields.length; i++){ %>
+    <% let f = it.allfields[i] %>
+        <%=f%> : '<%= camelCaseToWords(f) %>',
+    <%}%>    
+
+}

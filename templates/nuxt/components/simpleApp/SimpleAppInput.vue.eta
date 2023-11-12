@@ -10,7 +10,7 @@
 
         <!-- date component -->        
         <component :is="inputComponent" type="date" :pt="pt" 
-            v-else-if="inputType == SimpleAppInputType.date"
+            v-else-if="inputType == SimpleAppInputType.date"            
             :inputId="slotprops.uuid" :path="setting.instancepath"
             v-model="datevalue" @update:modelValue="updateDate" :readonly="isReadonly"/>
         <!-- calendar component -->        
@@ -23,8 +23,9 @@
         <component :is="inputComponent" v-model="modelValue"  :pt="pt"
             v-else-if="[SimpleAppInputType.select,SimpleAppInputType.list].includes(inputType)"
             :inputId="slotprops.uuid" :path="setting.instancepath"  
+            
             :readonly="isReadonly"
-                :options="getListOptions()" optionLabel="label" optionValue="value"/>
+            :options="getListOptions()" optionLabel="label" optionValue="value"/>
         
         <!-- radio component -->                
         <div v-else-if="inputType == SimpleAppInputType.radio" >
@@ -37,21 +38,13 @@
             </div>            
         </div>
         
-        <!-- autocomplete -->
+        <!-- autocomplete, need do more enterprise grade component-->
         <AutoComplete :is="inputComponent" v-model="modelValue"  
             v-else-if="inputType==SimpleAppInputType.autocomplete"  
                 forceSelection optionLabel="label" :dropdown="true"                                
                 @item-select="pickAutoComplete"
-                @complete="getListFromAutocompleteApi"          
-                
-                :pt="{
-                    root:{class:'rounded-lg flex flex-row'},
-                    input:{class:'w-full font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-blue-900/40  rounded-lg  rounded-tr-none rounded-br-none transition-colors duration-200 appearance-none hover:border-blue-500 focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)]  text-base'},
-                    loadingIcon:{class:'hidden'},
-                    dropdownbutton: {
-                        root:' bg-primary-600 hover:bg-primary-400 text-white rounded flex flex-row  p-3 rounded-tl-none rounded-bl-none '
-                    }
-                }"
+                @complete="getListFromAutocompleteApi"                          
+                :pt="pt"
                 :disabled="isReadonly"
                 :suggestions="list"                                
                 @blur="onBlurAutocomplete"
@@ -62,7 +55,8 @@
         <!--  document no input-->
         <SimpleAppDocumentNo v-else-if="inputType == SimpleAppInputType.documentno" 
             :setting="setting" v-model="modelValue" :inputId="slotprops.uuid"
-            :readonly="isReadonly" @update:docNoFormat="triggerDocNoFormatChange"            
+            :readonly="isReadonly" @update:docNoFormat="triggerDocNoFormatChange"     
+            :pt="pt"
              :path="setting.instancepath"/>
            
         
@@ -83,13 +77,11 @@
         <component  v-else-if="inputType == SimpleAppInputType.chip" 
          :is="inputComponent" :type="type" v-model="modelValue"
                  :pt="pt" 
-                :disabled="isReadonly" 
-                
-                
+                :disabled="isReadonly"                                 
                 :inputId="slotprops.uuid" :path="setting.instancepath"/>
         <!-- simple component -->        
-        <component v-else :is="inputComponent" :type="type" v-model="modelValue" :pt="pt" 
-                :readonly="isReadonly" 
+        <component v-else :is="inputComponent" :type="type" v-model="modelValue"
+                :readonly="isReadonly"                 
                 class="w-full flex flex-col"
                 :inputId="slotprops.uuid" :path="setting.instancepath"/>
             
@@ -120,6 +112,7 @@ import Rating from 'primevue/rating';
 import Slider from 'primevue/slider';
 import Textarea from 'primevue/textarea';
 import {SimpleAppInputType} from '~/types'
+
 
 let inputComponent :Component
 const emptyautocomplete =():autocompletetype=> ({_id:'',label:''})
@@ -210,7 +203,7 @@ const isReadonly = computed(()=>{
 })
 
 const updateDate = (value:any)=>{
-    modelValue.value = moment(value).toISOString()    
+    modelValue.value = moment(value).format('YYYY-MM-DD')
 }
 
 

@@ -8,32 +8,34 @@
 <template>
     <!-- <header>       -->
         <!-- <MegaMenu :model="getMenus()" orientation="horizontal" />               -->
-    <div class="bg-white  border-b-gray-300  h-10 flex flex-row">
+    <client-only>
+    <div class="flex flex-row">
         
         
         <div class="flex-1 flex flex-row gap-2 p-2">
             <div class="">
-                <HeaderButtonMenuPicker/>
-                
-            </div>            
-            <div class="">
-                <HeaderButtonHome/>                
-            </div>
+                <HeaderButtonMenuPicker/>                
+            </div>     
             
+            <!-- <div class="">
+                <HeaderButtonHome/>                
+            </div> -->
+            <HeaderBreadcrumb class="hidden md:block" v-if="useRoute().fullPath!='/'"></HeaderBreadcrumb>       
         </div>
         <div class="flex-1 flex flex-row-reverse  gap-2 p-2">
 
             <div class=" text-right">
-                <HeaderButtonProfile/>                                
+                <HeaderButtonProfile/>
             </div>
          
-            <div class="">
+            <!-- <div class="">
                 <HeaderSelectBranch/>              
-            </div>        
+            </div>         -->
         </div>
 
         
         
     </div>
+    </client-only>
     <!-- </header> -->
 </template>

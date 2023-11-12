@@ -1,8 +1,8 @@
 <template>
-    <div v-if="schema" :class="fieldcontainerclass">          
+    <div v-if="schema" class="flex flex-col">          
         <div v-if="hidelabel"></div>
-        <label v-else-if="error" class="text-danger-600" :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
-        <label v-else  :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
+        <label v-else-if="error" class="text-danger-600 overflow-hidden" :for="uuid">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
+        <label v-else  :for="uuid" class="whitespace-nowrap	text-gray-500 truncate">{{ fieldlabel }} <span v-if="props.setting.isrequired && fieldlabel" class="text-danger-600">*</span></label>        
         
         <!-- <div :uuid="uuid" >{{ modelValue }}</div> -->
         <!-- <div v-if="typeof modelValue =='object' && typeof modelValue['_id']!='undefined' && typeof modelValue['label']!='undefined' &&  readonly ==true " :uuid="uuid" class="simpleapp-value-readonly">{{ modelValue['label'] }}</div> -->
@@ -24,8 +24,10 @@ import SimpleAppValue from './SimpleAppValue.vue'
 // import {computed,setBlockTracking,watch} from 'vue'
 
 import {ref} from 'vue'
+
+
 const uuid =  crypto.randomUUID();
-const fieldlabel = ref('')
+// const fieldlabel = ref('')
 // const fielddesc = ref('')
 const defaultcssclass='simpleapp-input-container'
 const fieldcontainerclass = ref(defaultcssclass)
@@ -57,6 +59,7 @@ let schema:any
 const fielddesc = computed(()=>{
     return props.description ?? schema.description ?? ''
 })
+
 if(props.setting.fieldsetting && props.setting.fieldsetting.type){
     
     schema = props.setting.fieldsetting
@@ -68,9 +71,8 @@ if(props.setting.fieldsetting && props.setting.fieldsetting.type){
     const fieldnamearr = instancepath.value.split('/')
     const fieldname = camelCaseToWords(fieldnamearr[fieldnamearr.length-1])
 
-    if(props.label)fieldlabel.value = props.label 
-    else if (schema.title ) fieldlabel.value=schema.title
-    else fieldlabel.value=fieldname
+   
+    
     
     // if(props.description)fielddesc.value = props.description 
     // else if (schema?.description != 'undefined') fielddesc.value=schema.description
@@ -79,6 +81,18 @@ if(props.setting.fieldsetting && props.setting.fieldsetting.type){
    
 
 }
+const fieldlabel = computed(()=>{
+       
+       if(props.label){
+           return t(props.label)
+       }
+       else if (schema.title ) {
+           return  t(schema.title)
+       }
+       else{
+           return  t(props.setting.key)
+       }
+   })
 const errormsg = computed(()=>{
     
     props.setting.errors[instancepath.value]

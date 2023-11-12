@@ -25,3 +25,6 @@ export const getPageBaseUrl = (resourcename:string) =>{
 export const canPerform = (resource:string,action:string):boolean =>{
     return getUserStore().canPerform(resource,action)
 }
+
+export const getProfileEmail = () => getUserProfile().email
+export const getProfileFullName = () => getUserProfile().fullName
