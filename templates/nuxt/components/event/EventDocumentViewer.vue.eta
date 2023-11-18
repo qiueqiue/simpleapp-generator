@@ -1,0 +1,69 @@
+<template>
+    <Dialog v-model:visible="visible" 
+        @update:visible="closeDialog" 
+        :pt="{root:{class:'w-5/6 h-5/6'}}"
+        :modal="true" 
+        :close-on-escape="false" >                
+        <template #header>
+            <div class="flex flex-row">
+                <Chip v-for="(v,index) in allview" :label="v.label" @remove="deleteTab" :removable="index == allview.length-1"/>
+            </div>            
+        </template>
+        <template #default>
+            <div v-for="(v,index) in allview">
+                <component v-if="index == allview.length-1" :is="defineAsyncComponent(v.viewer)" :_id="v._id" :readonly="v.readonly"></component>
+            </div>
+        </template>                
+    </Dialog>
+</template>
+<script setup lang="ts">
+import { onKeyStroke } from '@vueuse/core'
+
+import { useDialog } from 'primevue/usedialog';
+import {defineAsyncComponent} from 'vue'
+import { ViewRecord } from '~/types';
+// import TabView from 'primevue/tabview';
+import Chip from 'primevue/chip';
+
+const tabindex =ref(0)
+const activetabindex=ref(0)
+const findindex = ref(0)
+const dialog = useDialog()
+const {$listen,} = useNuxtApp()
+const visible = ref(false)
+const _id = ref('')
+const ViewRecordComponent = ref()
+const readonly =  ref<boolean>()
+const allview = ref<ViewRecord[]>([])
+
+    
+onKeyStroke('Escape', (e) => {
+  e.preventDefault()
+  deleteTab()
+})
+
+const deleteTab=()=>{
+    
+    const index = allview.value.length- 1
+    allview.value.splice(index,1)
+
+    if(allview.value.length==0){
+        visible.value=false
+        return
+    }else{
+        activetabindex.value = activetabindex.value >0 ? activetabindex.value - 1 : 0
+    }
+}
+const closeDialog = ()=>{
+    allview.value=[]
+}
+$listen('ViewRecord',(setting)=>{     
+
+    visible.value=true
+    
+    allview.value.push(setting)
+    activetabindex.value = allview.value.length-1
+    
+})
+
+</script>

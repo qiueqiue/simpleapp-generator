@@ -16,6 +16,7 @@
  import ConfirmPopup from 'primevue/confirmpopup';
  import { useConfirm } from "primevue/useconfirm";
  const confirm = useConfirm();
+ const props = defineProps<{_id?:string}>()
  const isReadOnly =ref(true)
  const {$<%= it.typename %>Doc,$event } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()
@@ -25,7 +26,7 @@ const fetchRecord = async (recordid:string) =>{
   await doc.getById(recordid)
 }
 
-const id = computed(()=>String(useRoute().params.id??''))
+const id = computed(() => props._id ? props._id :  String(useRoute().params.id ?? ""));
   
 
 const disabled = computed(()=>{

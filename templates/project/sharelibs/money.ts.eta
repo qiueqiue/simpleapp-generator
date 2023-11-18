@@ -1,7 +1,6 @@
 export const getSubtotal = (details) =>{
     
     details.subTotal =  details.unitPrice * details.quantity
-    console.log(details)
     return details
 }
 

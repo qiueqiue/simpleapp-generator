@@ -8,14 +8,8 @@
 import {ref} from 'vue'
 import _ from 'lodash'
 import { SimpleAppClient } from  '~/simpleapp/generate/clients/SimpleAppClient' //'../SimpleAppClient';
-import Dialog from 'primevue/dialog';
-// import axios from 'axios'
-import ProgressSpinner from 'primevue/progressspinner';
-import ConfirmPopup from 'primevue/confirmpopup';
-import { useConfirm } from "primevue/useconfirm";
 
 import {SearchBody,CellSetting} from '~/types'
-const confirm = useConfirm();
 const props = defineProps<{
     document:SimpleAppClient<any,any>
     columns:CellSetting[]    
@@ -52,68 +46,11 @@ const newData = () => {
   visible.value=true;
 };
 
-const triggerEdit = (data: any) => {
-  let id = data._id
-  router.push({ path: getDocumentUrl(doc.getDocName(),id) })  
-};
-const editRecord = (id:string) => {
-  
-  console.log("editRecord",id)
-  
-  doc.getById(id).then(()=>{
-    visible.value=true
-    popuptitle.value = "Edit "+doc.getDocName()
-  });
-  
-};
-const createData = async () => {
-  disabled.value=true
-  
-    doc.create().then(()=>{
-      visible.value=false
-      refresh()
-    }).catch((err:any)=>{
-      console.error(err)
-    }).finally(()=>disabled.value=false)
- 
-};
-const updateData = async () => {
-  disabled.value=true
-  
-  doc.update().then(()=>{
-      visible.value=false
-      refresh()
-    }).catch((err:any)=>{
-      console.error(err)
-    }).finally(()=>disabled.value=false)
-  
-};
-const deleteData = (event:Event) => {
-    
-    confirm.require({
-        target: event.currentTarget as HTMLElement,
-        message:'Delete?',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
-        accept: ()=>{
-            disabled.value=true 
-            doc.delete(data.value._id ?? "").then(()=>visible.value=false).finally(() => {
-                refresh();    
-            });
-        },
-        reject: () => {
-            console.log("Cancel delete")
-        }
-    })  
-};
+
+
 
 onNuxtReady(()=>{
-  refresh()
-  if (route.params.id) {
-    const recordid:string = route.params.id.toString()
-    editRecord(recordid)  
-  }
-  
+  refresh()   
 })
 $listen('RefreshDocumentList',(data)=>{
   if(data.documentName == doc.getDocName()){
@@ -121,38 +58,55 @@ $listen('RefreshDocumentList',(data)=>{
   }
 })
 
+const getWantedFields = (selectedCols:CellSetting[]) =>{
+        let cols:string[] = []
+        
+        selectedCols.forEach((item)=>{
 
+            if(typeof item=='string'){
+                cols.push(item)
+            }else if(typeof item =='object'){
+                if(item.field !='*'){
+                    cols.push(item.field)
+                }
+                if(item.moreFields && item.moreFields.length>0){
+                    cols = cols.concat(item.moreFields)
+                }                
+            }
+        })        
+        return cols
+    }
+
+const selectRow =  (data:any) =>{  
+  console.log("select row",data)
+  goTo(doc.getDocName(),data._id)  
+}
 </script>
  
 <template>
     <div class="simpleapp-crudsimple">    
       <h1 v-if="systemwindows" class="error-text text-center">* system administration screen</h1>      
-      
-      <TableDocuments :value="recordlist" :columns="columns" :title="t(doc.getDocName())"> 
+      <div class="grid grid-cols-2">
+        <div v-if="recordlist" class="p-4">
+          <TableDocuments :value="recordlist" :columns="columns" :title="t(doc.getDocName())"  @select-row="selectRow"> 
             <template #toolbar>
                 <div class="w-full text-left">
-                    <Button class=" btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">New</Button>      
-                    <slot>
-                        undefine page content
-                    </slot>                     
+                    <Button class=" btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">{{ t('new') }}</Button>
                 </div>                
             </template>
             <template #additionaltoolbar>
-                <Button class="bg-secondary-600 hover:bg-secondary-400 text-white" @click="refresh()" type="button" >Refresh</Button>                                                                            
+                <Button class="bg-secondary-600 hover:bg-secondary-400 text-white" @click="refresh()" type="button" >{{ t('refresh') }}</Button>                                                                            
             </template>
-            <Column header=" ">
-                <template #body="{index,data}">                    
-                        <Button @click="goTo(doc.getDocName(),data._id)" icon="pi pi-pencil" class="btn btn-primary" >Edit</Button>                    
-                </template>
-            </Column>
         </TableDocuments>  
+      
+        </div>
+        <div class="p-4">
+          <slot>
+              undefine page content
+          </slot> 
+        </div>
+      </div>
       
       <DebugDocumentData v-model="data" :label="doc.getDocName()"/>
     </div>
 </template>
-
-<style scoped>
-.crudsimple-dialog{
-    z-index: 100;
-}
-</style>

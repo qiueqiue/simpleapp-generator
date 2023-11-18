@@ -54,14 +54,14 @@ onNuxtReady(()=>{
 
    <DocPageList :document="doc" :columns="columns" :sorts="sorts">
     <div>    
-    <Dialog v-model:visible="visible"
+  <!--  <Dialog v-model:visible="visible"
                 :pt="{ root: { class: 'w-full h-full bg-white' } , headertitle:{class:'m-2 ml-6 text-2xl font-bold'}}"
                 modal :header="doc.getDocName()" 
                 :autoZIndex="false" 
                 @update:visible="exitRecord"                
-                >                 
+                >    -->
                 <NuxtPage />
-        </Dialog>
+  <!-- </Dialog> -->
     
     </div>
   </DocPageList>

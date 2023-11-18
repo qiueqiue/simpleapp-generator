@@ -18,11 +18,13 @@ const items = computed(()=>{
     for(let i=0; i< patharr.length;i++){
         const p = patharr[i]
         pathurl = `${pathurl}/${p}`        
-        let pathlabel = t(p)
+        let pathlabel = ''
         if(i==0 && params['xorg']){
+            
             pathlabel = getUserProfile().branchName
             data.push ({ label: pathlabel }) 
         }else{
+            pathlabel = t(p)
             data.push ({ label: pathlabel  , url:pathurl}) 
         }
 
@@ -49,7 +51,7 @@ const getBranches = ()=>{
 <template>
     <Breadcrumb :home="home" :model="items" class="!p-0 border-none ">
                 <template #item="{ item }">
-                        <NuxtLink :to="item.url" v-if="item.url">
+                        <NuxtLink :to="item.url" v-if="item.url" :active-class="'-'" :exact-active-class="'-'">
                             <span :class="item.icon"></span>{{ item.label }}
                         </NuxtLink>
                         <div v-else>

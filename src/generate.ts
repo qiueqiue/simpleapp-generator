@@ -226,6 +226,11 @@ const generateSchema = ( docname: string,
               as:'[id].vue',
               validate: validateWritePage
             },
+            'pages.viewer.vue.eta': { 
+              to:`pages/[xorg]/${docname}`, 
+              as:'viewer.vue',
+              validate: validateWritePage
+            },
             'pages.landing.vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
               as:`../${docname}.vue`,

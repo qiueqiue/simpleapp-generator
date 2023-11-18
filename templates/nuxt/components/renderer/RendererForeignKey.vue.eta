@@ -1,11 +1,30 @@
 <template>    
-    <NuxtLink  v-if="setting?.collection" :to="getDocumentUrl(setting.collection,modelValue ? modelValue['_id']:'')" class="text-primary-700 hover:text-primary-500 cursor-pointer">        
+    <span  v-if="setting?.collection" @click="viewRecord" class="text-primary-700 hover:text-primary-500 cursor-pointer">        
         {{modelValue?.label}}
-    </NuxtLink>
+    </span>
     <span v-else>{{modelValue?.label || modelValue}}</span>
 </template>
 <script setup lang="ts">
-const modelValue = defineModel()
 
+
+const modelValue = defineModel<{label:string,_id:string}>()
 const props = defineProps<{setting:any}>()
+const {$event} = useNuxtApp()
+const viewer=ref()
+const viewRecord = () => {
+    viewer.value = getDocument(props.setting.collection)?.viewer
+    
+    // getDocumentUrl(setting.collection,modelValue ? modelValue['_id']:'')
+    //getDocumentUrl(setting.collection,modelValue ? modelValue['_id']:'')
+    $event('ViewRecord',{
+        _id: modelValue.value?._id as string,
+        label: modelValue.value?.label as string,
+        eventId: crypto.randomUUID(),
+        documentName: props.setting.collection,
+        viewer: viewer.value,
+        readonly:true
+
+    })
+
+}
 </script>

@@ -8,6 +8,7 @@
                 header:{ class:''},
                 headerRow:{ class:' bg-gray-200'},                                
             }"
+            v-on:row-click="clickRow"
             :value="value" 
             :filters="filters"
             :paginator="true" :rows="20"
@@ -100,13 +101,18 @@ import { FilterMatchMode } from 'primevue/api';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import renderComponent from '~/components/renderer'
+import { emit } from 'process';
 const props = defineProps<{
     value:any[]
-    columns: CellSetting[]
-    title:string
-    
+    columns: CellSetting[]    
+    title:string    
     
 }>()
+const emits = defineEmits(['selectRow'])
+
+const clickRow = (eventdata:any) =>{
+    emits('selectRow',eventdata.data)
+}
 
 const filters = ref({
     'global': {value: null, matchMode: FilterMatchMode.CONTAINS},

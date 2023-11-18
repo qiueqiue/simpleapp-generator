@@ -1,5 +1,6 @@
 import {SimpleAppClient} from '~/simpleapp/generate/clients/SimpleAppClient'
 import {CellSetting} from './documentlist'
+import { Component } from 'vue'
   export type DocumentMetaData =  {
     docName:string
     docType:string
@@ -8,6 +9,7 @@ import {CellSetting} from './documentlist'
     documentDate:string
     docNumber:boolean
     docClass: SimpleAppClient<any,any>
+    viewer: any
     
   }
   export type MenuData =  {

@@ -13,6 +13,9 @@ export const getAllDocuments=():DocumentMetaData[]  => [
       <% const d = it.modules[i] %>      
       <% const conf =  d.schema["x-simpleapp-config"] %>
       {docName:'<%= d['docname'].toLowerCase() %>',docType:'<%= d['doctype'].toUpperCase()%>',page: '<%=d['pagetype']%>', isolationType:'<%=conf['isolationType']%>', 
-            documentDate:'<%=conf['documentDate']??""%>', docNumber:<%=conf['generateDocumentNumber']??false%>, docClass: useNuxtApp().$<%=d['docname']%>Doc()},
+            documentDate:'<%=conf['documentDate']??""%>', docNumber:<%=conf['generateDocumentNumber']??false%>, 
+              viewer: () => import('~/pages/[xorg]/<%=d['docname'].toLowerCase()%>/viewer.vue'
+              ),
+              docClass: useNuxtApp().$<%=d['docname']%>Doc()},
     <%}%>
   ]

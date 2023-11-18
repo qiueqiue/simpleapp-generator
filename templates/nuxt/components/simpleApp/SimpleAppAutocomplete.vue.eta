@@ -1,0 +1,82 @@
+<template>    
+    <AutoComplete v-model="modelValue"  v-if="!readonly"
+               forceSelection optionLabel="label" :dropdown="true"                                
+               @item-select="pickAutoComplete"
+               @complete="getListFromAutocompleteApi"                          
+               :pt="pt"
+               :disabled="readonly"
+               :suggestions="list"                                
+               @blur="onBlurAutocomplete"
+               :inputId="inputId" :path="setting.instancepath"
+               :readonly="readonly"
+                />
+   <div v-else class="p-3 border rounded-lg border-gray-300 dark:border-blue-900/40 ">
+       <A :readonly="readonly" class="cursor-pointer text-primary-600  dark:text-primary-400 "
+          tabindex="0" @click="openViewer">{{modelValue?.label}}</A>
+   </div>
+</template>
+<script setup lang="ts">
+   import { isNull, pick } from 'lodash';
+   import {autocompletetype} from '~/types'
+   import {ForeignKey} from '~/types'
+   const {$event} = useNuxtApp()
+   const list = ref([])
+   const emptyautocomplete =():autocompletetype=> ({_id:'',label:''})
+   const autocompleteitem = ref<autocompletetype>(emptyautocomplete())
+   const props = defineProps<{
+       setting:any    
+       readonly?:boolean
+       inputId:string
+       pt?:any
+   }>()
+   const modelValue = defineModel<{_id:string,label:string}>()        
+   const onBlurAutocomplete = ()=>{
+   
+   if(  autocompleteitem.value === null){
+       autocompleteitem.value = emptyautocomplete()
+   }
+   if(isNull(modelValue.value )){
+       modelValue.value = autocompleteitem.value
+   }
+   else if(typeof modelValue.value =='object'){
+    
+   }else{
+       modelValue.value = autocompleteitem.value
+   }
+
+}
+const getListFromAutocompleteApi =  (event:any)=>{    
+ const keyword = event.query??''  
+ //props.setting.document.getDocType()
+ const targetDocument = props.setting.fieldsetting['x-foreignkey']
+ getDocumentApi(targetDocument).autoComplete(keyword).then((res:any)=>{
+   list.value = res.data 
+ })
+}
+const pickAutoComplete = (event:any)=>{
+ if(typeof event.value.query == 'undefined'){      
+     modelValue.value=event.value
+     autocompleteitem.value = event.value      
+ }
+}
+
+const emits = defineEmits(['change','update:modelValue','update:docNoFormat'])
+watch(modelValue ,(newvalue:any)=>{
+   modelValue.value=autocompleteitem.value                
+
+   emits('change',modelValue.value)
+   emits('update:modelValue',modelValue.value)    
+})
+
+const openViewer = () =>{
+   $event('ViewRecord',{
+       _id: modelValue.value?._id as string,
+       eventId: crypto.randomUUID(),
+       label: modelValue.value?.label as string,
+       readonly:true,
+       viewer : getDocument(props.setting.fieldsetting['x-foreignkey'])?.viewer,
+       documentName: props.setting.fieldsetting['x-foreignkey'],
+   })
+}
+
+</script>
