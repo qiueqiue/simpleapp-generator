@@ -10,11 +10,18 @@ import _ from 'lodash'
 import { SimpleAppClient } from  '~/simpleapp/generate/clients/SimpleAppClient' //'../SimpleAppClient';
 
 import {SearchBody,CellSetting} from '~/types'
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     document:SimpleAppClient<any,any>
     columns:CellSetting[]    
+    layoutClass?:string
+    col1Class?:string
+    col2Class?:string
     sorts?: string[][]
-}>()
+}>(),{
+  layoutClass:'grid grid-cols-2',
+  col1Class:'p-4',
+  col2Class:'p-4'
+})
 const resourcename = ref( _.upperFirst(props.document.getDocName()))
 const visible = ref(false)
 const doc = props.document
@@ -86,9 +93,9 @@ const selectRow =  (data:any) =>{
 <template>
     <div class="simpleapp-crudsimple">    
       <h1 v-if="systemwindows" class="error-text text-center">* system administration screen</h1>      
-      <div class="grid grid-cols-2">
-        <div v-if="recordlist" class="p-4">
-          <TableDocuments :value="recordlist" :columns="columns" :title="t(doc.getDocName())"  @select-row="selectRow"> 
+      <div :class="layoutClass">
+        <div v-if="recordlist" :class="col1Class">
+          <TableDocuments :value="recordlist" :columns="columns" :title="doc.getDocName()"  @select-row="selectRow"> 
             <template #toolbar>
                 <div class="w-full text-left">
                     <Button class=" btn-primary" @click="newData" v-tooltip="'Add new(ctrl+enter)'" v-if="canPerform(resourcename,'create')">{{ t('new') }}</Button>
@@ -100,13 +107,11 @@ const selectRow =  (data:any) =>{
         </TableDocuments>  
       
         </div>
-        <div class="p-4">
+        <div :class="col2Class">
           <slot>
               undefine page content
           </slot> 
         </div>
-      </div>
-      
-      <DebugDocumentData v-model="data" :label="doc.getDocName()"/>
+      </div>            
     </div>
 </template>

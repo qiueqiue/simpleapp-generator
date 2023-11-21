@@ -35,5 +35,6 @@ export enum SimpleAppInputType  {
 export type autocompletetype={
     _id:string
     label:string
+    code:string
     [key:string]:any
 }

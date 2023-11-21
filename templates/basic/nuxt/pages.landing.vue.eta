@@ -12,7 +12,6 @@
   const {$<%= it.typename %>Doc,$listen } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()
   const data = doc.getReactiveData();
-  const visible = ref(false)
 
   definePageMeta({
     name: '<%= it.typename %>',
@@ -38,30 +37,14 @@
     <%}%>
     ]
 
-const exitRecord = ()=>{
-        goTo(doc.getDocName())
-    }
-
-watch(()=> useRoute().fullPath ,(newvalue,oldvalue)=>{
-  visible.value = useRoute().params.id || useRoute().fullPath.includes("/new") ? true : false;
-})
-
-onNuxtReady(()=>{
-  visible.value = useRoute().params.id ||  useRoute().fullPath.includes('/new') ? true : false;  
-})
+const id=computed(()=>useRoute().params.id)
 </script>
 <template>
 
    <DocPageList :document="doc" :columns="columns" :sorts="sorts">
     <div>    
-  <!--  <Dialog v-model:visible="visible"
-                :pt="{ root: { class: 'w-full h-full bg-white' } , headertitle:{class:'m-2 ml-6 text-2xl font-bold'}}"
-                modal :header="doc.getDocName()" 
-                :autoZIndex="false" 
-                @update:visible="exitRecord"                
-                >    -->
-                <NuxtPage />
-  <!-- </Dialog> -->
+                <NuxtPage :_id="id ?? 'new'"/>
+  
     
     </div>
   </DocPageList>

@@ -22,7 +22,7 @@
                     </div>
                     <div class="flex-1">
                         <slot name="title">
-                            <h1 class="text text-2xl pt-2 text-center">{{ title }}</h1>
+                            <h1 class="text text-2xl pt-2 text-center">{{ t(title) }}</h1>
                         </slot>
                         
                     </div>                    
@@ -36,7 +36,7 @@
             <template #empty>
                 <div class="text-center ">
                     <div class="text-3xl   text-gray-400 pi pi-exclamation-circle"></div>
-                    <div class="text-3xl text-gray-400">no data found</div>
+                    <div class="text-3xl text-gray-400">{{t('noDataFound')}}</div>
                     
                 </div>
             </template>
@@ -48,7 +48,7 @@
                     <p >{{ t(col) }}</p>
                 </template>               
                 <template v-else-if="typeof col =='object'" #header>            
-                    <span>{{ col.title }} </span>
+                    <span>{{ t(col.title) }} </span>
                 </template>
                 <template v-else #header>
                     <span class="text-danger-600">unknown</span>

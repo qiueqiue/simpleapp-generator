@@ -216,14 +216,19 @@ const generateSchema = ( docname: string,
             }
           }
           const mapfiles = {
-            'pages.new.vue.eta': { 
+            'pages.form.vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
-              as:'new.vue',
+              as:'form.vue',
               validate: validateWritePage
             },
             'pages.[id].vue.eta': { 
               to:`pages/[xorg]/${docname}`, 
               as:'[id].vue',
+              validate: validateWritePage
+            },
+            'pages.new.vue.eta': { 
+              to:`pages/[xorg]/${docname}`, 
+              as:'new.vue',
               validate: validateWritePage
             },
             'pages.viewer.vue.eta': { 

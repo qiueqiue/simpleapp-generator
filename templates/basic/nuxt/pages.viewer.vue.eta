@@ -6,8 +6,16 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import Crud from './new.vue'
+import Crud from './form.vue'
+
+const emits = defineEmits(['afterCreate'])
+const afterCreate = (data:any)=>{
+    emits('afterCreate',data)
+}
+
 </script>
+
+
 <template>
-    <Crud/>
+    <Crud _id="new" @after-create="afterCreate"/>
 </template>

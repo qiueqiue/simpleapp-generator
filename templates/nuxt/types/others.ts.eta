@@ -37,7 +37,7 @@ import { Component } from 'vue'
   
   export type SearchBody = {
       
-      filter?:CellSetting[];
+      filter?:object;
       
       fields?: any[];
       

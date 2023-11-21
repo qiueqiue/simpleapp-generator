@@ -1,82 +1,163 @@
-<template>    
-    <AutoComplete v-model="modelValue"  v-if="!readonly"
-               forceSelection optionLabel="label" :dropdown="true"                                
+<template>   
+        <AutoComplete v-model="modelValue"  v-if="!readonly" ref="autocompleteinput"
+               forceSelection optionLabel="label"                
                @item-select="pickAutoComplete"
-               @complete="getListFromAutocompleteApi"                          
-               :pt="pt"
+               @complete="getListFromAutocompleteApi"       
+               :placeholder="t('keyword')"
+               :dropdown="true"
+               :dropdown-icon="buttonClass"               
+               @before-show="beforeShow"
+               @clear = "clear"
+               :dropdown-mode="'current'"
+                :pt="pt"
+                :delay="500"
                :disabled="readonly"
                :suggestions="list"                                
                @blur="onBlurAutocomplete"
                :inputId="inputId" :path="setting.instancepath"
                :readonly="readonly"
                 />
-   <div v-else class="p-3 border rounded-lg border-gray-300 dark:border-blue-900/40 ">
-       <A :readonly="readonly" class="cursor-pointer text-primary-600  dark:text-primary-400 "
-          tabindex="0" @click="openViewer">{{modelValue?.label}}</A>
-   </div>
+        <div v-else class="p-3 border rounded-lg border-gray-300 dark:border-blue-900/40 ">
+            <span :readonly="readonly" class="cursor-pointer text-primary-600  dark:text-primary-400 "
+                tabindex="0" @click="openViewer(true)">{{ modelValue && modelValue.label ?  modelValue.label:'-' }}</span>
+        </div>
 </template>
 <script setup lang="ts">
-   import { isNull, pick } from 'lodash';
-   import {autocompletetype} from '~/types'
-   import {ForeignKey} from '~/types'
-   const {$event} = useNuxtApp()
-   const list = ref([])
-   const emptyautocomplete =():autocompletetype=> ({_id:'',label:''})
-   const autocompleteitem = ref<autocompletetype>(emptyautocomplete())
-   const props = defineProps<{
-       setting:any    
-       readonly?:boolean
-       inputId:string
-       pt?:any
-   }>()
-   const modelValue = defineModel<{_id:string,label:string}>()        
-   const onBlurAutocomplete = ()=>{
-   
-   if(  autocompleteitem.value === null){
-       autocompleteitem.value = emptyautocomplete()
-   }
-   if(isNull(modelValue.value )){
-       modelValue.value = autocompleteitem.value
-   }
-   else if(typeof modelValue.value =='object'){
-    
-   }else{
-       modelValue.value = autocompleteitem.value
-   }
+import { isNull } from 'lodash';
+import {autocompletetype,SchemaConfig,SchemaType} from '~/types'
+const autocompleteinput = ref()
+const {$event} = useNuxtApp()
+const list = ref<any[]>([])
+const emptyautocomplete =():autocompletetype=> ({_id:'',code:'',label:''})
 
+const props = withDefaults(defineProps<{
+    setting:any    
+    allowAddNew?:boolean
+    showNull?:boolean
+    readonly?:boolean
+    inputId:string
+    pt?:any
+}>(),{
+allowAddNew:true,showNull:true
+})
+const autocompleteitem = ref<autocompletetype>(emptyautocomplete())
+const modelValue = defineModel<autocompletetype>()        
+if(modelValue.value && modelValue.value._id){
+    autocompleteitem.value={...modelValue.value}
 }
+//clear auto complete auto set value = empty
+const clear = ()=>{
+    autocompleteitem.value = emptyautocomplete()
+    modelValue.value = emptyautocomplete()
+}
+const buttonClass=computed(()=>modelValue.value?._id ? 'pi pi-link' : 'pi pi-angle-down')
+
+//if record picked, click button show record info instead
+const beforeShow = ()=>{    
+    if(modelValue.value?._id ){                
+        openViewer(true)        
+    }
+}
+   
+//recorrect data if lose focus
+const onBlurAutocomplete = ()=>{   
+    if(  autocompleteitem.value === null){
+        autocompleteitem.value = emptyautocomplete()
+    }
+    if(isNull(modelValue.value )){
+        modelValue.value = autocompleteitem.value
+    }
+    else if(typeof modelValue.value =='object'){
+        
+    }else{
+        modelValue.value = autocompleteitem.value
+    }
+}
+
+//obtain remote data
 const getListFromAutocompleteApi =  (event:any)=>{    
  const keyword = event.query??''  
- //props.setting.document.getDocType()
  const targetDocument = props.setting.fieldsetting['x-foreignkey']
  getDocumentApi(targetDocument).autoComplete(keyword).then((res:any)=>{
-   list.value = res.data 
+
+   list.value = res.data
+
+   if(props.allowAddNew){
+    list.value = list.value.concat({_id:'new',label:'<'+t('new')+'>'})
+   }
  })
 }
+
+//on select
 const pickAutoComplete = (event:any)=>{
- if(typeof event.value.query == 'undefined'){      
-     modelValue.value=event.value
-     autocompleteitem.value = event.value      
- }
+    console.log("event",event,'event.value._id',"'"+event.value._id+"'")
+    if(event.value._id===''){
+        
+        modelValue.value =  emptyautocomplete()
+        autocompleteitem.value = emptyautocomplete()
+        console.log(modelValue.value )
+    } else if(event.value._id==='new'){
+        
+        modelValue.value =  emptyautocomplete()
+        autocompleteitem.value = emptyautocomplete()
+        openViewer(false)        
+    } 
+    else if(typeof event.value.query == 'undefined'){      
+        modelValue.value=event.value
+        autocompleteitem.value = event.value      
+    }
 }
 
 const emits = defineEmits(['change','update:modelValue','update:docNoFormat'])
 watch(modelValue ,(newvalue:any)=>{
-   modelValue.value=autocompleteitem.value                
-
-   emits('change',modelValue.value)
-   emits('update:modelValue',modelValue.value)    
+   
+   emitChanges()
+   
 })
-
-const openViewer = () =>{
-   $event('ViewRecord',{
-       _id: modelValue.value?._id as string,
-       eventId: crypto.randomUUID(),
-       label: modelValue.value?.label as string,
-       readonly:true,
-       viewer : getDocument(props.setting.fieldsetting['x-foreignkey'])?.viewer,
-       documentName: props.setting.fieldsetting['x-foreignkey'],
-   })
+const emitChanges = () =>{
+    
+    emits('change',modelValue.value)
+ 
 }
+
+//pop up records
+const openViewer = (readonly:boolean) =>{
+    const remotedoc = getDocument(props.setting.fieldsetting['x-foreignkey'])
+    
+    if(remotedoc){
+        const schema:SchemaType = remotedoc.docClass.getSchema()
+        const labelfield = schema['x-simpleapp-config'].documentTitle as string
+        const codefield  = schema['x-simpleapp-config'].uniqueKey as string
+        $event('ViewRecord',{
+            _id: modelValue.value?._id as string,
+            eventId: crypto.randomUUID(),
+            label: modelValue.value?.label as string,
+            readonly:readonly,
+            viewer : getDocument(props.setting.fieldsetting['x-foreignkey'])?.viewer,
+            documentName: props.setting.fieldsetting['x-foreignkey'],
+
+            //after create, auto copy value into auto complete
+            afterCreate:(data:any)=>{                
+                autocompleteitem.value = {
+                    _id: data._id,
+                    code: data[codefield],                    
+                    label: data[labelfield],
+                }
+                if(schema['x-simpleapp-config'].additionalAutoCompleteFields){
+                    const addfields = schema['x-simpleapp-config'].additionalAutoCompleteFields
+                    for(let i=0;i<addfields.length;i++){
+                        const fieldname = addfields[i] as string
+                        autocompleteitem.value[fieldname] = data[fieldname]
+                    }
+                }   
+                modelValue.value = {...autocompleteitem.value}                             
+                emitChanges()
+                console.log("autocompleteitem.value",autocompleteitem.value ,modelValue.value)
+                
+            }
+        })
+
+    }
+  }
 
 </script>

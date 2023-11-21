@@ -10,7 +10,8 @@ import addErrors from 'ajv-errors';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import type { AxiosResponse } from 'axios';
-import {SearchBody,Notification,NotificationStatus} from '~/types'
+import {SearchBody,Notification,NotificationStatus,SchemaType} from '~/types'
+
 // import { useToast, } from 'primevue/usetoast';
 // import type {  ToastMessageOptions } from 'primevue/toast';
 // const toast = useToast();
@@ -31,7 +32,7 @@ export class SimpleAppClient<
   public event:Function|null=null;
   public listen:Function|null=null;
   protected data = <Ref<TData>>ref({} as TData);
-  public schema = {}; //cant define data type, cause it make autocomplete gone.
+  public schema = {} as SchemaType; //cant define data type, cause it make autocomplete gone.
   protected doctype = '';
   protected docname = '';
   protected errorlist = ref({});
@@ -46,8 +47,8 @@ export class SimpleAppClient<
   getDocName = () => this.docname;
   setNew = ()=>{}
   isNew = () => this.data.value['created']==''
-  setSchema = (schema: any) => (this.schema = schema);
-  getSchema = () => this.schema;
+  setSchema = (schema: SchemaType) => (this.schema = schema);
+  getSchema = ():SchemaType=> this.schema;
   getErrors = () => this.errorlist;
   getData = () => this.data.value;
   getApi = () =>this.docapi;

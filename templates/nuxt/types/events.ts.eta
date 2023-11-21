@@ -14,6 +14,7 @@ export type ViewRecord = {
     documentName: string
     viewer?: any 
     readonly?:boolean
+    afterCreate?:Function
 }
 export type RefreshDocumentList ={
     documentName : string,

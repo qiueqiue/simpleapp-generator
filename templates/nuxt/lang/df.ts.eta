@@ -8,6 +8,10 @@ export default {
     welcomeSimpleApp: 'Welcome To SimpleApp',
     changeHomePageMsg: '{fullName}, it is product front page and by right you shall replace it with something else.',
     realman:'Real man code with simpleapp',
+    new:'New',
+    keyword: 'Keyword',
+    empty: 'Empty',    
+    noDataFound:'No Data Found',
 
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>

@@ -6,8 +6,9 @@
  * last change 2023-09-09
  * author: Ks Tan
  */
-import Crud from './new.vue'
+import Crud from './form.vue'
+defineProps(['_id'])
 </script>
 <template>
-    <Crud/>
+    <Crud :_id="_id"/>
 </template>

@@ -6,6 +6,7 @@
  * Author: Ks Tan
  */
 import _ from 'lodash'
+import {SchemaType} from './types'
 import * as sharelibs from '../sharelibs'
 import * as jsonpath from 'jsonpath'
 import { SimpleAppClient } from "./SimpleAppClient";
@@ -46,7 +47,7 @@ export type {
     } from '../openapi'
 
 export class <%= it.typename%>Client extends SimpleAppClient<<%= it.typename%>,<%= it.doctype.toUpperCase()%>Api>{
-  public readonly schema= <%~ JSON.stringify(it.jsonschema) %>;
+  public readonly schema= <%~ JSON.stringify(it.jsonschema) %> as SchemaType;
   protected documentIdentityCode='<%~ it.autocompletecode %>'
   protected documentIdentityName='<%~ it.autocompletename %>'  
   <%if(it.jsonschema['x-simpleapp-config']['generateDocumentNumber']){%>

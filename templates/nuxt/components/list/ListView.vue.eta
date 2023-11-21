@@ -13,8 +13,10 @@
                 <li v-for="item in filterlist">                    
                     <div  :class="getSelectedCSS(item)">
                         <NuxtLink :to="`${url}/${item[idField]}`">
-                            <div class="mr-2">{{item[titleField]  }}</div>
-                            <div class="font font-bold text-right">{{item[subTitleField]}}</div>
+                            <slot>
+                                <div class="mr-2">{{item[titleField]  }}</div>
+                                <div class="font font-bold text-right">{{item[subTitleField]}}</div>
+                            </slot>
                         </NuxtLink>
                     </div>
                 
