@@ -12,8 +12,7 @@
               <div class="p-inputgroup flex flex-row">
                 <InputText
                   class="flex-1"
-                  type="email"
-                  placeholder="your company name"
+                  placeholder="yourCompanyMame"
                   v-model:model-value="data.tenantName"
                 />
                 <div class="p-inputgroup-addon p p-0">
@@ -34,6 +33,7 @@
           <div class="flex flex-col">
             <InputText            
               type="text"
+
               autofocus="true"
               v-model:model-value="data.tenantName"
               placeholder="Organization Name"
@@ -72,7 +72,7 @@ const createTenant = async () => {
 onhold.value = true;
 const { $axios, $listen } = useNuxtApp();
 
-const openapi = getApi();
+const openapi = getAllApi();
 const apipath = `${useRuntimeConfig().public.API_URL}`;
 let profileapi = new openapi.PROFILEApi(undefined, apipath, $axios);
 

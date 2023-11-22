@@ -21,7 +21,7 @@ const selectMenu = (menu:MenuData) =>{
       </svg>
     </button>
 
-     <Dialog v-model:visible="visible" modal header="Pick Document" :pt="{dialog:{ class:' bg-primary-800 ' }}">
+     <Dialog v-model:visible="visible" modal :header="t('pickDocument')" :pt="{dialog:{ class:' bg-primary-800 ' }}">
       <div class="">
           <Button v-for="menu in getMenus()" @click="selectMenu(menu)" >
             <div v-if="menu.isolationType == 'none'" class="text-warning-600 hover:text-warning-500">

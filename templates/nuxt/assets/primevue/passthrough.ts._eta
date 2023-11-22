@@ -24,7 +24,8 @@ const CustomTailwind = usePassThrough(
         selectbutton:{
             root:{class:'flex flex-row gap-1'},
             button: ({ context }) => ({
-                class: ['text-center border-gray-400 dark:border-gray-700 text-gray-50 dark:text-gray-300 rounded-lg  p-2 cursor-pointer hover:bg-primary-400 dark:hover:bg-primary-800 hover:text-white', context.active ? 'bg-primary-600  dark:bg-primary-700 text-white' : '']
+                
+                class: ['text-center border text-gray-300 dark:border-gray-700  dark:text-gray-300 rounded-lg  p-2 cursor-pointer  hover:bg-primary-400 dark:hover:bg-primary-800 hover:text-white', context.active ? 'bg-primary-600  dark:bg-primary-700 text-white' : '']
             }),
             label:{class: 'text-sm'},
         },
@@ -39,13 +40,16 @@ const CustomTailwind = usePassThrough(
             }
         },
         sidebar:{
-            root:{class:'w-1/2 bg-white border p-2 h-full'}
+            root:{class:'w-1/2  bg-white dark:bg-gray-800 border p-2 h-full'}
         },
         panel: {
             root:{class:['border']},
             title: {class: ['leading-none font-light text-2xl']},
             header:{class:['bg bg-gray-200 h-10 content-middle']},
             content:{class:['']}
+        },
+        breadcrumb:{
+            root:{class:''}
         }
     },
 );

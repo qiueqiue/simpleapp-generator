@@ -2,7 +2,7 @@ export type CellSetting  = {
     title: string
     field: string
     cssClass?:string
-    moreFields: string[]
+    moreFields?: string[]
     rendererName ?: string
     rendererSetting ?:any
  } | string 

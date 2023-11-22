@@ -129,7 +129,7 @@ import {SearchBody,CellSetting} from '~/types'
                 if(item.field !='*'){
                     cols.push(item.field)
                 }
-                if(item.moreFields && item.moreFields.length>0){
+                if(item?.moreFields && item.moreFields.length>0){
                     cols = cols.concat(item.moreFields)
                 }                
             }
