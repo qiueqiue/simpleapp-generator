@@ -4,28 +4,37 @@
  * last change 2023-10-28
  * Author: Ks Tan
  */
-import { Injectable, Scope,Inject,Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Scope,
+  Inject,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { Model, model, connect, PipelineStage } from 'mongoose';
-import {ModifiedCollection,ModifiedRecords} from '../types'
-import _ from 'lodash'
+import { ModifiedCollection, ModifiedRecords } from '../types';
+import _ from 'lodash';
 import { Module } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { Role } from './roles/roles.enum';
-import * as rolegroups from './roles/roles.group'
+import * as rolegroups from './roles/roles.group';
 import { UserService } from './../../services/user.service';
 import { InjectModel } from '@nestjs/mongoose';
 const Base64URL = require('@darkwolf/base64url');
 import { UserMongoSchema } from './../models/user.model';
-import {   User,  }  from './../types/user.type';
-import {   Permission,  }  from './../types/perm.type';
-import {ProfileUserBranch , ProfileUserInvites} from '../../profile/profile.types'
+import { User } from './../types/user.type';
+import { Permission } from './../types/perm.type';
+import {
+  ProfileUserBranch,
+  ProfileUserInvites,
+} from '../../profile/profile.types';
 
-import {ClientSession}  from 'mongoose'
+import { ClientSession } from 'mongoose';
 
-@Injectable({scope:Scope.REQUEST})
+@Injectable({ scope: Scope.REQUEST })
 export class UserContext {
-  protected sessionId : string =crypto.randomUUID()
-  protected logger = new Logger()
+  protected sessionId: string = crypto.randomUUID();
+  protected logger = new Logger();
   protected uid: string = '';
   protected _id: string = '';
   protected uname: string = '';
@@ -34,32 +43,36 @@ export class UserContext {
   protected xOrg: string = '';
   protected tenantId: number = 0;
   protected orgId: number = 0;
-  protected orgRecordId:string = ''
-  protected branchRecordId:string = ''
+  protected orgRecordId: string = '';
+  protected branchRecordId: string = '';
   protected branchId: number = 0;
   protected ssoACL: any = {};
   protected token: string = '';
   protected refreshtoken: string = '';
   protected group: string = '';
   protected branchCode: string = '';
-  protected branchName: string = '';  
+  protected branchName: string = '';
   protected orgCode: string = '';
-  protected orgName: string = '';  
-  protected branches: any[] = []
-  protected lastActivity : string = new Date().toISOString()
-  protected invites: any[] = []  //User + field tenant:Tenant[]
+  protected orgName: string = '';
+  protected branches: any[] = [];
+  protected lastActivity: string = new Date().toISOString();
+  protected invites: any[] = []; //User + field tenant:Tenant[]
   protected roles: string[] = [];
-  protected modifiedRecords:ModifiedRecords = {createds:{},updateds:{},deleteds:{}}
+  private dbsession: ClientSession
+  protected modifiedRecords: ModifiedRecords = {
+    createds: {},
+    updateds: {},
+    deleteds: {},
+  };
 
   constructor(
-    private readonly usermodel:Model<User>,
-    private readonly permmodel:Model<Permission>,
-    private dbsession:ClientSession,
-    
-    ) {
-    
-  }
-  getDBSession = ():ClientSession => this.dbsession
+    private readonly usermodel: Model<User>,
+    private readonly permmodel: Model<Permission>,
+    // private dbsession: ClientSession,
+  ) {}
+  
+  setDBSession = (dbsession:ClientSession) =>  {this.dbsession =  dbsession}
+  getDBSession = (): ClientSession => this.dbsession;
   getId = () => this._id;
   getUid = () => this.uid;
   getUname = () => this.uname;
@@ -70,36 +83,33 @@ export class UserContext {
   getEmail = () => this.email;
   getGroup = () => this.group;
   getRoles = () => this.roles;
-  getModifieds = () => this.modifiedRecords
-  getBranches = ():ProfileUserBranch[] => {
+  getModifieds = () => this.modifiedRecords;
+  getBranches = (): ProfileUserBranch[] => {
     this.branches;
-    const data:ProfileUserBranch[] = []
+    const data: ProfileUserBranch[] = [];
 
-    if(this.branches){
-      for(let i=0;i<this.branches.length; i++){
-        const b= this.branches[i]
+    if (this.branches) {
+      for (let i = 0; i < this.branches.length; i++) {
+        const b = this.branches[i];
         data.push({
-          _id: b._id,          
+          _id: b._id,
           branch: b.branch[0],
           group: b.group,
-          xOrg: this.generateXorg(b.tenantId,b.orgId,b.branchId)
-
-        })
+          xOrg: this.generateXorg(b.tenantId, b.orgId, b.branchId),
+        });
       }
     }
-    return data
-    
-  }
-  getInvites = ():ProfileUserInvites[] =>{
-    
-    // const usermodel = model<User>('user',UserMongoSchema,'user')    
-    
-    const data:ProfileUserInvites[] = []
-    if( this.invites){
+    return data;
+  };
+  getInvites = (): ProfileUserInvites[] => {
+    // const usermodel = model<User>('user',UserMongoSchema,'user')
+
+    const data: ProfileUserInvites[] = [];
+    if (this.invites) {
       // console.log("getInvites",res)
-      for(let i=0;i< this.invites.length; i++){
-        const r =  this.invites[0]
-        
+      for (let i = 0; i < this.invites.length; i++) {
+        const r = this.invites[0];
+
         data.push({
           _id: r._id,
           email: r.email,
@@ -107,147 +117,171 @@ export class UserContext {
           fullName: '',
           tenantName: r.tenant[0].tenantName,
           created: r.created,
-        })
+        });
       }
     }
-    return data    
-    
-    };
-  setCurrentUserInfo = async (tokenstr: string,xorg)=>{
-    this.setXorg(xorg);      
-    await this.setUserToken(tokenstr)
-    
-  }
+    return data;
+  };
+  setCurrentUserInfo = async (tokenstr: string, xorg) => {
+    this.setXorg(xorg);
+    await this.setUserToken(tokenstr);
+  };
 
   /**
    * obtain user profile filter by uid,tenantId,orgId,branchId
    * @returns Promise<User|undefined>
    */
-  obtainProfileFromDb = async () : Promise<User|undefined>=>{
-    const filter = { $match:{uid:this.uid,tenantId:this.tenantId} }
+  obtainProfileFromDb = async (): Promise<User | undefined> => {
+    const filter = { $match: { uid: this.uid, tenantId: this.tenantId } };
 
-    const joinpermission:PipelineStage = {$lookup: {
-      from : 'permission',
-      localField : '_id',
-      foreignField : 'userId',
-      as : 'permissions',
-      pipeline:[
-          { 
-            $match:{
+    const joinpermission: PipelineStage = {
+      $lookup: {
+        from: 'permission',
+        localField: '_id',
+        foreignField: 'userId',
+        as: 'permissions',
+        pipeline: [
+          {
+            $match: {
               // userId:this.getId(),
-              tenantId:this.tenantId,
-              orgId:this.orgId,
-              branchId:this.branchId,            
-          }},
-          {$lookup:{from: 'branch',localField: 'branchId',foreignField:'branchId',as: 'currentbranch'}},
-          {$lookup:{from: 'organization',localField: 'orgId',foreignField:'orgId',as: 'currentorg'}}
-        ]
-    }}
+              tenantId: this.tenantId,
+              orgId: this.orgId,
+              branchId: this.branchId,
+            },
+          },
+          {
+            $lookup: {
+              from: 'branch',
+              localField: 'branchId',
+              foreignField: 'branchId',
+              as: 'currentbranch',
+            },
+          },
+          {
+            $lookup: {
+              from: 'organization',
+              localField: 'orgId',
+              foreignField: 'orgId',
+              as: 'currentorg',
+            },
+          },
+        ],
+      },
+    };
 
-    const pipeline:PipelineStage[]=[filter,]
+    const pipeline: PipelineStage[] = [filter];
 
-    if(this.tenantId>0){
-      pipeline.push(joinpermission)
+    if (this.tenantId > 0) {
+      pipeline.push(joinpermission);
     }
     // console.log("obtainProfileFromDbobtainProfileFromDb ",pipeline)
     // const users = await usermodel.find(filter)
-    const users = await this.usermodel.aggregate(pipeline)
-    this.logger.verbose(`aggregate user profile from database`,'obtainProfileFromDb' )   
-    this.logger.verbose(pipeline,'obtainProfileFromDb x' )   
-    this.logger.verbose(users,'obtainProfileFromDb' )   
+    const users = await this.usermodel.aggregate(pipeline);
+    this.logger.verbose(
+      `aggregate user profile from database`,
+      'obtainProfileFromDb',
+    );
+    this.logger.verbose(pipeline, 'obtainProfileFromDb x');
+    this.logger.verbose(users, 'obtainProfileFromDb');
     // console.log("obtainProfileFromDbobtainProfileFromDb ",users)
-    if(users && users.length>0){
-      const userinfo = users[0]
+    if (users && users.length > 0) {
+      const userinfo = users[0];
 
-      console.log(userinfo)
-      if(this.tenantId>0){
-        const myperm=userinfo.permissions[0]
-        
-        if(myperm && myperm.group){
-          userinfo.group = myperm.group                    
-          userinfo.roles = rolegroups[userinfo.group]()
-          
-          userinfo.branchRecordId = myperm.currentbranch[0].branchRecordId
-          userinfo.branchCode = myperm.currentbranch[0].branchCode
-          userinfo.branchName = myperm.currentbranch[0].branchName          
-          userinfo.orgRecordId = myperm.currentorg[0]._id
-          userinfo.orgCode = myperm.currentorg[0].orgCode
-          userinfo.orgName = myperm.currentorg[0].orgName
-          
-        }    
-      }else{        
-        userinfo.group = '' 
+      //console.log(userinfo)
+      if (this.tenantId > 0) {
+        const myperm = userinfo.permissions[0];
+
+        if (myperm && myperm.group) {
+          userinfo.group = myperm.group;
+          userinfo.roles = rolegroups[userinfo.group]();
+
+          userinfo.branchRecordId = myperm.currentbranch[0].branchRecordId;
+          userinfo.branchCode = myperm.currentbranch[0].branchCode;
+          userinfo.branchName = myperm.currentbranch[0].branchName;
+          userinfo.orgRecordId = myperm.currentorg[0]._id;
+          userinfo.orgCode = myperm.currentorg[0].orgCode;
+          userinfo.orgName = myperm.currentorg[0].orgName;
+        }
+      } else {
+        userinfo.group = '';
       }
-      
-      const currentitme = new Date(this.lastActivity).getTime()
-      
-      const dblastactivity = userinfo.lastActivity ?? '2000-01-01T00:00:00Z' 
-      const lastvisit = new Date( dblastactivity).getTime() ?? 0
+
+      const currentitme = new Date(this.lastActivity).getTime();
+
+      const dblastactivity = userinfo.lastActivity ?? '2000-01-01T00:00:00Z';
+      const lastvisit = new Date(dblastactivity).getTime() ?? 0;
       // if(currentitme - lastvisit)
-   
 
       //update last activtity dont too frequent
-      //if(!dblastactivity || currentitme - lastvisit > 5000 ){         
-      //  const newusermodel = await this.usermodel.findById(userinfo._id)      
-      //  newusermodel.lastActivity= this.lastActivity        
+      //if(!dblastactivity || currentitme - lastvisit > 5000 ){
+      //  const newusermodel = await this.usermodel.findById(userinfo._id)
+      //  newusermodel.lastActivity= this.lastActivity
       //  const result = await newusermodel.save()
       //}
-      
-      // const result =  await this.usermodel.findOneAndUpdate({_id: userinfo._id},{lastActivity: new Date().toISOString})
-      return userinfo  
-    }else{
-      return undefined
-    }
-    
-  }
-  setUserToken = async (tokenstr: string) => {    
 
+      // const result =  await this.usermodel.findOneAndUpdate({_id: userinfo._id},{lastActivity: new Date().toISOString})
+      return userinfo;
+    } else {
+      return undefined;
+    }
+  };
+  setUserToken = async (tokenstr: string) => {
     //define token info
-    const tokeninfo = jwt.decode(tokenstr);      
+    const tokeninfo = jwt.decode(tokenstr);
     this.token = tokenstr;
     this.uid = tokeninfo.sub;
     this.email = tokeninfo.email;
     this.uname = tokeninfo.preferred_username;
-    this.fullname = tokeninfo.name;    
-    this.ssoACL = tokeninfo.resource_access;    
-    this.logger.verbose(`set token ${this.uid}`)   
+    this.fullname = tokeninfo.name;
+    this.ssoACL = tokeninfo.resource_access;
+    this.logger.verbose(`set token ${this.uid}`);
     //read current user from db
     // console.log("await this.obtainProfileFromDb()")
-    const userinfo = await this.obtainProfileFromDb()      
-    this.logger.verbose(userinfo,'obtainProfileFromDb result')    
-    if(userinfo){
-      this.logger.debug(`${this.uid} user exists in tenant (${this.tenantId})`,'setUserToken' )   
+    const userinfo = await this.obtainProfileFromDb();
+    this.logger.verbose(userinfo, 'obtainProfileFromDb result');
+    if (userinfo) {
+      this.logger.debug(
+        `${this.uid} user exists in tenant (${this.tenantId})`,
+        'setUserToken',
+      );
 
-      this._id = userinfo._id.toString()
-      this.branchCode = userinfo['branchCode'] ?? ''
-      this.branchName = userinfo['branchName'] ?? ''
-      this.orgCode = userinfo['orgCode'] ?? ''
-      this.orgName = userinfo['orgName'] ?? ''
-      this.orgRecordId = userinfo['orgRecordId'] ?? ''
-      this.branchRecordId = userinfo['branchRecordId'] ?? ''
-      this.group = userinfo['group'] ?? ''
-      this.roles = userinfo['roles'] ?? [Role.Everyone,Role.User]
-    }else{
-      this.logger.debug(`Set unknown id of current user`,'setUserToken' )   
+      this._id = userinfo._id.toString();
+      this.branchCode = userinfo['branchCode'] ?? '';
+      this.branchName = userinfo['branchName'] ?? '';
+      this.orgCode = userinfo['orgCode'] ?? '';
+      this.orgName = userinfo['orgName'] ?? '';
+      this.orgRecordId = userinfo['orgRecordId'] ?? '';
+      this.branchRecordId = userinfo['branchRecordId'] ?? '';
+      this.group = userinfo['group'] ?? '';
+      this.roles = userinfo['roles'] ?? [Role.Everyone, Role.User];
+    } else {
+      this.logger.debug(`Set unknown id of current user`, 'setUserToken');
       // this.group = ''
       // this.tenantId=0
       // this.orgId=0
       // this.orgCode=0
-      this.roles = [Role.Everyone,Role.Unknown]
+      this.roles = [Role.Everyone, Role.Unknown];
     }
-    this.logger.debug(`${this.uid} have _id (${this.getId()}), group (${this.group}) and role (${this.getRoles()})` )   
+    this.logger.debug(
+      `${this.uid} have _id (${this.getId()}), group (${
+        this.group
+      }) and role (${this.getRoles()})`,
+    );
 
-    if(this.isRealmAdmin() && !this.roles.includes(Role.SuperAdmin)){
-      this.roles.push(Role.SuperAdmin)
+    if (this.isRealmAdmin() && !this.roles.includes(Role.SuperAdmin)) {
+      this.roles.push(Role.SuperAdmin);
     }
-    this.logger.verbose(this)   
+    this.logger.verbose(this);
   };
 
-
-  generateXorg = (tenantId:number,orgId:number,branchId:number):string=>{
-    return Base64URL.encodeText(`${tenantId}-${orgId}-${branchId}`)
-  }
-  getInfo = () => {    
+  generateXorg = (
+    tenantId: number,
+    orgId: number,
+    branchId: number,
+  ): string => {
+    return Base64URL.encodeText(`${tenantId}-${orgId}-${branchId}`);
+  };
+  getInfo = () => {
     return this;
   };
   getBranchFilter = () => {
@@ -282,16 +316,16 @@ export class UserContext {
       createdBy: u.uid,
       updatedBy: u.uid,
       created: new Date().toISOString(),
-      updated: new Date().toISOString()
+      updated: new Date().toISOString(),
     };
   };
   getUpdateFilter = () => {
     const u = this;
     return {
       updatedBy: u.uid,
-      updated: new Date().toISOString()
+      updated: new Date().toISOString(),
     };
-  };  
+  };
   setXorg = (xorg) => {
     try {
       const decodedText: string = Base64URL.decodeText(xorg);
@@ -301,8 +335,7 @@ export class UserContext {
         const u = this;
         u.tenantId = Number(arrXorg[0]);
         u.orgId = Number(arrXorg[1]);
-        u.branchId = Number(arrXorg[2]);     
-        
+        u.branchId = Number(arrXorg[2]);
       } else {
         throw 'invalid x-org';
       }
@@ -311,233 +344,264 @@ export class UserContext {
     }
   };
 
-
-  async getUserInfo(){
-     
+  async getUserInfo() {
     // obtain basic user info
     const userinfo = {
-      _id: this.getId() ,
-      sessionId:this.sessionId,
+      _id: this.getId(),
+      sessionId: this.sessionId,
       tenantId: this.getTenantId(),
       orgId: this.getOrgId(),
-      orgRecordId: this.orgRecordId ,
+      orgRecordId: this.orgRecordId,
       branchRecordId: this.branchRecordId,
       branchId: this.getBranchId(),
       branchCode: this.branchCode,
       branchName: this.branchName,
-      orgCode:this.orgCode,
-      orgName:this.orgName,
+      orgCode: this.orgCode,
+      orgName: this.orgName,
       email: this.getEmail(),
       uid: this.getUid(),
       fullName: this.getFullname(),
       group: this.group,
       roles: this.getRoles(),
       branches: this.getBranches(),
-      invites: await this.getInvites()
+      invites: await this.getInvites(),
+    };
+    this.logger.debug(userinfo, 'init getUserInfo()');
+
+    if (this.getId() != '') {
+      this.logger.debug(userinfo, 'obtain permissions and invitations');
+      const filter: PipelineStage = {
+        $match: {
+          uid: this.uid,
+          tenantId: this.tenantId,
+        },
+      } as PipelineStage;
+      const permission: PipelineStage = {
+        $lookup: {
+          from: 'permission',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'permissions',
+          pipeline: [
+            // {$match:{userId: this.getId(),},},
+            {
+              $lookup: {
+                from: 'branch',
+                localField: 'branchId',
+                foreignField: 'branchId',
+                as: 'branch',
+              },
+            },
+          ],
+        },
+      };
+      const lookupinvitation: PipelineStage = {
+        $lookup: {
+          from: 'user',
+          localField: 'email',
+          foreignField: 'email',
+          as: 'invites',
+          pipeline: [
+            { $match: { uid: '' } },
+            {
+              $lookup: {
+                from: 'tenant',
+                localField: 'tenantId',
+                foreignField: 'tenantId',
+                as: 'tenant',
+              },
+            },
+          ],
+        },
+      };
+
+      const pipeline: PipelineStage[] = [filter, permission, lookupinvitation];
+      this.logger.debug(pipeline, 'getUserInfo');
+      // // // const users = await usermodel.find(filter)
+      const users = await this.usermodel.aggregate(pipeline);
+      this.logger.debug(users, 'users from aggregate');
+
+      this.invites = users[0].invites;
+      this.branches = users[0].permissions;
+      this.logger.verbose(users, 'getUserInfo');
+      userinfo.branches = this.getBranches();
+      userinfo.invites = this.getInvites();
+      // this.logger.debug(`getUserInfo result ${userinfo}`)
+    } else {
+      this.logger.log(
+        `${this.getUid()} does not exists in current tenant (${this.tenantId})`,
+      );
     }
-    this.logger.debug(userinfo,"init getUserInfo()")
 
-    if(this.getId()!=''){
-      this.logger.debug(userinfo,"obtain permissions and invitations")
-      const filter:PipelineStage ={ $match:{
-        uid:this.uid,
-        tenantId :this.tenantId
-       }} as PipelineStage
-      const permission:PipelineStage = {$lookup: {
-      from : 'permission',
-      localField : '_id',
-      foreignField : 'userId',
-      as : 'permissions',
-      pipeline:[
-        // {$match:{userId: this.getId(),},},
-        {$lookup:{from : 'branch',localField : 'branchId',foreignField : 'branchId',as : 'branch',}},
-      ]
-    }}
-    const lookupinvitation:PipelineStage = {$lookup: {
-      from : 'user',
-      localField : 'email',
-      foreignField : 'email',
-      as : 'invites',
-      pipeline:[
-        {$match:{uid: ''}},
-        {$lookup:{from : 'tenant',localField : 'tenantId',foreignField : 'tenantId',as : 'tenant',}},
-      ]
-    }}
-
-    const pipeline:PipelineStage[]=[
-      filter,
-      permission,
-      lookupinvitation
-    ]
-    this.logger.debug(pipeline,"getUserInfo")
-    // // // const users = await usermodel.find(filter)
-    const users = await this.usermodel.aggregate(pipeline)
-    this.logger.debug(users,'users from aggregate')
-
-    
-    this.invites = users[0].invites
-    this.branches = users[0].permissions
-    this.logger.verbose(users,"getUserInfo")
-    userinfo.branches=this.getBranches()
-    userinfo.invites=this.getInvites()
-    // this.logger.debug(`getUserInfo result ${userinfo}`)
-    
-    }else{
-      this.logger.log(`${this.getUid()} does not exists in current tenant (${this.tenantId})`)
-    }
-    
-
-    return userinfo
+    return userinfo;
   }
-  async decideInvitation (id:string, decision:string):Promise<boolean> {
-    
+  async decideInvitation(id: string, decision: string): Promise<boolean> {
     // const usermodel = model<User>('user',UserMongoSchema,'user')
-    const res = await this.usermodel.findById(id)
+    const res = await this.usermodel.findById(id);
     // console.log("find invitation:",res)
-    if(!res.uid){
-      res.uid = this.getUid()
-      res.fullName = this.fullname
-      res.active = true
-      
-      if(decision=='accept'){
-        const result = await res.save({session:this.dbsession})
-        this.logger.log(result,"accept invitation 1")
+    if (!res.uid) {
+      res.uid = this.getUid();
+      res.fullName = this.fullname;
+      res.active = true;
+
+      if (decision == 'accept') {
+        const result = await res.save({ session: this.dbsession });
+        this.logger.log(result, 'accept invitation 1');
         //set permission of all user under this.user_id
-        const updateresult = await this.permmodel.updateMany({ uid:'',user_id:res._id},{uid:this.getUid()}).session(this.dbsession)
-        this.logger.log(updateresult,"update all permission")
-        return true
-      }else{
-        const deleteresult = await this.usermodel.deleteOne({_id: id}).session(this.dbsession)         
-        await this.permmodel.deleteMany({ uid:'',user_id:res._id}).session(this.dbsession)
-        return true
-      }          
-    }else{
-      throw new BadRequestException(`${id} not found.`)
-    }    
-
+        const updateresult = await this.permmodel
+          .updateMany({ uid: '', user_id: res._id }, { uid: this.getUid() })
+          .session(this.dbsession);
+        this.logger.log(updateresult, 'update all permission');
+        return true;
+      } else {
+        const deleteresult = await this.usermodel
+          .deleteOne({ _id: id })
+          .session(this.dbsession);
+        await this.permmodel
+          .deleteMany({ uid: '', user_id: res._id })
+          .session(this.dbsession);
+        return true;
+      }
+    } else {
+      throw new BadRequestException(`${id} not found.`);
+    }
   }
 
-  isRealmAdmin = ()=>{
-    const o = this.ssoACL    
-    const ssoclient = process.env.OAUTH2_CLIENTID
-    const adminRole = process.env.OAUTH2_ADMINROLE    
+  isRealmAdmin = () => {
+    const o = this.ssoACL;
+    const ssoclient = process.env.OAUTH2_CLIENTID;
+    const adminRole = process.env.OAUTH2_ADMINROLE;
     // return false
-    if(this.getEmail()===process.env.ADMIN_EMAIL){
-      return true
-    }    
-    else if( o[ssoclient] && o[ssoclient]['roles'] && o[ssoclient]['roles'] == adminRole ){
-          return true
-    }else{     
-      return false
+    if (this.getEmail() === process.env.ADMIN_EMAIL) {
+      return true;
+    } else if (
+      o[ssoclient] &&
+      o[ssoclient]['roles'] &&
+      o[ssoclient]['roles'] == adminRole
+    ) {
+      return true;
+    } else {
+      return false;
     }
-    
-  }
+  };
 
-
-  searchInsertedRecordId(collection:string,_id:string){
-    return this.modifiedRecords.createds[collection].find((item)=>item===_id)
+  searchInsertedRecordId(collection: string, _id: string) {
+    return this.modifiedRecords.createds[collection].find(
+      (item) => item === _id,
+    );
   }
-  addInsertedRecordId(collection:string,_id:string){
-    if(this.modifiedRecords.createds[collection]){
-      this.modifiedRecords.createds[collection].push(_id)
-    }else{
-      this.modifiedRecords.createds[collection] = [_id]
+  addInsertedRecordId(collection: string, _id: string) {
+    if (this.modifiedRecords.createds[collection]) {
+      this.modifiedRecords.createds[collection].push(_id);
+    } else {
+      this.modifiedRecords.createds[collection] = [_id];
     }
   }
-  addUpdatedRecordId(collection:string,_id:string){
-    if(this.modifiedRecords.updateds[collection]){
-      this.modifiedRecords.updateds[collection].push(_id)
-    }else{
-      this.modifiedRecords.updateds[collection] = [_id]
+  addUpdatedRecordId(collection: string, _id: string) {
+    if (this.modifiedRecords.updateds[collection]) {
+      this.modifiedRecords.updateds[collection].push(_id);
+    } else {
+      this.modifiedRecords.updateds[collection] = [_id];
     }
-
   }
-  addDeletedRecordId(collection:string,_id:string){
-    if(this.modifiedRecords.deleteds[collection]){
-      this.modifiedRecords.deleteds[collection].push(_id)
-    }else{
-      this.modifiedRecords.deleteds[collection] = [_id]
+  addDeletedRecordId(collection: string, _id: string) {
+    if (this.modifiedRecords.deleteds[collection]) {
+      this.modifiedRecords.deleteds[collection].push(_id);
+    } else {
+      this.modifiedRecords.deleteds[collection] = [_id];
     }
-
   }
 
+  async getAllTenants() {
+    const results = [];
+    if (this.getId() != '') {
+      const filteruser: PipelineStage = {
+        $match: {
+          uid: this.uid,
+          tenantId: { $gt: 0 },
+        },
+      } as PipelineStage;
 
-  async getAllTenants (){
-    const results = []
-    if(this.getId()!=''){
-        const filteruser:PipelineStage ={ $match:{
-          uid:this.uid,
-          tenantId :{'$gt':0}
-        }} as PipelineStage
+      const getTenantData: PipelineStage = {
+        $lookup: {
+          from: 'tenant',
+          localField: 'tenantId',
+          foreignField: 'tenantId',
+          as: 'tenant',
+        },
+      };
 
-        const getTenantData:PipelineStage = { $lookup:{
-          from : 'tenant',
-          localField : 'tenantId',
-          foreignField : 'tenantId',
-          as : 'tenant',}}
+      const permission: PipelineStage = {
+        $lookup: {
+          from: 'permission',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'permissions',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'organization',
+                localField: 'orgId',
+                foreignField: 'orgId',
+                as: 'org',
+              },
+            },
+            {
+              $lookup: {
+                from: 'branch',
+                localField: 'branchId',
+                foreignField: 'branchId',
+                as: 'branch',
+              },
+            },
+          ],
+        },
+      };
 
-        const permission:PipelineStage = {$lookup: {
-        from : 'permission',
-        localField : '_id',
-        foreignField : 'userId',
-        as : 'permissions',
-        pipeline:[
-          
-          {$lookup:{from : 'organization',localField : 'orgId',foreignField : 'orgId',as : 'org',}},
-          {$lookup:{from : 'branch',localField : 'branchId',foreignField : 'branchId',as : 'branch',}},
-        ]
-      }}
-      
-      const pipelines:PipelineStage[] =[filteruser,getTenantData,permission]
+      const pipelines: PipelineStage[] = [
+        filteruser,
+        getTenantData,
+        permission,
+      ];
       // const users=[]
-      this.logger.warn(pipelines,"pipelines")
-      const users = await this.usermodel.aggregate(pipelines)    
-      
-      if(users){
+      this.logger.warn(pipelines, 'pipelines');
+      const users = await this.usermodel.aggregate(pipelines);
 
-        
-        const activeusers = users.filter((u)=>{
+      if (users) {
+        const activeusers = users.filter((u) => {
           // console.log(u.active,'===',true, ' && ',u.tenant[0].active,'===',true)
-          return u.active===true && u.tenant[0].active===true
-        })
+          return u.active === true && u.tenant[0].active === true;
+        });
         // return activeusers
-        activeusers.forEach((u)=>{
+        activeusers.forEach((u) => {
+          const permissions = u.permissions
+            .filter((item: any) => {
+              return item.org[0].active && item.branch[0].active;
+            })
+            .map((item: any) => {
+              return {
+                _id: item._id,
+                orgId: item.orgId,
+                branchId: item.branchId,
+                group: item.group,
+                orgCode: item.org[0].orgCode,
+                orgName: item.org[0].orgName,
+                branchCode: item.branch[0].branchCode,
+                branchName: item.branch[0].branchName,
+                xOrg: this.generateXorg(u.tenantId, item.orgId, item.branchId),
+              };
+            });
 
-          const permissions = u.permissions.filter((item:any)=>{
-            return item.org[0].active && item.branch[0].active
-           })
-           .map((item:any)=>{
-  
-            return {
-              _id: item._id,
-              orgId: item.orgId,
-              branchId: item.branchId,
-              group: item.group,
-              orgCode: item.org[0].orgCode,
-              orgName: item.org[0].orgName,
-              branchCode: item.branch[0].branchCode,
-              branchName: item.branch[0].branchName,
-              xOrg: this.generateXorg(u.tenantId,item.orgId,item.branchId)
-            }
-           })
-  
-  
-  
-            
-           results.push({
+          results.push({
             _id: u._id,
-            fullname : u.fullname,
+            fullname: u.fullname,
             tenantId: u.tenantId,
             tenantName: u.tenant[0].tenantName,
-            permissions: permissions
-           })
-        })
-        
+            permissions: permissions,
+          });
+        });
       }
-
-
-      
     }
-    return results
+    return results;
   }
 }

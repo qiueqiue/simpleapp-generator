@@ -51,7 +51,7 @@ export class <%= it.typename %>Processor extends SimpleAppService<<%= it.typenam
   
 
    reCalculateValue(data:<%= it.typename %>){
-    console.log('trigger new recalculate')    
+    //console.log('trigger new recalculate')    
     const jsopbj= new jsonpath['JSONPath']()
     <% if(it.jsonschema['x-simpleapp-config']['formulas']){ %>
         <%Object.keys(it.jsonschema['x-simpleapp-config']['formulas']).forEach(function(index) { %>

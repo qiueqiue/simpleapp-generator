@@ -411,6 +411,9 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
   async findIdThenDelete(appuser:UserContext,id: string): Promise<any> {
     const deletedata = await this.findById(appuser,id);    
+    if(!deletedata){
+      throw new NotFoundException(`${id} not found`,"not found")
+    }
     const dbsession = appuser.getDBSession()
     if(!dbsession.inTransaction()){
       dbsession.startTransaction()
@@ -456,6 +459,9 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   findIdThenUpdate = async (appuser:UserContext,id: string, data: T,session:mongo.ClientSession=undefined) => {
     const existingdata = await this.findById(appuser,id);
+    if(!existingdata){
+      throw new NotFoundException(`${id} not found`,"not found")
+    }
     await this.hook(appuser,HookType.beforeUpdate, data);
 
     const dbsession = appuser.getDBSession()
@@ -593,9 +599,9 @@ export class SimpleAppService<T extends { _id?: string }> {
        const fks:string[] = this.foreignkeys[collectionname]
        let  results:string[] = []
        fks.forEach(fieldpath=>{        
-          console.log("fieldpath:",fieldpath,"vdata",data,vdata)
+        //console.log("fieldpath:",fieldpath,"vdata",data,vdata)
          const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
-         console.log("tmp",tmp)
+        // console.log("tmp",tmp)
          
          results = results.concat(tmp)        
        })

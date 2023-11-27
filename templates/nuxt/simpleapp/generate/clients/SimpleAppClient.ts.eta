@@ -24,7 +24,7 @@ type crudType = {
   runSearch: Function
 };
 export class SimpleAppClient<
-  TData extends { _id?: string,created:string },
+  TData extends { _id?: string,created?:string },
   TApi extends crudType,
 > {
   protected defaultTimeOut=5000
@@ -134,7 +134,9 @@ export class SimpleAppClient<
             summary:'Record update success',
             status:NotificationStatus.success,
             data:errors
-          })
+          })        
+          this.data.value = res.data
+          console.log("save ok ", this.data.value)
           return res.data;
         }).catch((errors:any)=>{
           $event('Notification',{

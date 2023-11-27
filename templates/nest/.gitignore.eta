@@ -2,7 +2,6 @@
 /dist
 /node_modules
 /public_html
-/src/simpleapp/generate
 /src/app.module.ts
 /src/app.service.ts
 /src/app.controller.ts

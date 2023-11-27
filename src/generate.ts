@@ -102,6 +102,9 @@ const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
     // }      
 }
   
+
+const isGenerateTest = (data:TypeGenerateDocumentVariable) => data.autocompletecode && data.autocompletename
+  
 /**
  * generate frontend nuxt and backend nest codes.
  * 
@@ -167,10 +170,11 @@ const generateSchema = ( docname: string,
       const generateTemplatefolder = `${constants.templatedir}/basic/${foldertype}`    
       const allfiles = readdirSync(generateTemplatefolder,{recursive:true})      
       for(let j=0; j<allfiles.length;j++){
+        
         const filename:string = String(allfiles[j])      
         const templatepath = `${generateTemplatefolder}/${filename}`        
         
-        if(_.last(filename.split('.'))!='eta'){
+        if(_.last(filename.split('.'))!='eta'){        
           // log.warn("skip file: ",filename)
           continue;
         }
@@ -201,7 +205,28 @@ const generateSchema = ( docname: string,
               writeFileSync(targetfile,filecontent);
             }
             
-          }      
+          }else if(filecategory=='test' && isGenerateTest(variables)){            
+
+            const targetfolder = `${backendFolder}/test/documents/${docname}`
+            const targetfile = `${targetfolder}/${docname}.e2e-spec.ts`
+            log.warn("test file: ",targetfile)
+            // `${backendServiceFolder}/${doctype}.${filecategory}.${filetype}`
+            if(!existsSync(targetfolder)){
+              mkdirSync(targetfolder,{recursive:true})
+            }         
+            if(!existsSync(targetfile)){
+              log.info("process: ",targetfile)
+              const filecontent = eta.render(templatepath, variables)     
+              writeFileSync(targetfile,filecontent);
+              //create stub files
+              mkdirSync(`${targetfolder}/stub`,{recursive:true})
+              writeFileSync(`${targetfolder}/stub/id1.create.ts`,'export default () => ({_id:"00000000-0000-0000-0000-000000000001",})');
+              writeFileSync(`${targetfolder}/stub/id1.update.ts`,'export default () => ({_id:"00000000-0000-0000-0000-000000000001",})');
+              writeFileSync(`${targetfolder}/stub/id2.create.ts`,'export default () => ({_id:"00000000-0000-0000-0000-000000000002",})');
+              
+            }
+          }
+               
         }else if(foldertype=='nuxt'){
           const capname = capitalizeFirstLetter(docname)
           const validateWritePage = (folder:string,isexists:boolean)=>{

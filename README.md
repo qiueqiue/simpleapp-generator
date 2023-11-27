@@ -26,7 +26,7 @@ SimpleApp generator is a typescript code generator for convert jsonschemas becom
 1. [jsonschemas](./docs/jsonschema.md)
 2. [backend walk through](./docs/backend.md)
 3. [frontend walk through](./docs/frontend.md)
-
+4. [End to End test](./docs/test.md)
 
 
 # Quick start

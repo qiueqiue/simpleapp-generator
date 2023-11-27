@@ -11,10 +11,10 @@ export class ApiKeyValuePair {
     field1: any
 }
 export class ApiSearchBody{            
-    @ApiProperty({"type":Object,"required":false,"examples":['{"field1":"1"}'],"default":[{"field1":"ok","field2":true,}]} )
+    @ApiProperty({ "type":Object, "required":false, "examples":['{"field1":"1"}'] ,"default":{"field1":"ok","field2":true,}} )
     filter:  Object;
-    @ApiProperty({"type":[Object],"required":true,"examples":['["field1","field2"]'],"default":[["field1","field2"]]} )
+    @ApiProperty({"type":[Object],"required":true,"examples":['["field1","field2"]'],"default":["field1","field2"]} )
     fields:  [Object];
-    @ApiProperty({"type":()=>[Object],"required":true,"examples":['[{"field1":"asc"}]'],"default":[[{"field1":"asc"}]]} )
+    @ApiProperty({"type":()=>[Object],"required":true,"examples":['[[ "field1", "asc" ]]'],"default":[[ 'field1', 'asc' ]]} )
     sorts:  [Object];
 }

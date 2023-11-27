@@ -1,0 +1,22 @@
+import { getServer, getSupertest, token, emptyxorg, getXorg } from './setting';
+
+describe('Check no token or xorg /', () => {
+  it('/ (GET)', async () => {
+    //suppose fail cause no token
+    await getSupertest(getServer())
+      .get('/')
+      .set('x-org', getXorg())
+      .expect(401);
+    //suppose fail cause no xorg
+    await getSupertest(getServer())
+      .get('/')
+      .set('Authorization', token)
+      .expect(401);
+    //suppose ok
+    await getSupertest(getServer())
+      .get('/')
+      .set('Authorization', token)
+      .set('x-org', getXorg())
+      .expect(200);
+  });
+});

@@ -18,7 +18,8 @@ import {
   Res,
   Req,
   HttpStatus,
-  HttpCode
+  HttpCode,
+  NotFoundException
 } from '@nestjs/common';
 import { SimpleAppAbstractController } from './simpleapp.controller';
 import { <%= it.typename %>Service } from '../../services/<%= it.doctype %>.service';
@@ -211,7 +212,12 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   @ApiResponse({ status: 500, description: 'Internal error' })
   @ApiOperation({ operationId: 'runFindOne' })
   async findOne(@AppUser() appuser: UserContext,@Param('id') id: string) {    
-    return await this._findOne(appuser,id);
+    const data = await this._findOne(appuser, id);
+     if(!data ){
+        throw new NotFoundException(`${id} not found`,"not found")
+     }else{
+      return data
+     }
   }
   
 

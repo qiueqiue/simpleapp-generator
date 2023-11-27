@@ -23,7 +23,7 @@ async function bootstrap() {
 
   // app.enableCors();
   const httpAdapter = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new SimpleAppExceptionFilter(httpAdapter));
+  // app.useGlobalFilters(new SimpleAppExceptionFilter(httpAdapter));
 
   const config = new DocumentBuilder()
     .setTitle(process.env.PROJECT_NAME)
