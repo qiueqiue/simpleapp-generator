@@ -12,11 +12,10 @@
   const {$<%= it.typename %>Doc,$listen } = useNuxtApp();
   const doc = $<%= it.typename %>Doc()
   const data = doc.getReactiveData();
-
+  
   definePageMeta({
-    name: '<%= it.typename %>',
-    title: '<%= it.typename %>',
-  })
+    menuPath:'sample/<%= it.name %>'    
+  });
 
   const columns:CellSetting[] = [<%Object.keys(it.jsonschema.properties).forEach(function(key) { %>
         <%let obj=it.jsonschema.properties[key] %>
@@ -42,6 +41,7 @@ const id=computed(()=>useRoute().params.id)
 <template>
 
    <DocPageList :document="doc" :columns="columns" :sorts="sorts">
+    <title v-if="!id">{{ t(doc.getDocName())  }} </title>
     <div>    
                 <NuxtPage :_id="id ?? 'new'"/>
   

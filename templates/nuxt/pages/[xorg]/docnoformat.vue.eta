@@ -1,5 +1,6 @@
 <template>
   <div class="grid grid-cols-5 p-4">
+    <title>{{ t('docnoformat')}} </title>
     <ListView
       :list="getAllDocFormats()"
       idField="docType"
@@ -22,9 +23,8 @@
  * author: Ks Tan
  */
 
- definePageMeta({
-  name: "docnoformat",
-  title: "docnoformat",
-});
+definePageMeta({
+  menuPath: "setting/docnoformat",
+  })
 </script>
 

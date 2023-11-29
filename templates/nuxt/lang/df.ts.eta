@@ -17,6 +17,9 @@ export default {
     yourCompanyName: 'Your Company Name',
     onlyAppearInDebugMode: 'Only Appear In Debug Mode',
     pickDocument:'Pick Document',
+    sample:'Sample',
+    createYourContentHere: 'Create your content here',
+    setting: 'Setting',
 
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>

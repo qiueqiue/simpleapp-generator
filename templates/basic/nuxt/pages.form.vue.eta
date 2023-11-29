@@ -92,6 +92,12 @@ if (id.value && id.value != 'new') {
     
     <SimpleAppForm #default="o" :document="doc" :readonly="isReadOnly">
     <client-only>
+        <% if(it.autocompletename){%> 
+            <title v-if="id">{{ t(doc.getDocName())}}: {{ data.<%=it.autocompletename%> ?? ''}}</title>
+        <%}else{%> 
+            <title v-if="id">{{ t(doc.getDocName())}}</title>
+        <%}%> 
+        
         <div v-if="isReadOnly" class="w-full">
             <Button
                 class="btn-primary" @click="isReadOnly=false"

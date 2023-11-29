@@ -131,12 +131,12 @@ onMounted(() => {
 });
 
 definePageMeta({
-  name: 'user',
-  title: 'user'
+  menuPath: "setting/user",
   })
 </script>
 <template>
   <div class="grid grid-cols-4">
+    <title>{{ t('user')}} </title>
     <div v-if="userlist" class="m-2 p-2 border-r-2">
       <TabView>
         <TabPanel header="Active">

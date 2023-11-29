@@ -5,16 +5,29 @@ import {MenuData} from '~/types'
 const visible = ref(false)
 
 // const emit = defineEmits(['select'])
-const selectMenu = (menu:MenuData) =>{
-  navigateTo(menu.url)
-  visible.value=false
-  
-  // emit('select',menu)
+const selectMenu = (menuname:{name:string,children:any}) =>{
+  goTo(menuname.name)
+  visible.value=false  
 }
+
+
+const m =  getMenustFromPageMeta()
+const treemenu:any[] = []
+
+
+getMenustFromPageMeta().reduce((r, item) => {
+    item.split('/').reduce((o, name) => {
+        var temp = (o.children = o.children || []).find(q => q.name === name);
+        if (!temp) o.children.push(temp = { name });
+        return temp;
+    }, r);
+    return r;
+}, { children: treemenu })
+
+
 </script>
 <template>
-  <div>
-
+  <div>    
     <button class="text-center border-none  cursor-pointer" v-if="getCurrentXorg()" @click="visible=true">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -23,12 +36,16 @@ const selectMenu = (menu:MenuData) =>{
 
      <Dialog v-model:visible="visible" modal :header="t('pickDocument')" :pt="{dialog:{ class:' bg-primary-800 ' }}">
       <div class="">
-          <Button v-for="menu in getMenus()" @click="selectMenu(menu)" >
-            <div v-if="menu.isolationType == 'none'" class="text-warning-600 hover:text-warning-500">
-              * {{ camelCaseToWords(menu.label) }}
+          <div v-for="m in treemenu" class="m-4">
+            <h3>{{ t(m.name) }}</h3>
+            <div class="grid grid-cols-6 gap-4">
+              <button v-for="submenu in m.children" class="border rounded-lg p-2" @click="selectMenu(submenu)">              
+                {{ t(submenu.name) }}
+              </button>
             </div>
-            <div v-else class="">{{ camelCaseToWords(menu.label) }}</div>
-          </Button>
+            
+          </div>
+          
         </div>
     </Dialog>           
   </div>

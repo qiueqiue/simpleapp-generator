@@ -8,6 +8,7 @@
 </script>
 <template>
   <div class="grid place-content-center">
+  <title>{{ t('home')}} </title>
     <ClientOnly><div class="flex flex-row">
       <div class="block">
         <h1

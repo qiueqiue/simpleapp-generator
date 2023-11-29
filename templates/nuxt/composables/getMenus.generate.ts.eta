@@ -58,3 +58,13 @@ export const getMenus =() :MenuData[]=>{
 //   console.log('data',data)
   return allowmenus
 }
+
+
+export const getMenustFromPageMeta =() =>{
+  const allmenus = useRouter().getRoutes()
+              .filter((item)=>(item.meta && item.meta.menuPath))
+              .map(item=>item.meta.menuPath) as string[]
+              
+  return allmenus.sort((one:string, two:string) => (one > two ? -1 : 1))
+  
+}
