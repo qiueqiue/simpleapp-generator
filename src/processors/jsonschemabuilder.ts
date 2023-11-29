@@ -20,22 +20,13 @@ import {
 const log: Logger<ILogObj> = new Logger();
 const configname =  "x-simpleapp-config"
 const FOREIGNKEY_PROPERTY = 'x-foreignkey'
-const COMPULSORYFIELDS={  _id:{type:'string'},
-  created:{type:'string'},
-  updated:{type:'string'},
-  createdBy:{type:'string'},
-  updatedBy:{type:'string'},
-  tenantId: {type:'integer',default:1,minimum:1 },
-  orgId: {type:'integer',default:1,minimum:1 },
-  branchId: {type:'integer',default:1,minimum:1 },
-}
 export const readJsonSchemaBuilder = async (docname: string,orijsondata:JSONSchema7,
 ) => {
   // log.info(`----------------------------------------------------`)
   // log.error(`Processing schema ${docname}`)
   //validation
   if(!orijsondata[configname]) throw new Error(`Undefine ${configname}`)
-  
+  if(!orijsondata[configname]) throw new Error(`Undefine ${configname}`)
   // // Object.assign(targettemplate,schematemplates[currentschematype])
   // console.log("just want process schemaprops ********>>",targettemplate)
   
@@ -58,32 +49,8 @@ export const readJsonSchemaBuilder = async (docname: string,orijsondata:JSONSche
     }
     orijsondata.properties["docNoFormat"] = tmp as JSONSchema7Definition
   }
-
-  //apply some controls
-  //control docnoformatis required
-
-  // let schemaprops:any = targettemplate.properties 
-  // console.log("just want process targettemplate ######>>>",orijsondata)
-  // let schemadefinitions = targettemplate.definitions
-
-  
-  // Object.assign(schemaconfigs,orijsondata[configname])
-  // Object.assign(schemaprops,orijsondata.properties)
-  
-  // if(orijsondata['definitions']){
-  //   Object.assign(schemadefinitions,orijsondata['definitions'])
-  // }
-  
-  
-  // //merge properties from template
-  // Object.keys(schemaconfigs).forEach(keyname=>{
-  //   if(!schemaconfigs[keyname]){
-  //     log.fatal(`Undefine ${keyname} in "${configname}"`)
-  //   }
-  // })
-
-  //fill in default values
-  
+  //enforce format uuid for _id
+  orijsondata.properties['_id']['format']='uuid' 
 
 
   // let newschema:JSONSchema7 & SchemaType = {
