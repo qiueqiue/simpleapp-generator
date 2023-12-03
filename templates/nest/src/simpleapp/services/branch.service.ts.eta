@@ -39,7 +39,7 @@ export class BranchService extends BranchProcessor {
       //         case 'afterValidation':
       //         break;
       case 'beforeCreate':
-        const searchresult = await this.increament.generateNextNo(
+        const searchresult = await this.increament.runGenerateNextNo(
           appuser,
           'branch',
           'branchId',

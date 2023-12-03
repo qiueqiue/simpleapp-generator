@@ -36,7 +36,7 @@ export class OrganizationService extends OrganizationProcessor {
       //         case 'afterValidation':
       //         break;
       case 'beforeCreate':
-        const searchresult = await this.increament.generateNextNo(
+        const searchresult = await this.increament.runGenerateNextNo(
           appuser,
           'organization',
           'orgId',

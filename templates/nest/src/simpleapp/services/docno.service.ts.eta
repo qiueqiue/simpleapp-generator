@@ -63,7 +63,7 @@ export class DocnoformatService extends DocnoformatProcessor {
    * @param doctype
    * @returns
    */
-  async listDocFormats(appuser: UserContext, doctype: string) {
+  async runListDocFormats(appuser: UserContext, doctype: string) {
     doctype = doctype.toUpperCase();
     const searchresult = await this.search(
       appuser,

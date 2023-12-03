@@ -553,25 +553,6 @@ export class SimpleAppService<T extends { _id?: string }> {
     return this.findIdThenUpdate(appuser,id, partialdata);
   }
 
-  /**
-   * change property documentStatus for specific document, no workflow execution
-   * @param id
-   * @param docstatus
-   * @returns Promise
-   */
-  async executeWorkFlow(appuser:UserContext,id: string, bpmnname: string, docstatus: string) {
-    const data = await this.findById(appuser,id);
-    return "ok"
-    // Workflow.getInstance().executeWorkFlow(
-    //   id,
-    //   bpmnname,
-    //   docstatus,
-    //   data,
-    // );
-  }
-  
-
-
   async genNewDocNo(appuser:UserContext,data:T){
     this.logger.debug("genNewDocNo")
     const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)

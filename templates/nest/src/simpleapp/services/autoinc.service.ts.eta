@@ -53,7 +53,7 @@ export class AutoincreamentService extends AutoincreamentProcessor {
   //     return true;
   //   };
 
-  async generateNextNo(
+  async runGenerateNextNo(
     appuser: UserContext,
     collection: string,
     field: string,

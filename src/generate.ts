@@ -199,10 +199,14 @@ const generateSchema = ( docname: string,
             if(!existsSync(backendServiceFolder)){
               mkdirSync(backendServiceFolder,{recursive:true})
             }         
-            if(!existsSync(targetfile)){
-              log.info("process: ",targetfile)
+
+            if(!existsSync(targetfile) || readFileSync(targetfile, 'utf-8').includes('--remove-this-line-to-prevent-override--')){
+              log.info("Write ",targetfile)
               const filecontent = eta.render(templatepath, variables)     
-              writeFileSync(targetfile,filecontent);
+              writeFileSync(targetfile,filecontent);            
+            }
+            else{
+              log.info("skip ",targetfile)
             }
             
           }else if(filecategory=='test' && isGenerateTest(variables)){            

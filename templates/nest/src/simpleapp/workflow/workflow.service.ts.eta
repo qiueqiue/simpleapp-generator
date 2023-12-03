@@ -1,0 +1,297 @@
+/**
+ * bpmn microservices
+ * require endpoints
+ * 3. get list of proccess
+ * 
+ * user method
+ * 1. start new process *
+ * 2. update existing process
+ * 3. cancel process *
+ * 4. find my process *
+ * 5. find all proccess by filter in current tenant *
+ * 6. invoke process (approve, accept and reject)
+ * 7.getproccessbyid
+ * 
+ * supply callback
+ * 1. send messaging
+ * 2. obtain dynamic users, candidate users/groups
+ * 3. 
+ 
+ */
+
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  WorkflowSettingApiSchema,
+  WorkflowDataApiSchema,
+  WorkflowProcess, WorkflowTask,UserTaskActors
+} from './workflow.type';
+import {BPMNServer, Logger as bpmnlogger} from 'bpmn-server'
+import {configuration} from './configuration'
+import { UserContext } from '../generate/commons/user.context';
+export {
+  WorkflowSettingApiSchema,
+  WorkflowDataApiSchema,
+} from './workflow.type';
+
+
+@Injectable()
+export class WorkflowService {
+  protected bpmnServer:BPMNServer
+  private readonly logger = new Logger();
+  constructor() {
+    this.bpmnServer = new BPMNServer(configuration)        
+  }
+
+  /** 
+  * !! waiting founder 
+  * get all workflow userTask
+  * create new process definitions
+  */
+  async getMyUserTask(appuser: UserContext){
+    throw new BadRequestException(`getMyWorkflows is not supported yet`)  
+   }
+   
+ 
+  /** 
+  * !! waiting founder 
+  * deveploper method  
+  * create new process definitions
+  */
+ async newWorkflowDefinitions(appuser: UserContext,workflowName:string,xml:string){
+  throw new BadRequestException(`newWorkflowDefinitions "${workflowName}" is not supported yet`)  
+ }
+  
+
+ 
+ async getWorkflowDefinitions(appuser: UserContext){
+  throw new BadRequestException(`getWorkflowDefinitions is not supported yet`)    
+ }
+
+
+ async readWorkflowDefinition(appuser: UserContext,workflowname:string){
+  throw new BadRequestException(`readWorkflowDefinition is not supported yet`)    
+ }
+
+ async deleteWorkflowDefinition(appuser: UserContext,workflowname:string){
+  throw new BadRequestException(`deleteWorkflowDefinition is not supported yet`)    
+ }
+
+ async updateWorkflowDefinition(appuser: UserContext,workflowname:string,xml:string){
+  throw new BadRequestException(`updateWorkflowDefinition is not supported yet`)    
+ }
+
+ /**
+  * admin workflow service, obtain all active workflows and it's pending task from all tenant
+  * status: done
+  * @param appuser 
+  * @returns array of workflow process and it's waiting task
+  */
+ async getAllActiveProcesses(appuser:UserContext){
+  const alldata = await this.bpmnServer.dataStore.findInstances({status:'running'},'summary')
+  const result = this.workflowProcessArrayMaping(alldata)
+  return result  
+}
+
+
+/**
+ * delete a workflow process from database
+ * @param appuser 
+ * @param id 
+ * @returns 
+ */
+async deleteWorkflowById(appuser: UserContext,id:string){
+  if( await this.getWorkflowById(appuser,id)){
+    const result =  await this.bpmnServer.dataStore.deleteInstances({id:id})
+    return {
+      status: 'ok',
+      deletedCount: result['deletedCount']
+    }
+  }
+  
+}
+
+
+/**
+ * invoke workflow process to next step
+ * @param appuser 
+ * @param id 
+ * @param taskId 
+ * @param data 
+ * @returns 
+ */
+async invokeWorkflowUserTask(appuser: UserContext, taskId:string, data:any){
+  try{
+    const response = await this.bpmnServer.engine.invoke({'items.id': taskId, 'items.status':'wait'}, data );
+    return Object.keys(response)
+  }catch(e){
+    throw new NotFoundException(e)
+  }
+  
+}
+
+
+/**
+ * !! waiting founder
+ * use in adhoc situation override bpmn assignee/candidateUsers/Groups with data
+ * status: draft
+ * @param appuser 
+ * @param id 
+ * @param taskId 
+ * @param data 
+ */
+async updateWorkflowUserTask(appuser: UserContext, id:string,taskId:string, data:UserTaskActors){
+  try{
+    const result = await this.bpmnServer.dataStore.findInstance({id:id},{})
+    const usertask = result.items.find((item)=>item.id==taskId)
+    if(usertask){
+      usertask.assignee=data.assignee
+      usertask.candidateUsers=data.candidateUsers
+      usertask.candidateGroups=data.candidateGroups
+      // result.save()
+      
+    }else{
+      throw new NotFoundException(`user task id:${taskId} not found`)
+      
+    }
+  }catch(e){
+    throw new NotFoundException(e)
+  }
+  
+  // throw new BadRequestException(`updateWorkflowUserTask is not supported yet`)    
+}
+
+
+/**
+ * 
+ * @param appuser search all workflow in current tenant
+ * @param filter 
+ * @returns 
+ */
+async searchRunningWorkflowProcesses(appuser:UserContext,filter:any){  
+  // filter['data.tenantId']= appuser.getTenantId()  //tmp disabled waiting
+  filter['status']='running'
+  return await this.searchWorkflowProcesses(appuser,filter)
+}
+
+
+/**
+ * 
+ * @param appuser search all workflow in current tenant
+ * @param filter 
+ * @returns 
+ */
+async searchWorkflowProcesses(appuser:UserContext,filter:any){  
+    // filter['data.tenantId']= appuser.getTenantId()  //tmp disabled waiting
+    const alldata = await this.bpmnServer.dataStore.findInstances(filter,'summary')
+    const result = this.workflowProcessArrayMaping(alldata)
+    return result
+  }
+  
+
+  
+ async getPendingProcess(appuser:UserContext){
+  const tmp:any[] = await this.bpmnServer.dataStore.findItems({
+    'items.status':'wait',      
+  })    
+  
+ 
+  const result = tmp.map((proc)=>({
+    id: proc.instanceId,
+    assignee: proc.assignee,
+    candidateUsers: proc.candidateUsers,
+    candidateGroups: proc.candidateGroups,
+    data:proc.data,      
+    processName: proc.processName,
+    startedAt: proc.startedAt,
+    type: proc.type,
+    taskName:proc.name,
+    userId:proc.userId
+  }))
+  return result
+ }
+
+  /**
+   * initialise new workflow process
+   * status: done
+   * @param appuser 
+   * @param workflowName 
+   * @param data 
+   * @returns workflowsummary
+   */
+  async startWorkflow(appuser: UserContext,workflowName: string, fulldata?: any) {    
+    const result =  await this.bpmnServer.engine.start(workflowName,fulldata.data,null,appuser.getUid());
+    return {
+      id: result.id,
+      name: result.name,
+      status: result.status,
+      userId: result.userId,
+      startedAt: result.item.startedAt
+    }
+  }
+
+  /**
+   * read single process full property
+   * @param appuser 
+   * @param id 
+   * @returns 
+   */
+  async getWorkflowById(appuser: UserContext,id: string) {
+    try{
+      const data = await this.bpmnServer.dataStore.findInstance({id:id},{}) // .findInstances({id:id},'full')  
+      const result = this.workflowProcessMaping(data)      
+        return result   
+    }
+    catch(e){
+      throw new NotFoundException(e)
+    }        
+  }
+  async getPendingWorkflows(appuser: UserContext,) {
+    const tmp:any[] = await this.bpmnServer.dataStore.findItems({
+      'items.status':'wait',      
+    })    
+    
+   
+    const result = tmp.map((proc)=>({
+      id: proc.instanceId,
+      assignee: proc.assignee,
+      candidateUsers: proc.candidateUsers,
+      candidateGroups: proc.candidateGroups,
+      data:proc.data,      
+      processName: proc.processName,
+      startedAt: proc.startedAt,
+      type: proc.type,
+      taskName:proc.name,
+      userId:proc.userId
+    }))
+    return result
+  }
+
+
+
+  // helper
+  workflowProcessArrayMaping(alldata:any[]){
+    const result = alldata.map((data)=>this.workflowProcessMaping(data))
+    return result
+  }
+  workflowProcessMaping(data:any){
+    const result:WorkflowProcess = {
+      id:data.id,
+      name:data.name,
+      status:data.status,
+      startedAt:data.startedAt,
+      items:data.items
+        .filter((item)=>item.type!='bpmn:SequenceFlow')
+        .map((item)=>({
+          taskId: item.id,
+          name: item.name,
+          status:item.status,
+          assignee: item.assignee,
+          candidateUsers: item.candidateUsers,
+          candidateGroups: item.candidateGroups,
+          type: item.type,
+        }))
+    }
+
+    return result
+  }
+}

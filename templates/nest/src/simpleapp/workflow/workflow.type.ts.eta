@@ -1,0 +1,35 @@
+import { UserService } from './../services/user.service';
+export type WorkflowSettingApiSchema = {
+  userServiceUrl: string;
+  callBackUrl?: string;
+  assignee?: string;
+  candidateUsers?: string[];
+  candidategroups?: string[];
+};
+
+export type WorkflowDataApiSchema = {
+  data: any;
+  workflowSetting: WorkflowSettingApiSchema;
+};
+
+export type WorkflowTask = {
+  id: string,
+  name: string,
+  assignee: string,
+  candidateUsers: string[]
+  candidateGroups: string[]
+  type: string,
+}
+export type WorkflowProcess = {  
+    id: string
+    name: string
+    status: string
+    startedAt: string
+    items: WorkflowTask[]
+}
+
+export type UserTaskActors = {
+  assignee: string
+  candidateUsers: string[]
+  candidateGroups: string[]
+}

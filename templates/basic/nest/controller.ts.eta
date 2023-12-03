@@ -142,15 +142,19 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
       )
   <%}%>
   
-  @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })
-  @ApiResponse({status: 418,description: 'undefine bpmn,setDocumentStatus or bpmn'})
-  @ApiOperation({ operationId: '<%=api.execute ??api.action%>' })
+  @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })  
+  @ApiOperation({ operationId: 'run<%=capitalizeFirstLetter(api.execute ??api.action)%>' })
   <% if(api.queryPara && api.queryPara.length>0) {%>
       <%for(let q=0;q<api.queryPara.length; q++){%>
         @ApiQuery({name: "<%=api['queryPara'][q]%>",required: false,type: String})
       <%}%>
   <%}%>  
-  async <%=api.execute??api.action %>(@AppUser() appuser: UserContext,@Res() res:Response,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+  async <%=capitalizeFirstLetter(api.execute??api.action) %>(
+    @AppUser() appuser: UserContext,
+    <%if(['post','put'].includes(api.method.toLowerCase())){%>
+      @Body() data:any,
+    <%}%>
+    <% if(api.entryPoint && api.entryPoint.includes(':')) {%>
           <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
@@ -167,8 +171,8 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
             <%}%>
         <%}%>
          ){
-    <%if(api.execute){%>
-      const result =  await this.service.<%=api.execute%>(appuser,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+    
+      return await this.service.run<%=capitalizeFirstLetter(api.execute ?? api.action)%>(appuser,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
           <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>
@@ -183,19 +187,15 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
               <%= api['queryPara'][q] %>,              
             <%}%>
         <%}%>
+        <%if(['post','put'].includes(api.method.toLowerCase())){%>
+          data,
+        <%}%>
         )
-      res.status(HttpStatus.OK).send(result)
-    <%} else if (api.bpmn){ %>
-      const result =  await this.service.executeWorkFlow(appuser,id,'<%=api.bpmn%>',''); 
-      res.status(HttpStatus.OK).send(result)
-    <%} else if (api.setDocumentStatus){ %>
-      return await this.service.setDocumentStatus(appuser,id,'<%=api.setDocumentStatus%>');
-    <%} else {%>
-       res.status(HttpStatus.I_AM_A_TEAPOT).send('execute api"<%=api.action%>", but undefine property bpmn/setDocumentStatus/execute in jsonschema')
-    <%}%>
+      
+   
   } 
 <%}%>
-/***************************** end x-document-api definations *****************************************/
+/***************************** end x-document-api definitions *****************************************/
   @Get(':id')
   
   <%if(superadmindoctype.includes(it.doctype)){%>
