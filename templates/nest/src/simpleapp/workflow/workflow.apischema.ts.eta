@@ -30,68 +30,106 @@ export class WorkflowDataApiSchema {
   data: any;
 }
 
+export class WorkflowTaskApiSchema {
+  @ApiProperty()
+  id: string;
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  status: string;
+  @ApiProperty()
+  assignee: string;
+  @ApiProperty()
+  candidateUsers: string[];
+  @ApiProperty()
+  candidateGroups: string[];
+  @ApiProperty()
+  type: string;
+}
+export class WorkflowProcessApiSchema {
+  @ApiProperty()
+  id: string;
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  startedAt: string;
+  @ApiProperty()
+  status: string;
+  @ApiProperty({ type: () => [WorkflowTaskApiSchema] })
+  items: WorkflowTaskApiSchema[];
+}
 
-export class WorkflowTaskApiSchema  {
+export class SearchWorkflowProcessApiSchema {
+  @ApiProperty()
+  id: string;
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  startedAt: string;
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  'items.id': string;
+  @ApiProperty()
+  'items.name': string;
+  @ApiProperty()
+  'items.status': string;
+  @ApiProperty()
+  'items.assignee': string;
+  @ApiProperty()
+  'items.candidateUsers': string[];
+  @ApiProperty()
+  'items.candidateGroups': string[];
+  @ApiProperty()
+  'items.type': string;
+}
+
+export class UserTaskActorsApiSchema {
+  @ApiProperty()
+  assignee: string;
+  @ApiProperty()
+  candidateUsers: string[];
+  @ApiProperty()
+  candidateGroups: string[];
+}
+
+
+
+
+
+export class UserTaskApiSchema {
   @ApiProperty()
   id: string
   @ApiProperty()
-  name: string
+  taskId:  string
   @ApiProperty()
-  status: string
+  elementId:  string
   @ApiProperty()
-  assignee: string
+  name:  string
   @ApiProperty()
-  candidateUsers: string[]
+  processName:  string
   @ApiProperty()
-  candidateGroups: string[]
+  assignee:  string
+  @ApiProperty({ type: () => [String] })
+  candidateUsers:  string[]
+  @ApiProperty({ type: () => [String] })
+  candidateGroups:  string[]
+  @ApiProperty({ type: Object, required: true })
+  data: any
   @ApiProperty()
-  type: string
-}
-export class WorkflowProcessApiSchema {  
-    @ApiProperty()
-    id: string
-    @ApiProperty()
-    name: string
-    @ApiProperty()
-    startedAt: string
-    @ApiProperty()
-    status: string
-    @ApiProperty({ type: () => [WorkflowTaskApiSchema] })
-    items: WorkflowTaskApiSchema[]
-}
+  vars: any
+  @ApiProperty()
+  startedAt:  string
+  @ApiProperty()
+  followUpDate:  string
+  @ApiProperty()
+  dueDate:  string
+  @ApiProperty()
+  priority:  string
+  @ApiProperty()
+  type:  string
+  @ApiProperty()
+  userId: string
 
-export class SearchWorkflowProcessApiSchema {  
-  @ApiProperty()
-  id: string
-  @ApiProperty()
-  name: string
-  @ApiProperty()
-  startedAt: string
-  @ApiProperty()
-  status: string
-  
-  @ApiProperty()
-  "items.id": string
-  @ApiProperty()
-  "items.name": string
-  @ApiProperty()
-  "items.status": string
-  @ApiProperty()
-  "items.assignee": string
-  @ApiProperty()
-  "items.candidateUsers": string[]
-  @ApiProperty()
-  "items.candidateGroups": string[]
-  @ApiProperty()
-  "items.type": string
-}
-
-
-export class UserTaskActorsApiSchema  {
-  @ApiProperty()
-  assignee: string
-  @ApiProperty()
-  candidateUsers: string[]
-  @ApiProperty()
-  candidateGroups: string[]
 }

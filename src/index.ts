@@ -23,7 +23,7 @@ program
   .version(version)
   .description("An simpleapp CLI tool for generate frontend (vuejs) and backend(nestjs) codes")  
   .option("-c, --config-file <value>", 'configuration file')
-  .option("-g, --generate-type <value>", 'generate type all, backend, frontend')
+  .option("-g, --generate-type <value>", 'generate type init, backend, frontend')
   .parse(process.argv);
 
 let path=''

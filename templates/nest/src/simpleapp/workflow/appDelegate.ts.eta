@@ -81,7 +81,12 @@ class MyAppDelegate extends DefaultAppDelegate{
     async executionEvent(context, event) {
 
         if (context.item) {
-
+            if (event == 'wait' && context.item.element.type == 'bpmn:UserTask')
+			{
+				 const msg=`********reaching user task******`;
+		
+				console.log(msg, event);
+			}
 //            console.log(`----->Event: '${event}' for ${context.item.element.type} '${context.item.element.id}' id: ${context.item.id}`);
 //            if (event == 'wait' && context.item.element.type == 'bpmn:UserTask')
 //                console.log(`----->Waiting for User Input for '${context.item.element.id}' id: ${context.item.id}`);
@@ -103,24 +108,24 @@ class MyAppDelegate extends DefaultAppDelegate{
     }
 }
 
-async function delay(time, result) {
-    console.log("delaying ... " + time)
-    return new Promise(function (resolve) {
-        setTimeout(function () {
-            console.log("delayed is done.");
-            resolve(result);
-        }, time);
-    });
-}
-import * as readline from 'readline';
-const cl = readline.createInterface(process.stdin, process.stdout);
-const question = function (q) {
-    return new Promise((res, rej) => {
-        cl.question(q, answer => {
-            res(answer);
-        })
-    });
-};
+// async function delay(time, result) {
+//     console.log("delaying ... " + time)
+//     return new Promise(function (resolve) {
+//         setTimeout(function () {
+//             console.log("delayed is done.");
+//             resolve(result);
+//         }, time);
+//     });
+// }
+// import * as readline from 'readline';
+// const cl = readline.createInterface(process.stdin, process.stdout);
+// const question = function (q) {
+//     return new Promise((res, rej) => {
+//         cl.question(q, answer => {
+//             res(answer);
+//         })
+//     });
+// };
 // class MyServices {
 //     async promptUser(input, context) {
 //         console.log('executing prompt user');

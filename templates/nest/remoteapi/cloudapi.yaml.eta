@@ -1,0 +1,768 @@
+---
+openapi: 3.0.3
+info:
+  title: Cloud API
+  description: This is a cloud API
+  version: 0.9.3
+servers:
+- url: /
+security:
+- simbizoauth: []
+- xorg: []
+paths:
+  /cloudapi/avatar:
+    post:
+      tags:
+      - Avatar Resource
+      description: "Upload avatar with email and base64 image (png), size auto scale\
+        \ down"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK
+  /cloudapi/avatar/{emailmd5hash}:
+    get:
+      tags:
+      - Avatar Resource
+      description: "Get avatar image from storage, if not exists try get from gravatar"
+      parameters:
+      - name: emailmd5hash
+        in: path
+        description: The email MD5 hash of the user
+        required: true
+        schema:
+          default: 3acc837f898bdaa338b7cd7a9ab6dd5b
+          type: string
+      - name: size
+        in: query
+        schema:
+          format: int32
+          default: 60
+          type: integer
+      responses:
+        "200":
+          description: OK
+  /cloudapi/email:
+    post:
+      tags:
+      - Email Resource
+      description: "API for send email, default using mailgun. Support mailgun template"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailApiModel'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/invitation/{key}:
+    post:
+      tags:
+      - Hotvalue Resource
+      description: "Create or replace and invitation hotvalue, trigger kafka and pusher\
+        \ channel=invitation and key=[tenant_id]{key}"
+      parameters:
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: invitationvalue1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotvalueInvitation'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/json/{key}:
+    post:
+      tags:
+      - Hotvalue Resource
+      description: "Create or replace and text hotvalue, trigger kafka and pusher\
+        \ channel=json and key=[tenant_id]{key}"
+      parameters:
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: jsonvalue1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/setupcompany/{key}:
+    post:
+      tags:
+      - Hotvalue Resource
+      description: "Create or replace and setupcompany hotvalue, trigger kafka and\
+        \ pusher channel=setupcompany and key=[tenant_id]{key}"
+      parameters:
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: setupcompanyvalue1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotvalueSetupCompany'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/text/{key}:
+    post:
+      tags:
+      - Hotvalue Resource
+      description: "Create or replace and text hotvalue, trigger kafka and pusher\
+        \ channel=text and key=[tenant_id]{key}"
+      parameters:
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: textvalue1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/{channel}:
+    get:
+      tags:
+      - Hotvalue Resource
+      parameters:
+      - name: channel
+        in: path
+        description: "hotvalue channel, supported value is text/json/invitation"
+        required: true
+        schema:
+          type: string
+        example: text
+      responses:
+        "200":
+          description: OK
+  /cloudapi/hotvalue/{channel}/{key}:
+    get:
+      tags:
+      - Hotvalue Resource
+      description: "retrieve value of /{channel}/key, it isolated by tenant_id "
+      parameters:
+      - name: channel
+        in: path
+        description: "hotvalue channel, supported value is text/json/invitation"
+        required: true
+        schema:
+          type: string
+        example: text
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: value1
+      responses:
+        "200":
+          description: OK
+    delete:
+      tags:
+      - Hotvalue Resource
+      description: "delete value of /{channel}/key, it isolated by tenant_id"
+      parameters:
+      - name: channel
+        in: path
+        description: "hotvalue channel, supported value is text/json/invitation"
+        required: true
+        schema:
+          type: string
+        example: text
+      - name: key
+        in: path
+        description: Identity of the value. Isolated by tenant
+        required: true
+        schema:
+          type: string
+        example: value1
+      responses:
+        "200":
+          description: OK
+  /cloudapi/notification:
+    post:
+      tags:
+      - Notification Resource
+      description: send firebase notification to mobile apps
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationApiModel'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/sms:
+    post:
+      tags:
+      - SMS Resource
+      description: "API for send SMS into mobile device, each SMS come with cost.\
+        \ Only support silverstreet at the moment"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SMSApiModel'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/storage/{bucketname}:
+    get:
+      tags:
+      - Storage Resource
+      parameters:
+      - name: bucketname
+        in: path
+        required: true
+        schema:
+          default: s3-bucket-name
+          type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+      - Storage Resource
+      description: "Accept multi part file upload using http form post, return json\
+        \ result"
+      parameters:
+      - name: bucketname
+        in: path
+        required: true
+        schema:
+          default: s3-bucket-name
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileUpload'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/storage/{bucketname}/{key}:
+    get:
+      tags:
+      - Storage Resource
+      parameters:
+      - name: bucketname
+        in: path
+        required: true
+        schema:
+          default: s3-bucket-name
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /cloudapi/tester:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/avatar/{emailmd5hash}:
+    get:
+      tags:
+      - Tester Resource
+      parameters:
+      - name: emailmd5hash
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: size
+        in: query
+        schema:
+          format: int32
+          default: 60
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/email:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/hotvalue:
+    get:
+      tags:
+      - Tester Resource
+      description: Prepare html page for monitor hot value
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/notification:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/sms:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/storage:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tester/tmpfile:
+    get:
+      tags:
+      - Tester Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInstance'
+  /cloudapi/tmpfile:
+    post:
+      tags:
+      - Tmpfile Resource
+      description: "Accept multi part file upload using http form post, return json\
+        \ result"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FileUpload'
+      responses:
+        "200":
+          description: OK
+  /cloudapi/tmpfile/{key}:
+    get:
+      tags:
+      - Tmpfile Resource
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Charset:
+      type: object
+      properties:
+        name:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        aliasSet:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        registered:
+          type: boolean
+    EmailApiModel:
+      description: Model class for a process that accepts multiple file uploads
+      required:
+      - subject
+      - to
+      type: object
+      properties:
+        subject:
+          description: apiuser which is executed by which user
+          minLength: 3
+          type: string
+          example: user1
+        to:
+          format: email
+          description: Email address
+          minItems: 1
+          type: array
+          items:
+            type: string
+          example:
+          - tester@simitgroup.com
+        cc:
+          format: email
+          description: Cc to Emails
+          type: array
+          items:
+            type: string
+          example: []
+        bcc:
+          format: email
+          description: Bcc to Emails
+          type: array
+          items:
+            type: string
+          example: []
+        ishtml:
+          description: Decide email body is html
+          type: boolean
+          example: false
+        body:
+          description: Email body example
+          type: string
+          example: example of email body
+        template:
+          format: ""
+          description: Mailgun template name
+          type: string
+          example: testing
+        template_variables:
+          format: ""
+          description: variables use in mailgun email template
+          type: object
+          additionalProperties:
+            type: string
+          example: []
+        attachments:
+          format: binary
+          description: List of file attachments
+          type: array
+          items:
+            $ref: '#/components/schemas/TmpfileModel'
+    Expression:
+      type: object
+      properties:
+        namespace:
+          type: string
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        literal:
+          type: boolean
+        literalValue:
+          type: object
+        origin:
+          $ref: '#/components/schemas/Origin'
+        generatedId:
+          format: int32
+          type: integer
+    FileUpload:
+      type: object
+    HotvalueInvitation:
+      type: object
+      properties:
+        roleArr:
+          type: array
+          items:
+            type: string
+        accessArr:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+        email:
+          type: string
+    HotvalueSetupCompany:
+      type: object
+      properties:
+        agreement:
+          type: boolean
+        companyname:
+          type: string
+        generatesample:
+          type: boolean
+        industry:
+          type: string
+        telephone:
+          type: string
+    Locale:
+      type: object
+      properties:
+        language:
+          type: string
+        script:
+          type: string
+        country:
+          type: string
+        variant:
+          type: string
+        extensionKeys:
+          uniqueItems: true
+          type: array
+          items:
+            format: byte
+            type: string
+        unicodeLocaleAttributes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        unicodeLocaleKeys:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        iSO3Language:
+          type: string
+        iSO3Country:
+          type: string
+        displayLanguage:
+          type: string
+        displayScript:
+          type: string
+        displayCountry:
+          type: string
+        displayVariant:
+          type: string
+        displayName:
+          type: string
+    NotificationApiModel:
+      required:
+      - tokens
+      - body
+      type: object
+      properties:
+        priority:
+          description: "Priority status, normal or high"
+          type: string
+          example: normal
+        title:
+          description: Push notification title
+          type: string
+          example: Thanks for using SIMBIZ!
+        imageurl:
+          description: Image url to show
+          type: string
+          example: http://wwww.myimage.com/image1.jpg
+        sound:
+          description: Notification sound
+          type: string
+          example: default
+        data:
+          description: Hidden data for mobile apps
+          type: object
+          additionalProperties:
+            type: string
+          example: {}
+        tokens:
+          description: Firebase client tokens
+          minItems: 1
+          type: array
+          items:
+            type: string
+          example:
+          - e8zE9LzSnkYpmatL:APQt...
+        body:
+          description: Push notification body
+          type: string
+          example: this is body msg
+    Origin:
+      type: object
+      properties:
+        line:
+          format: int32
+          type: integer
+        lineCharacterStart:
+          format: int32
+          type: integer
+        lineCharacterEnd:
+          format: int32
+          type: integer
+        templateId:
+          type: string
+        templateGeneratedId:
+          type: string
+        variant:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Variant'
+          nullable: true
+    ParameterDeclaration:
+      type: object
+      properties:
+        typeInfo:
+          type: string
+        key:
+          type: string
+        defaultValue:
+          $ref: '#/components/schemas/Expression'
+        origin:
+          $ref: '#/components/schemas/Origin'
+    Part:
+      type: object
+      properties:
+        name:
+          type: string
+        typeInfo:
+          type: string
+        virtualMethod:
+          type: boolean
+    SMSApiModel:
+      required:
+      - recipients
+      - body
+      - isascii
+      type: object
+      properties:
+        recipients:
+          format: mobile
+          description: Telephone number
+          minItems: 1
+          type: array
+          items:
+            type: string
+          example:
+          - "601987654321"
+        body:
+          type: string
+        isascii:
+          type: boolean
+    Template:
+      type: object
+      properties:
+        expressions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expression'
+        generatedId:
+          type: string
+        id:
+          type: string
+        variant:
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/Variant'
+          nullable: true
+        parameterDeclarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParameterDeclaration'
+        fragment:
+          type: boolean
+    TemplateInstance:
+      type: object
+      properties:
+        timeout:
+          format: int64
+          type: integer
+        template:
+          $ref: '#/components/schemas/Template'
+    TmpfileModel:
+      type: object
+      properties:
+        filename:
+          description: File name
+          type: string
+        uuid:
+          format: uuid
+          description: file uuid from uploadtmpfile service
+          type: string
+    Variant:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/Locale'
+        contentType:
+          type: string
+        encoding:
+          $ref: '#/components/schemas/Charset'
+        hashCode:
+          format: int32
+          type: integer
+        mediaType:
+          type: string
+        charset:
+          $ref: '#/components/schemas/Charset'
+  securitySchemes:
+    simbizoauth:
+      type: oauth2
+      description: Authentication
+      flows:
+        implicit:
+          authorizationUrl: https://login.simbiz.cloud/auth/realms/simbiz.cloud/protocol/openid-connect/auth
+          tokenUrl: https://login.simbiz.cloud/auth/realms/simbiz.cloud/protocol/openid-connect/token/introspect
+          refreshUrl: https://login.simbiz.cloud/auth/realms/simbiz.cloud/protocol/openid-connect/token
+    xorg:
+      type: apiKey
+      description: x-org
+      name: x-org
+      in: header

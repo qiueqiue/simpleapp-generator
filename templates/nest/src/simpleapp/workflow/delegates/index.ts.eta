@@ -1,3 +1,0 @@
-export * from  './hello'
-import {InvoiceDelegates} from './invoice.delegates'
-export const invoiceDelegates = new InvoiceDelegates()

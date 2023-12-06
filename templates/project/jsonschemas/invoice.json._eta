@@ -8,7 +8,7 @@
     "documentTitle": "invoiceTitle",
     "documentDate": "invoiceDate",
     "generateDocumentNumber": true,
-    "pageType": "crud",
+    "pageType": "crud",    
     "formulas": [
       { "jsonPath": "$.details[*]", "formula": "sharelibs.getSubtotal(value)" },
       {
@@ -23,9 +23,9 @@
     "updated": { "type": "string" },
     "createdBy": { "type": "string" },
     "updatedBy": { "type": "string" },
-    "tenantId": { "type": "integer", "default": 1},
-    "orgId": { "type": "integer", "default": 1},
-    "branchId": { "type": "integer", "default": 1},
+    "tenantId": { "type": "integer", "default": 1 },
+    "orgId": { "type": "integer", "default": 1 },
+    "branchId": { "type": "integer", "default": 1 },
     "customer": {
       "type": "object",
       "x-foreignkey": "customer",
@@ -39,8 +39,12 @@
       "examples": ["SI1111"],
       "format": "documentno"
     },
-    "invoiceDate": { "type": "string", "format":"date"},
-    "invoiceTitle": { "type": "string", "examples": ["Sales to XYZ"] ,"minLength":3},
+    "invoiceDate": { "type": "string", "format": "date" },
+    "invoiceTitle": {
+      "type": "string",
+      "examples": ["Sales to XYZ"],
+      "minLength": 3
+    },
     "invoiceTotal": { "type": "number", "default": 0 },
     "details": {
       "type": "array",

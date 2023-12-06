@@ -1,0 +1,126 @@
+<template>
+    <button class="text-center border-none  cursor-pointer p-1" @click="visible=true" >
+        <i class="pi pi-bell"></i>
+        <Sidebar v-model:visible="visible" position="right"  :modal="false" :dismissable="false">            
+            <template #header>
+                <div class="text text-lg font-bold">{{ t('mytasks') }}</div>
+            </template>
+            <HeaderButtonTaskItem  v-for="task in tasklist" :task="task" @click="viewTask"></HeaderButtonTaskItem>                                                
+        </Sidebar>
+        <Dialog v-model:visible="dialogvisible" 
+            @update:visible="closeDialog" 
+            :pt="{root:{class:'w-1/2 h-5/6'}}"
+            :modal="true" 
+            :close-on-escape="false" >                
+            <template #header>
+                <div class="text text-lg font-bold">
+                    {{ selectedtask.processName }} / {{ selectedtask.name }}
+                </div>            
+            </template>
+            <template #default>
+                <div >
+
+                    <div>                       
+                        <pre>{{ selectedtask.data}}</pre>
+                    </div>
+                    <div class="border ">
+                        <Card>
+                            <template #header>Response</template>
+                            <template #content>
+                              <div v-if="formSchema">     
+                                
+                                <SimpleAppJsonSchemaForm :schema="formSchema" #default="o">                                                        
+                                    <div v-for="field in Object.keys(formSchema.properties)" class="border p-2">                                      
+                                        <SimpleAppInput :setting="o.getField(`#/properties/${field}`)" 
+                                         :input-type="autoPickInput(formSchema.properties[field])"
+                                         v-model="data[field]" />
+                                    </div>                                    
+                                </SimpleAppJsonSchemaForm>                                
+                              </div>                                
+                            </template>
+                            <template #footer>
+                                <Button class="btn-primary" @click="invokeTask()">{{ t('submit') }}</Button>
+                                
+                            </template>
+                        </Card>                        
+                    </div>                                                   
+                </div>
+            </template>                
+        </Dialog>
+    </button>
+</template>
+<script setup lang="ts">
+import {UserTaskType,SimpleAppInputType} from '~/types'
+import { useDialog } from 'primevue/usedialog';
+const dialog = useDialog()
+const dialogvisible = ref(false)
+const visible = ref(false)
+const selectedtask = ref()
+const tasklist = ref<UserTaskType[]>([])
+const formSchema = ref()
+const data = ref<any>({})
+//computed(async ()=>await getTaskList())
+
+onMounted(async ()=> syncTask())
+watch(visible,(newvalue)=>{
+    if(newvalue){
+        syncTask()
+    }
+})
+const syncTask = async ()=>{
+    tasklist.value = await getTaskList()
+    if(tasklist.value.length==0){
+        visible.value=false
+    }
+}
+const closeDialog = ()=>{
+    console.log('close dialog')
+}
+
+const invokeTask = async ()=>{
+    const res = await invokeUserTask(selectedtask.value.taskId,data)
+    syncTask()
+    dialogvisible.value=false
+}
+const viewTask = async (task:UserTaskType)=>{
+    selectedtask.value=task
+    dialogvisible.value=true
+    const formsettings:any = await getTaskForm(task.processName, task.elementId)
+    formSchema.value = formsettings.schema
+    Object.keys(formsettings.schema.properties).forEach((key)=>{        
+        data.value[key]=null
+    })
+    console.log("data,data",data)
+}
+
+const autoPickInput = (setting:any) =>{
+    if(setting.type=='boolean'){
+        return SimpleAppInputType.checkbox
+    }if(setting.type=='number'){
+        return SimpleAppInputType.number
+    }
+    else if(setting.enum){
+        return SimpleAppInputType.select
+    }
+    else if(setting.type=='string'){
+        return pickStringInput(setting)        
+    }else{
+        return SimpleAppInputType.text
+    }
+}
+
+const pickStringInput = (setting:any) =>{
+    switch(setting.format){
+        case 'date':
+            return SimpleAppInputType.date
+        break;
+        case 'textarea':
+            return SimpleAppInputType.textarea
+        break;
+        case 'text':
+        default:
+            return SimpleAppInputType.text
+        break;
+    }
+}
+</script>

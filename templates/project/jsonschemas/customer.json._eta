@@ -7,7 +7,7 @@
     "documentTitle": "customerName",
     "generateDocumentNumber": true,
     "isolationType": "org",
-    "pageType": "crud"
+    "pageType": "crud"    
   },
   "properties": {
     "_id": { "type": "string" },
@@ -15,28 +15,32 @@
     "updated": { "type": "string" },
     "createdBy": { "type": "string" },
     "updatedBy": { "type": "string" },
-    "tenantId": { "type": "integer", "default": 1},
+    "tenantId": { "type": "integer", "default": 1 },
     "orgId": { "type": "integer", "default": 1 },
-    "branchId": { "type": "integer", "default": 1},
+    "branchId": { "type": "integer", "default": 1 },
     "customerNo": {
       "type": "string",
       "format": "documentno",
       "examples": ["S0001"]
     },
-    "customerName": { "type": "string", "examples": ["Customer 1"],"minLength":3 },
+    "customerName": {
+      "type": "string",
+      "examples": ["Customer 1"],
+      "minLength": 3
+    },
     "customerStatus": {
       "type": "string",
-      "enum": ["unknown", "potential","suspended","existing"],
+      "enum": ["unknown", "potential", "suspended", "existing"],
       "examples": ["unknown"]
     },
     "email": {
       "type": "string",
-      "oneOf":[{"format":"email"}, { "enum": [ "" ] }]      
-    },  
+      "oneOf": [{ "format": "email" }, { "enum": [""] }]
+    },
     "tel": {
       "type": "string",
-      "oneOf":[{"format":"tel"}, { "enum": [ "" ] }]      
-    },  
+      "oneOf": [{ "format": "tel" }, { "enum": [""] }]
+    },
     "active": { "type": "boolean", "default": true, "examples": [true] },
     "description": { "type": "string", "format": "text" },
     "docNoFormat": {

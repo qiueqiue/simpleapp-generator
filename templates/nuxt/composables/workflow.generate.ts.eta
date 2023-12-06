@@ -1,0 +1,16 @@
+import {UserTaskType} from '../types'
+export const getTaskList = async ()=>{
+    const tasks = await getWorkflowApi().getMyUserTask()
+    return tasks.data as UserTaskType[]
+}
+
+export const getTaskForm =  async (workflowName:string,elementId:string)=>{
+    const tasks = await getWorkflowApi().getWorkflowUserTaskFormKey(workflowName,elementId)
+    return tasks.data
+}
+
+
+export const invokeUserTask =  async (taskId:string, data:any)=>{
+    const result = await getWorkflowApi().invokeWorkflowUserTask(taskId,data)
+    return result.data
+}

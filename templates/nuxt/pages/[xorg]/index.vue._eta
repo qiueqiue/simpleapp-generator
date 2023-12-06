@@ -8,9 +8,11 @@
 </script>
 <template>
   <div class="frontpage-container">
-    <title>{{ getUserProfile().branchName }}</title>
+    <client-only>
+      <title>{{ getUserProfile().branchName }}</title>
+    </client-only>
     <h1 class="border text-3xl text-center m-20 p-20">
-      {{ t('createYourContentHere') }}
-    </h1>    
+      {{ t("createYourContentHere") }}
+    </h1>
   </div>
 </template>

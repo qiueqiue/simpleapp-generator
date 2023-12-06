@@ -20,6 +20,8 @@ export default {
     sample:'Sample',
     createYourContentHere: 'Create your content here',
     setting: 'Setting',
+    mytasks: 'My Tasks',
+    suspend: 'Suspend',
 
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>

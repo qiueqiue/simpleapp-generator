@@ -13,23 +13,44 @@ export type WorkflowDataApiSchema = {
 };
 
 export type WorkflowTask = {
-  id: string,
-  name: string,
-  assignee: string,
-  candidateUsers: string[]
-  candidateGroups: string[]
-  type: string,
-}
-export type WorkflowProcess = {  
-    id: string
-    name: string
-    status: string
-    startedAt: string
-    items: WorkflowTask[]
-}
+  id: string;
+  name: string;
+  assignee: string;
+  candidateUsers: string[];
+  candidateGroups: string[];
+  type: string;
+};
+export type WorkflowProcess = {
+  id: string;
+  name: string;
+  status: string;
+  startedAt: string;
+  items: WorkflowTask[];
+};
 
 export type UserTaskActors = {
-  assignee: string
-  candidateUsers: string[]
-  candidateGroups: string[]
+  assignee: string;
+  candidateUsers: string[];
+  candidateGroups: string[];
+};
+
+
+export type UserTaskType = {
+  
+    id: string
+    taskId:  string
+    elementId:  string
+    name:  string
+    processName:  string
+    assignee:  string
+    candidateUsers:  string[]
+    candidateGroups:  string[]
+    data: any
+    vars: any
+    startedAt:  string
+    followUpDate:  string
+    dueDate:  string
+    priority:  string
+    type:  string
+    userId: string 
 }

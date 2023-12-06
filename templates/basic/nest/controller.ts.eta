@@ -141,7 +141,9 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
       <%}%>
       )
   <%}%>
-  
+  <% if(['post','put','patch'].includes(api.method)){ %>
+    @ApiBody({ description: 'Data', type: Object })
+  <%}%>  
   @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })  
   @ApiOperation({ operationId: 'run<%=capitalizeFirstLetter(api.execute ??api.action)%>' })
   <% if(api.queryPara && api.queryPara.length>0) {%>
@@ -151,7 +153,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
   <%}%>  
   async <%=capitalizeFirstLetter(api.execute??api.action) %>(
     @AppUser() appuser: UserContext,
-    <%if(['post','put'].includes(api.method.toLowerCase())){%>
+    <%if(['post','put','patch'].includes(api.method.toLowerCase())){%>
       @Body() data:any,
     <%}%>
     <% if(api.entryPoint && api.entryPoint.includes(':')) {%>

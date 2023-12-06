@@ -1,0 +1,20 @@
+
+export type UserTaskType = {
+  
+    id: string
+    taskId:  string
+    elementId:  string
+    name:  string
+    processName:  string
+    assignee:  string
+    candidateUsers:  string[]
+    candidateGroups:  string[]
+    data: any
+    vars: any
+    startedAt:  string
+    followUpDate:  string
+    dueDate:  string
+    priority:  string
+    type:  string
+    userId: string 
+}

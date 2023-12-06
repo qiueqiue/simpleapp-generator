@@ -1,0 +1,5 @@
+export * from './hello';
+export * from './usertask';
+export * from './customer';
+import { InvoiceDelegates } from './invoice.delegates';
+export const invoiceDelegates = new InvoiceDelegates();

@@ -19,279 +19,412 @@
  
  */
 
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   WorkflowSettingApiSchema,
   WorkflowDataApiSchema,
-  WorkflowProcess, WorkflowTask,UserTaskActors
+  WorkflowProcess,
+  WorkflowTask,
+  UserTaskActors,
+  UserTaskType
 } from './workflow.type';
-import {BPMNServer, Logger as bpmnlogger} from 'bpmn-server'
-import {configuration} from './configuration'
+import { BPMNServer, Logger as bpmnlogger } from 'bpmn-server';
+import { configuration } from './configuration';
 import { UserContext } from '../generate/commons/user.context';
+import * as formschemas from './formschema'
 export {
   WorkflowSettingApiSchema,
   WorkflowDataApiSchema,
 } from './workflow.type';
 
-
 @Injectable()
 export class WorkflowService {
-  protected bpmnServer:BPMNServer
+  protected bpmnServer: BPMNServer;
   private readonly logger = new Logger();
   constructor() {
-    this.bpmnServer = new BPMNServer(configuration)        
+    this.bpmnServer = new BPMNServer(configuration);
   }
 
-  /** 
-  * !! waiting founder 
-  * get all workflow userTask
-  * create new process definitions
-  */
-  async getMyUserTask(appuser: UserContext){
-    throw new BadRequestException(`getMyWorkflows is not supported yet`)  
-   }
-   
- 
-  /** 
-  * !! waiting founder 
-  * deveploper method  
-  * create new process definitions
-  */
- async newWorkflowDefinitions(appuser: UserContext,workflowName:string,xml:string){
-  throw new BadRequestException(`newWorkflowDefinitions "${workflowName}" is not supported yet`)  
- }
-  
+  /**
+   * get all workflow userTask for specific uid (uuid)
+   * @param appuser
+   * @returns array of usertask
+   */
+  async getActorUserTask(appuser: UserContext, uid: string) {
+    const tmp: any[] = await this.bpmnServer.dataStore.findItems({
+      'items.status': 'wait',
+      'data.tenantId': appuser.getTenantId(),
+      //filter uid properties base on function
+      $or: [
+        { 'items.assignee': appuser.getUname() },
+        { 'items.candidateUsers': appuser.getUname() },
+        { 'items.candidateGroups': appuser.getGroup() },
+      ],
+    });
+    const result:UserTaskType[] = tmp.map((proc) => {
+      const subitem:UserTaskType = {
+      id: proc.instanceId,
+      taskId: proc.id,
+      elementId: proc.elementId,
+      name: proc.name,
+      processName: proc.processName,
+      assignee: proc.assignee,
+      candidateUsers: proc.candidateUsers,
+      candidateGroups: proc.candidateGroups,
+      data: proc.data,
+      vars: proc.vars,
+      startedAt: proc.startedAt,
+      followUpDate: proc.followUpDate,
+      dueDate: proc.dueDate,
+      priority: proc.priority,
+      type: proc.type,
+      userId: proc.userId,
+    }
+    return subitem
+  });
+    return result;
+    // throw new BadRequestException(`getActorUserTask is not supported yet`)
+  }
+  /**
+   * get all workflow userTask for my uid (uuid)
+   * @param appuser
+   * @returns array of usertask
+   */
+  async getMyUserTask(appuser: UserContext) {
+    return await this.getActorUserTask(appuser, appuser.getUid());
+  }
 
- 
- async getWorkflowDefinitions(appuser: UserContext){
-  throw new BadRequestException(`getWorkflowDefinitions is not supported yet`)    
- }
+  /**
+   * !! waiting founder
+   * deveploper method
+   * create new process definitions
+   */
+  async newWorkflowDefinitions(
+    appuser: UserContext,
+    workflowName: string,
+    xml: string,
+  ) {
+    throw new BadRequestException(
+      `newWorkflowDefinitions "${workflowName}" is not supported yet`,
+    );
+  }
 
+  async getWorkflowDefinitions(appuser: UserContext) {
+    throw new BadRequestException(
+      `getWorkflowDefinitions is not supported yet`,
+    );
+  }
 
- async readWorkflowDefinition(appuser: UserContext,workflowname:string){
-  throw new BadRequestException(`readWorkflowDefinition is not supported yet`)    
- }
+  async readWorkflowDefinition(appuser: UserContext, workflowname: string) {
+    throw new BadRequestException(
+      `readWorkflowDefinition is not supported yet`,
+    );
+  }
 
- async deleteWorkflowDefinition(appuser: UserContext,workflowname:string){
-  throw new BadRequestException(`deleteWorkflowDefinition is not supported yet`)    
- }
+  async deleteWorkflowDefinition(appuser: UserContext, workflowname: string) {
+    throw new BadRequestException(
+      `deleteWorkflowDefinition is not supported yet`,
+    );
+  }
 
- async updateWorkflowDefinition(appuser: UserContext,workflowname:string,xml:string){
-  throw new BadRequestException(`updateWorkflowDefinition is not supported yet`)    
- }
+  async updateWorkflowDefinition(
+    appuser: UserContext,
+    workflowname: string,
+    xml: string,
+  ) {
+    throw new BadRequestException(
+      `updateWorkflowDefinition is not supported yet`,
+    );
+  }
 
- /**
-  * admin workflow service, obtain all active workflows and it's pending task from all tenant
-  * status: done
-  * @param appuser 
-  * @returns array of workflow process and it's waiting task
-  */
- async getAllActiveProcesses(appuser:UserContext){
-  const alldata = await this.bpmnServer.dataStore.findInstances({status:'running'},'summary')
-  const result = this.workflowProcessArrayMaping(alldata)
-  return result  
-}
+  /**
+   * admin workflow service, obtain all active workflows and it's pending task from all tenant
+   * status: done
+   * @param appuser
+   * @returns array of workflow process and it's waiting task
+   */
+  async getAllActiveProcesses(appuser: UserContext) {
+    const alldata = await this.bpmnServer.dataStore.findInstances(
+      { status: 'running' },
+      'summary',
+    );
+    const result = this.workflowProcessArrayMaping(alldata);
+    return result;
+  }
 
-
-/**
- * delete a workflow process from database
- * @param appuser 
- * @param id 
- * @returns 
- */
-async deleteWorkflowById(appuser: UserContext,id:string){
-  if( await this.getWorkflowById(appuser,id)){
-    const result =  await this.bpmnServer.dataStore.deleteInstances({id:id})
-    return {
-      status: 'ok',
-      deletedCount: result['deletedCount']
+  /**
+   * delete a workflow process from database
+   * @param appuser
+   * @param id
+   * @returns
+   */
+  async deleteWorkflowById(appuser: UserContext, id: string) {
+    if (await this.getWorkflowById(appuser, id)) {
+      const result = await this.bpmnServer.dataStore.deleteInstances({
+        id: id,
+      });
+      return {
+        status: 'ok',
+        deletedCount: result['deletedCount'],
+      };
     }
   }
-  
-}
 
-
-/**
- * invoke workflow process to next step
- * @param appuser 
- * @param id 
- * @param taskId 
- * @param data 
- * @returns 
- */
-async invokeWorkflowUserTask(appuser: UserContext, taskId:string, data:any){
-  try{
-    const response = await this.bpmnServer.engine.invoke({'items.id': taskId, 'items.status':'wait'}, data );
-    return Object.keys(response)
-  }catch(e){
-    throw new NotFoundException(e)
-  }
-  
-}
-
-
-/**
- * !! waiting founder
- * use in adhoc situation override bpmn assignee/candidateUsers/Groups with data
- * status: draft
- * @param appuser 
- * @param id 
- * @param taskId 
- * @param data 
- */
-async updateWorkflowUserTask(appuser: UserContext, id:string,taskId:string, data:UserTaskActors){
-  try{
-    const result = await this.bpmnServer.dataStore.findInstance({id:id},{})
-    const usertask = result.items.find((item)=>item.id==taskId)
-    if(usertask){
-      usertask.assignee=data.assignee
-      usertask.candidateUsers=data.candidateUsers
-      usertask.candidateGroups=data.candidateGroups
-      // result.save()
-      
-    }else{
-      throw new NotFoundException(`user task id:${taskId} not found`)
-      
+  /**
+   * invoke workflow process to next step
+   * @param appuser
+   * @param id
+   * @param taskId
+   * @param data
+   * @returns
+   */
+  async invokeWorkflowUserTask(
+    appuser: UserContext,
+    taskId: string,
+    data: any,
+  ) {
+    try {
+      const response = await this.bpmnServer.engine.invoke(
+        { 'items.id': taskId, 'items.status': 'wait' },
+        data,
+      );
+      return Object.keys(response);
+    } catch (e) {
+      throw new NotFoundException(e);
     }
-  }catch(e){
-    throw new NotFoundException(e)
   }
-  
-  // throw new BadRequestException(`updateWorkflowUserTask is not supported yet`)    
-}
 
+  /**
+   * !! waiting founder
+   * use in adhoc situation override bpmn assignee/candidateUsers/Groups with data
+   * status: draft
+   * @param appuser
+   * @param id
+   * @param taskId
+   * @param data
+   */
+  async updateWorkflowUserTask(
+    appuser: UserContext,
+    id: string,
+    taskId: string,
+    data: UserTaskActors,
+  ) {
+    try {
+      const result = await this.bpmnServer.dataStore.findInstance(
+        { id: id },
+        {},
+      );
 
-/**
- * 
- * @param appuser search all workflow in current tenant
- * @param filter 
- * @returns 
- */
-async searchRunningWorkflowProcesses(appuser:UserContext,filter:any){  
-  // filter['data.tenantId']= appuser.getTenantId()  //tmp disabled waiting
-  filter['status']='running'
-  return await this.searchWorkflowProcesses(appuser,filter)
-}
+      const usertask = result.items.find((item) => item.id == taskId);
+      if (usertask) {
+        const result = await this.bpmnServer.engine.assign(
+          { id: id, 'items.id': taskId },
+          { newData: 1 },
+          appuser.getUid(),
+          data,
+        );
+        return 'OK'; //Object.keys(result)
+      } else {
+        throw new NotFoundException(`user task id:${taskId} not found`);
+      }
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
 
+    // throw new BadRequestException(`updateWorkflowUserTask is not supported yet`)
+  }
 
-/**
- * 
- * @param appuser search all workflow in current tenant
- * @param filter 
- * @returns 
- */
-async searchWorkflowProcesses(appuser:UserContext,filter:any){  
+  /**
+   *
+   * @param appuser search all workflow in current tenant
+   * @param filter
+   * @returns
+   */
+  async searchRunningWorkflowProcesses(appuser: UserContext, filter: any) {
     // filter['data.tenantId']= appuser.getTenantId()  //tmp disabled waiting
-    const alldata = await this.bpmnServer.dataStore.findInstances(filter,'summary')
-    const result = this.workflowProcessArrayMaping(alldata)
-    return result
+    filter['status'] = 'running';
+    return await this.searchWorkflowProcesses(appuser, filter);
   }
-  
 
-  
- async getPendingProcess(appuser:UserContext){
-  const tmp:any[] = await this.bpmnServer.dataStore.findItems({
-    'items.status':'wait',      
-  })    
-  
- 
-  const result = tmp.map((proc)=>({
-    id: proc.instanceId,
-    assignee: proc.assignee,
-    candidateUsers: proc.candidateUsers,
-    candidateGroups: proc.candidateGroups,
-    data:proc.data,      
-    processName: proc.processName,
-    startedAt: proc.startedAt,
-    type: proc.type,
-    taskName:proc.name,
-    userId:proc.userId
-  }))
-  return result
- }
+  /**
+   *
+   * @param appuser search all workflow in current tenant
+   * @param filter
+   * @returns
+   */
+  async searchWorkflowProcesses(appuser: UserContext, filter: any) {
+    filter['data.tenantId'] = appuser.getTenantId(); //tmp disabled waiting
+    const alldata = await this.bpmnServer.dataStore.findInstances(
+      filter,
+      'summary',
+    );
+    const result = this.workflowProcessArrayMaping(alldata);
+    return result;
+  }
+
+  async getPendingProcess(appuser: UserContext) {
+    const tmp: any[] = await this.bpmnServer.dataStore.findItems({
+      'items.status': 'wait',
+    });
+
+    const result = tmp.map((proc) => ({
+      id: proc.instanceId,
+      assignee: proc.assignee,
+      candidateUsers: proc.candidateUsers,
+      candidateGroups: proc.candidateGroups,
+      data: proc.data,
+      processName: proc.processName,
+      startedAt: proc.startedAt,
+      type: proc.type,
+      taskName: proc.name,
+      userId: proc.userId,
+    }));
+    return result;
+  }
 
   /**
    * initialise new workflow process
    * status: done
-   * @param appuser 
-   * @param workflowName 
-   * @param data 
+   * @param appuser
+   * @param workflowName
+   * @param data
    * @returns workflowsummary
    */
-  async startWorkflow(appuser: UserContext,workflowName: string, fulldata?: any) {    
-    const result =  await this.bpmnServer.engine.start(workflowName,fulldata.data,null,appuser.getUid());
-    return {
-      id: result.id,
-      name: result.name,
-      status: result.status,
-      userId: result.userId,
-      startedAt: result.item.startedAt
+  async startWorkflow(appuser: UserContext, workflowName: string, data?: any) {
+    try {
+      data.tenantId = appuser.getTenantId();
+      data.orgId = appuser.getOrgId();
+      data.branchId = appuser.getBranchId();
+      const result = await this.bpmnServer.engine.start(
+        workflowName,
+        data,
+        null,
+        appuser.getUid(),
+      );
+      return {
+        id: result.id,
+        name: result.name,
+        status: result.status,
+        userId: result.userId,
+        startedAt: result.item.startedAt,
+      };
+    } catch (e) {
+      throw new BadRequestException(e, JSON.stringify(data));
     }
   }
 
   /**
    * read single process full property
-   * @param appuser 
-   * @param id 
-   * @returns 
+   * @param appuser
+   * @param id
+   * @returns
    */
-  async getWorkflowById(appuser: UserContext,id: string) {
-    try{
-      const data = await this.bpmnServer.dataStore.findInstance({id:id},{}) // .findInstances({id:id},'full')  
-      const result = this.workflowProcessMaping(data)      
-        return result   
+  async getWorkflowById(appuser: UserContext, id: string) {
+    try {
+      const data = await this.bpmnServer.dataStore.findInstance({ id: id }, {}); // .findInstances({id:id},'full')
+      const result = this.workflowProcessMaping(data);
+      return result;
+    } catch (e) {
+      throw new NotFoundException(e);
     }
-    catch(e){
-      throw new NotFoundException(e)
-    }        
   }
-  async getPendingWorkflows(appuser: UserContext,) {
-    const tmp:any[] = await this.bpmnServer.dataStore.findItems({
-      'items.status':'wait',      
-    })    
-    
-   
-    const result = tmp.map((proc)=>({
+  async getPendingWorkflows(appuser: UserContext) {
+    const tmp: any[] = await this.bpmnServer.dataStore.findItems({
+      'items.status': 'wait',
+    });
+
+    const result = tmp.map((proc) => ({
       id: proc.instanceId,
       assignee: proc.assignee,
       candidateUsers: proc.candidateUsers,
       candidateGroups: proc.candidateGroups,
-      data:proc.data,      
+      data: proc.data,
       processName: proc.processName,
       startedAt: proc.startedAt,
       type: proc.type,
-      taskName:proc.name,
-      userId:proc.userId
-    }))
-    return result
+      taskName: proc.name,
+      userId: proc.userId,
+    }));
+    return result;
   }
 
+  /**
+   * obtain specific bpmn task camunda:formKey
+   * @param appuser
+   * @param processName
+   * @param elementId
+   * @returns properties
+   */
+  async getWorkflowUserTaskFormKey(
+    appuser,
+    processName: string,
+    elementId: string,
+  ) {
+    try{
 
+    
+    let definition = await this.bpmnServer.definitions.load(processName);
+    let node = definition.getNodeById(elementId);
+    if(node){
+       const formKey = node.def.formKey
+        let schema:string =''
+      if(formKey.includes('jsonschema://')){
+          const keyname = formKey.replace('jsonschema://','')          
+          schema = formschemas[keyname]
+        }else if(formKey.includes('custom://')){
+          schema=formKey
+        }else{
+          //others implementation like http://, https:// and etc
+        }
+
+        if(schema){
+          return {
+            processName: processName,
+            elementId: elementId,
+            schema: schema
+          }
+        }else{
+          throw new InternalServerErrorException(`Cannot resolve schema from invalid formKey '${formKey}', example: 'jsonschema://SimpleApproveReject' or 'custom://your-custom-key'`)
+        }
+    }else{
+      throw new NotFoundException(`Element ${elementId} not found in process ${processName}`)
+    }
+   
+    }catch(e){
+      throw new InternalServerErrorException(e)
+    }
+  }
 
   // helper
-  workflowProcessArrayMaping(alldata:any[]){
-    const result = alldata.map((data)=>this.workflowProcessMaping(data))
-    return result
+  workflowProcessArrayMaping(alldata: any[]) {
+    const result = alldata.map((data) => this.workflowProcessMaping(data));
+    return result;
   }
-  workflowProcessMaping(data:any){
-    const result:WorkflowProcess = {
-      id:data.id,
-      name:data.name,
-      status:data.status,
-      startedAt:data.startedAt,
-      items:data.items
-        .filter((item)=>item.type!='bpmn:SequenceFlow')
-        .map((item)=>({
+  workflowProcessMaping(data: any) {
+    const result: WorkflowProcess = {
+      id: data.id,
+      name: data.name,
+      status: data.status,
+      startedAt: data.startedAt,
+      items: data.items
+        .filter((item) => item.type != 'bpmn:SequenceFlow')
+        .map((item) => ({
           taskId: item.id,
           name: item.name,
-          status:item.status,
+          status: item.status,
           assignee: item.assignee,
           candidateUsers: item.candidateUsers,
           candidateGroups: item.candidateGroups,
           type: item.type,
-        }))
-    }
+        })),
+    };
 
-    return result
+    return result;
   }
 }

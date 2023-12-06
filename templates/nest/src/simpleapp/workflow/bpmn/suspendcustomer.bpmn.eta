@@ -1,51 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:process id="Process_1" name="approve1" isExecutable="false">
+    <bpmn:extensionElements />
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_1a63g0z</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0qpgd23">
-      <bpmn:incoming>Flow_15oysi6</bpmn:incoming>
+      <bpmn:incoming>Flow_0ds03ms</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="Activity_07kqvhs" name="approve1" camunda:assignee="$(this.data.preparedBy)" camunda:candidateGroups="branchManagers,ceo">
+    <bpmn:sequenceFlow id="Flow_1x9zeai" sourceRef="approve1" targetRef="set-customer-inactive" />
+    <bpmn:sequenceFlow id="Flow_1a63g0z" sourceRef="StartEvent_1" targetRef="approve1" />
+    <bpmn:userTask id="approve1" name="approve by supervisor" camunda:formKey="jsonschema://SimpleApproveReject" camunda:assignee="kstan">
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_1a63g0z</bpmn:incoming>
       <bpmn:outgoing>Flow_1x9zeai</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_15oysi6" sourceRef="Activity_068mwb7" targetRef="Event_0qpgd23" />
-    <bpmn:sequenceFlow id="Flow_1x9zeai" sourceRef="Activity_07kqvhs" targetRef="Activity_068mwb7" />
-    <bpmn:sequenceFlow id="Flow_1a63g0z" sourceRef="StartEvent_1" targetRef="Activity_07kqvhs" />
-    <bpmn:serviceTask id="Activity_068mwb7" name="set invoice remark">
+    <bpmn:sequenceFlow id="Flow_0ds03ms" sourceRef="set-customer-inactive" targetRef="Event_0qpgd23" />
+    <bpmn:serviceTask id="set-customer-inactive" name="set customer inactive" camunda:delegateExpression="suspendCustomer">
       <bpmn:incoming>Flow_1x9zeai</bpmn:incoming>
-      <bpmn:outgoing>Flow_15oysi6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0ds03ms</bpmn:outgoing>
     </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="-138" y="72" width="36" height="36" />
+        <dc:Bounds x="-148" y="72" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0qpgd23_di" bpmnElement="Event_0qpgd23">
-        <dc:Bounds x="302" y="72" width="36" height="36" />
+        <dc:Bounds x="352" y="72" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0f4317o_di" bpmnElement="Activity_07kqvhs">
-        <dc:Bounds x="10" y="50" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_1odv9ki_di" bpmnElement="approve1">
+        <dc:Bounds x="-20" y="50" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1k66qh1_di" bpmnElement="Activity_068mwb7">
-        <dc:Bounds x="150" y="50" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNShape id="Activity_03pdbkx_di" bpmnElement="set-customer-inactive">
+        <dc:Bounds x="170" y="50" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_15oysi6_di" bpmnElement="Flow_15oysi6">
-        <di:waypoint x="250" y="90" />
-        <di:waypoint x="302" y="90" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x9zeai_di" bpmnElement="Flow_1x9zeai">
-        <di:waypoint x="110" y="90" />
-        <di:waypoint x="150" y="90" />
+        <di:waypoint x="80" y="90" />
+        <di:waypoint x="170" y="90" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1a63g0z_di" bpmnElement="Flow_1a63g0z">
-        <di:waypoint x="-102" y="90" />
-        <di:waypoint x="10" y="90" />
+        <di:waypoint x="-112" y="90" />
+        <di:waypoint x="-20" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ds03ms_di" bpmnElement="Flow_0ds03ms">
+        <di:waypoint x="270" y="90" />
+        <di:waypoint x="352" y="90" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
