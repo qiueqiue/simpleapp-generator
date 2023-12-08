@@ -145,13 +145,13 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
     @ApiBody({ description: 'Data', type: Object })
   <%}%>  
   @ApiResponse({status: 200,description: '<%=api.description%>' ,type: Object  })  
-  @ApiOperation({ operationId: 'run<%=capitalizeFirstLetter(api.execute ??api.action)%>' })
+  @ApiOperation({ operationId: 'run<%=capitalizeFirstLetter(api.action)%>' })
   <% if(api.queryPara && api.queryPara.length>0) {%>
       <%for(let q=0;q<api.queryPara.length; q++){%>
         @ApiQuery({name: "<%=api['queryPara'][q]%>",required: false,type: String})
       <%}%>
   <%}%>  
-  async <%=capitalizeFirstLetter(api.execute??api.action) %>(
+  async <%=capitalizeFirstLetter(api.action) %>(
     @AppUser() appuser: UserContext,
     <%if(['post','put','patch'].includes(api.method.toLowerCase())){%>
       @Body() data:any,
@@ -174,7 +174,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
         <%}%>
          ){
     
-      return await this.service.run<%=capitalizeFirstLetter(api.execute ?? api.action)%>(appuser,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
+      return await this.service.run<%=capitalizeFirstLetter(api.action)%>(appuser,<% if(api.entryPoint && api.entryPoint.includes(':')) {%>
           <%let subpath = api.entryPoint.split('/')%>
           <% for(let a=0;a<subpath.length;a++){%>
             <%const partstr = subpath[a]%>

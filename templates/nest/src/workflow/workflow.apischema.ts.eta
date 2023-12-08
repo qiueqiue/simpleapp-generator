@@ -94,42 +94,37 @@ export class UserTaskActorsApiSchema {
   candidateGroups: string[];
 }
 
-
-
-
-
 export class UserTaskApiSchema {
   @ApiProperty()
-  id: string
+  id: string;
   @ApiProperty()
-  taskId:  string
+  taskId: string;
   @ApiProperty()
-  elementId:  string
+  elementId: string;
   @ApiProperty()
-  name:  string
+  name: string;
   @ApiProperty()
-  processName:  string
+  processName: string;
   @ApiProperty()
-  assignee:  string
+  assignee: string;
   @ApiProperty({ type: () => [String] })
-  candidateUsers:  string[]
+  candidateUsers: string[];
   @ApiProperty({ type: () => [String] })
-  candidateGroups:  string[]
+  candidateGroups: string[];
   @ApiProperty({ type: Object, required: true })
-  data: any
+  data: any;
   @ApiProperty()
-  vars: any
+  vars: any;
   @ApiProperty()
-  startedAt:  string
+  startedAt: string;
   @ApiProperty()
-  followUpDate:  string
+  followUpDate: string;
   @ApiProperty()
-  dueDate:  string
+  dueDate: string;
   @ApiProperty()
-  priority:  string
+  priority: string;
   @ApiProperty()
-  type:  string
+  type: string;
   @ApiProperty()
-  userId: string
-
+  userId: string;
 }

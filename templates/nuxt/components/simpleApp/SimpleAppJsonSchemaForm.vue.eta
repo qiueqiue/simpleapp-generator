@@ -1,48 +1,41 @@
 <template>
     <form class="simpleapp-form" @submit.prevent="true">
         <slot name="header"><h3 class="flex flex-col">{{ title }}</h3></slot>
-        <slot  name="default" :getField="getField"></slot>
+        <slot  name="default" :getField="getField" :validate="validate"></slot>
     </form>
 </template>
 <script setup lang="ts" >
-// import type {SimpleAppFieldSetting} from '/types'    
-import { SimpleAppClient } from  '~/simpleapp/generate/clients/SimpleAppClient'
 import type { JSONSchema7,JSONSchema7Definition } from 'json-schema';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
 import _ from 'lodash'
+const modelValue = defineModel()
     const props = defineProps<{
         title?:string,
         schema:JSONSchema7,
+        // data:any,
         // document: SimpleAppClient<any,any>
         readonly?:boolean
     }>()
     if(!props.schema){
         throw "undefine jsonschema property 'schema'"
     }
-    // const obj = {schema:props.schema,data: props.schema}
+    const formerrors = ref<any>({})
     const getField = (path:string)=>{
-        // console.log("simpleform topath",path)
-        // const data = props.document.getData()
-        const schema = props.schema
-        const fieldsetting = getPathObject(schema,path)
-        // console.log("setting",fieldsetting)
-        
-        
-        return {
+    const schema = props.schema
+    const fieldsetting = getPathObject(schema,path)
+    
+    return {
             path: path,
             key: _.last(path.split('/')),
             instancepath: getInstancePath(schema,path),
-            fieldsetting: fieldsetting,
-            // modelObject: data,
-            // document: props.document,
-            // apiObj:props.document.getApi(),
-            // modelField: 'email',
+            fieldsetting: fieldsetting,            
             isrequired: getIsRequired(schema,path),
-            // errors: props.document.getErrors(),
+            errors: formerrors,
             readonly: props.readonly
         } //as SimpleAppFieldSetting
     }
-
-    //    "schemaPath": "#/properties/email/format",
 
     const getModelValue=(data:any,path:string)=>{
 
@@ -130,4 +123,47 @@ import _ from 'lodash'
         
     }    
    }
+
+
+   const validate=(callback:Function) => {
+    const ajv = new Ajv({ allErrors: true });
+    addFormats(ajv);
+    addErrors(ajv)
+    
+    ajv.addFormat('tel',/^$|^\d{7,15}$/gm)    
+    ajv.addFormat('text',/.*$/)
+    ajv.addFormat('html',/.*$/)
+    ajv.addFormat('documentno',/.*$/)
+    
+    ajv.addKeyword({ keyword: 'x-foreignkey', schemaType: 'string' });
+    ajv.addKeyword({ keyword: 'x-simpleapp-config', schemaType: 'object' });
+
+    
+    // this.errorlist.value = {};
+    // this.hook('pre-validation', this.data.value);
+    const validate = ajv.compile(props.schema);
+    const valid = validate(modelValue.value);
+    if (!valid) {
+      const errors = validate.errors;
+      const tmp: { [key: string]: any } = {};
+      if (errors) {
+        for (let i = 0; i < errors?.length; i++) {
+          const key: string = errors[i]['instancePath'];
+          if (!tmp[key]) {
+            tmp[key] = [];
+          }
+          tmp[key].push(errors[i]);
+        }
+      }
+      formerrors.value = tmp;
+      console.error(formerrors.value );
+
+      // return validate.errors;
+      callback(formerrors.value )
+    } else {
+        //   this.hook('post-validation', this.data.value);
+        callback(false)
+    }
+  }
+
 </script>

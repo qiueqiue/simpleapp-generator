@@ -1,0 +1,46 @@
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { UserContext } from "src/simpleapp/generate/commons/user.context";
+import { CustomerService } from "src/simpleapp/services/cust.service";
+import { User } from "src/simpleapp/services/user.service";
+import { Permission } from "src/simpleapp/services/perm.service";
+let mydelegate:WorkflowDelegateService
+
+export class Class1 {
+    async hello (vars, context){console.log("hellohellohellohellor",Object.keys(context))};    
+}
+
+
+@Injectable()
+export class WorkflowDelegateService {
+    class1
+    constructor(
+        @InjectModel('User') private readonly usermodel: Model<User>,
+        @InjectModel('Permission') private readonly permmodel: Model<Permission>,
+        public custsvc:CustomerService,
+    ){
+        this.class1 = new Class1()    
+        mydelegate=this    
+    }
+
+    //bpmn service task execution, it trigger from bpmn, not controller, so i cant obtain jwt&xorg tokens
+    async suspendCustomer (vars, context){        
+        const paras = context.instance.data        
+        const appuser = mydelegate.prepareAppUser(paras)        
+        const id = context.instance.data.id
+        const oridata = await mydelegate.custsvc.findById(appuser,id)
+        oridata.active=false
+        oridata.description = paras.description
+        const result = await mydelegate.custsvc.findIdThenUpdate(appuser,id,oridata)
+        console.log("suspendCustomer", result)
+      };      
+
+
+    prepareAppUser(data:any){
+        const appuser = new UserContext(this.usermodel, this.permmodel);             
+        appuser.setAsStaticUser('000-00-00-00','bpmn','bpmn workflow user', 'bpmn@bpmn.org')        
+        appuser.setCurrentTenant(data.tenantId,data.orgId,data.branchId)
+        return appuser
+    }
+}

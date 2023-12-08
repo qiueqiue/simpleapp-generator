@@ -70,7 +70,7 @@ export const prepareNest = (callback:Function)=>{
     if(!fs.existsSync(`${targetfolder}/.env`)){
 
     
-        exec(`cd ${targetfolder};pnpm install --save bpmn-server moment @casl/ability jsonpath yaml lodash @types/lodash nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
+        exec(`cd ${targetfolder};pnpm install --save @nestjs/event-emitter bpmn-server moment @casl/ability jsonpath yaml lodash @types/lodash nest-keycloak-connect keycloak-connect bpmn-client @nestjs/serve-static jsonwebtoken axios @darkwolf/base64url json-schema @wearenova/mongoose-tenant @nestjs/swagger @nestjs/mongoose mongoose  ajv ajv-formats ajv-errors @nestjs/config`,async (error, stdout, stderr)=>{
             // log.info(`dependency installed`)
             if(!error){
                 // fs.mkdirSync(`${targetfolder}/public_html`,{recursive:true})

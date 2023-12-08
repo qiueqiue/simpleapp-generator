@@ -51,7 +51,7 @@ Example better than 100 words, you may refer:
 {
     "x-simpleapp-config":{
       additionalApis:[{
-        action:"genNextNumber",
+        action:"generateNextNo",
         entrypoint:"gennextno/:collection/:field",
         requiredrole:["User"],
         method: 'get', 

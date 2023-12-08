@@ -23,26 +23,26 @@
                     <div>                       
                         <pre>{{ selectedtask.data}}</pre>
                     </div>
-                    <div class="border ">
+                    <div class="border " v-if="formSchema">
+                        <SimpleAppJsonSchemaForm :schema="formSchema" v-model="data"  #default="o" >                                                        
                         <Card>
                             <template #header>Response</template>
                             <template #content>
-                              <div v-if="formSchema">     
-                                
-                                <SimpleAppJsonSchemaForm :schema="formSchema" #default="o">                                                        
+                              <div >                                                            
                                     <div v-for="field in Object.keys(formSchema.properties)" class="border p-2">                                      
                                         <SimpleAppInput :setting="o.getField(`#/properties/${field}`)" 
                                          :input-type="autoPickInput(formSchema.properties[field])"
-                                         v-model="data[field]" />
+                                         v-model="data[field]" />                                         
                                     </div>                                    
-                                </SimpleAppJsonSchemaForm>                                
                               </div>                                
                             </template>
                             <template #footer>
-                                <Button class="btn-primary" @click="invokeTask()">{{ t('submit') }}</Button>
+                                <Button class="btn-primary" @click="o.validate(validateCallBack)">{{ t('submit') }}</Button>
                                 
                             </template>
-                        </Card>                        
+                        </Card> 
+                        </SimpleAppJsonSchemaForm>                                
+
                     </div>                                                   
                 </div>
             </template>                
@@ -121,6 +121,13 @@ const pickStringInput = (setting:any) =>{
         default:
             return SimpleAppInputType.text
         break;
+    }
+}
+
+const validateCallBack = async (errors:any)=>{
+    // console.log("After validate",result)
+    if(!errors){
+        await invokeTask()
     }
 }
 </script>

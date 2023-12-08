@@ -4,13 +4,21 @@
  * last change 2023-10-28
  * Author: Ks Tan
  */
-import { Injectable, Logger,Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import jsonpath from 'jsonpath'
-import {  uniq } from 'lodash';
+import jsonpath from 'jsonpath';
+import { uniq } from 'lodash';
 import { AuditTrail } from '../commons/audittrail.service';
-import {foreignkeys} from '../commons/dicts/foreignkeys'
-import { Model,Types,PipelineStage,mongo, FilterQuery, ProjectionType} from 'mongoose';
+import { foreignkeys } from '../commons/dicts/foreignkeys';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  Model,
+  Types,
+  PipelineStage,
+  mongo,
+  FilterQuery,
+  ProjectionType,
+} from 'mongoose';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
@@ -50,8 +58,12 @@ export type MoreProjectionType = {
 };
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
+  
+  @Inject(EventEmitter2)
+  protected eventEmitter: EventEmitter2
+  
   protected logger = new Logger();
-  protected strictIsolation = true
+  protected strictIsolation = true;
   protected jsonschema = { type: 'object', properties: {}, required: [] };
   protected documentIdentityCode = 'code';
   protected documentIdentityLabel = 'label';
@@ -64,15 +76,14 @@ export class SimpleAppService<T extends { _id?: string }> {
   protected data: T = { _id: '' } as T;
   protected doc: Model<T>; //set private to prevent developer break data isolation control
   protected errorlist = [];
-  protected withDocNumberFormat=false
-  protected foreignkeys = {}
-  
+  protected withDocNumberFormat = false;
+  protected foreignkeys = {};
+
   @Inject(AuditTrail)
-  protected audittrail: AuditTrail
+  protected audittrail: AuditTrail;
 
   @Inject(DocNumberFormatGenerator)
-  protected docnogenerator: DocNumberFormatGenerator
-
+  protected docnogenerator: DocNumberFormatGenerator;
 
   // protected userprovider = new UserContext() ;
 
@@ -80,14 +91,14 @@ export class SimpleAppService<T extends { _id?: string }> {
     doctype: string,
     docname: string,
     newdoc: Model<T>,
-    isolationtype: IsolationType = IsolationType.org    
-  ) {            
+    isolationtype: IsolationType = IsolationType.org,
+  ) {
     // console.log("-------init simpleapp service abstract class -------userprovider=",typeof this.userprovider)
     this.documentType = doctype.toUpperCase();
     this.documentName = docname;
     this.doc = newdoc;
     this.isolationtype = isolationtype;
-    this.hook(undefined,HookType.init, undefined);
+    this.hook(undefined, HookType.init, undefined);
     // this.tenantdoc = tenantdoc
   }
   getDocumentType = () => this.documentType;
@@ -104,8 +115,8 @@ export class SimpleAppService<T extends { _id?: string }> {
     this.data = { ...newdata };
     return this;
   };
-  reCalculateValue(data:T) {}
-  getIsolationFilter = (appuser:UserContext,) => {
+  reCalculateValue(data: T) {}
+  getIsolationFilter = (appuser: UserContext) => {
     let isolationFilter = {};
     switch (this.isolationtype) {
       case 'none':
@@ -124,7 +135,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     return isolationFilter;
   };
-  async list(appuser:UserContext,) {
+  async list(appuser: UserContext) {
     try {
       //console.log("this.isolationFilter",this.getIsolationFilter())
       const products = await this.doc.find(this.getIsolationFilter(appuser));
@@ -147,7 +158,7 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     // console.log(this.moreAutoCompleteField);
   };
-  async getAutoComplete(appuser:UserContext, keyword: string) {
+  async getAutoComplete(appuser: UserContext, keyword: string) {
     try {
       const filter1 = {};
       const filter2 = {};
@@ -186,18 +197,18 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   /**
    * Special search function which can by pass data isolation. reserved and try not use
-   * @param appuser 
-   * @param filters 
-   * @returns 
+   * @param appuser
+   * @param filters
+   * @returns
    */
-  private async searchNoIsolation(appuser:UserContext,filters: Object) {
+  private async searchNoIsolation(appuser: UserContext, filters: Object) {
     try {
-      await this.hook(appuser,HookType.beforeSearch, filters);
+      await this.hook(appuser, HookType.beforeSearch, filters);
       const products = await this.doc.find(filters);
       const productlist = products.map((p: T) => {
         return p;
       });
-      await this.hook(appuser,HookType.afterSearch, productlist);
+      await this.hook(appuser, HookType.afterSearch, productlist);
       //   console.log(products);
       return productlist;
     } catch (err) {
@@ -205,43 +216,48 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     // return this;
   }
-  async aggregate(appuser:UserContext,pipeline:PipelineStage[]){
-    
-    if(pipeline[0] && pipeline[0]['$match']){      
-      try{
-        const isolationFilter= {... this.getIsolationFilter(appuser)}
-        this.polishIsolationFilter(isolationFilter)      
-       
+  async aggregate(appuser: UserContext, pipeline: PipelineStage[]) {
+    if (pipeline[0] && pipeline[0]['$match']) {
+      try {
+        const isolationFilter = { ...this.getIsolationFilter(appuser) };
+        this.polishIsolationFilter(isolationFilter);
 
-        Object.assign(pipeline[0]['$match'],isolationFilter);
+        Object.assign(pipeline[0]['$match'], isolationFilter);
         //console.log("final agg",pipeline)
-        return await this.doc.aggregate(pipeline)
-      }catch(err){
-        throw new InternalServerErrorException(err);  
+        return await this.doc.aggregate(pipeline);
+      } catch (err) {
+        throw new InternalServerErrorException(err);
       }
-      
-    }else{
-      throw new InternalServerErrorException('first aggregate pipelinestage shall use $match');
+    } else {
+      throw new InternalServerErrorException(
+        'first aggregate pipelinestage shall use $match',
+      );
     }
-
   }
-  async search(appuser:UserContext,filters: FilterQuery<T>,projection:ProjectionType<T>=undefined,sort:any=undefined) {
+  async search(
+    appuser: UserContext,
+    filters: FilterQuery<T>,
+    projection: ProjectionType<T> = undefined,
+    sort: any = undefined,
+  ) {
     try {
-      const isolationFilter= {... this.getIsolationFilter(appuser)}
-      this.polishIsolationFilter(isolationFilter)      
-     
+      const isolationFilter = { ...this.getIsolationFilter(appuser) };
+      this.polishIsolationFilter(isolationFilter);
+
       // console.log("initial search",filters)
-      const newfilters ={...filters,...isolationFilter}
-      await this.hook(appuser,HookType.beforeSearch, newfilters);
+      const newfilters = { ...filters, ...isolationFilter };
+      await this.hook(appuser, HookType.beforeSearch, newfilters);
       // console.log("before _find",newfilters)
       // console.log("this.doc",this.doc)
-      const products = await this.doc.find(newfilters,projection,{session:appuser.getDBSession()}).sort(sort);
+      const products = await this.doc
+        .find(newfilters, projection, { session: appuser.getDBSession() })
+        .sort(sort);
       // console.log("after search",products)
       const productlist = products.map((p: T) => {
         return p;
       });
       // console.log("after map",productlist)
-      await this.hook(appuser,HookType.afterSearch, productlist);
+      await this.hook(appuser, HookType.afterSearch, productlist);
       //   console.log(products);
       return productlist;
     } catch (err) {
@@ -249,10 +265,10 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
     // return this;
   }
-  async findById(appuser:UserContext,id: string) {
-    await this.hook(appuser,HookType.beforeFetchRecord, id);
-    const data = await this.search(appuser,{ _id: id });
-    await this.hook(appuser,HookType.afterFetchRecord, data);
+  async findById(appuser: UserContext, id: string) {
+    await this.hook(appuser, HookType.beforeFetchRecord, id);
+    const data = await this.search(appuser, { _id: id });
+    await this.hook(appuser, HookType.afterFetchRecord, data);
     if (data.length == 1) {
       // console.log('data0', data[0]);
       return data[0];
@@ -261,88 +277,100 @@ export class SimpleAppService<T extends { _id?: string }> {
     }
   }
 
-
-  async create(appuser:UserContext, data:T) {
-    
+  async create(appuser: UserContext, data: T) {
     let result;
-    if(!data._id){
-      data._id = crypto.randomUUID()
+    if (!data._id) {
+      data._id = crypto.randomUUID();
     }
-    const dbsession = appuser.getDBSession()
-    if(!dbsession.inTransaction()){
-      dbsession.startTransaction()
+    const dbsession = appuser.getDBSession();
+    if (!dbsession.inTransaction()) {
+      dbsession.startTransaction();
     }
 
-
-    this.logger.debug('this.withDocNumberFormat :' + this.withDocNumberFormat + '  && ' + '!data[this.documentIdentityCode] ==' + !data[this.documentIdentityCode])
-    if(this.withDocNumberFormat && !data[this.documentIdentityCode]){
-      await this.genNewDocNo(appuser,data)
+    this.logger.debug(
+      'this.withDocNumberFormat :' +
+        this.withDocNumberFormat +
+        '  && ' +
+        '!data[this.documentIdentityCode] ==' +
+        !data[this.documentIdentityCode],
+    );
+    if (this.withDocNumberFormat && !data[this.documentIdentityCode]) {
+      await this.genNewDocNo(appuser, data);
     }
-    
-    await this.hook(appuser,HookType.beforeCreate, data);
-    
-    let isolationFilter:any =  {...appuser.getCreateFilter()}    
-    isolationFilter = this.polishIsolationFilter(isolationFilter,data)      
-    
-    this.logger.debug("isolationFilter",'SimpleAppService')
-    this.logger.debug(isolationFilter,'SimpleAppService')
-    this.logger.debug("Create data before isolation",'SimpleAppService')
-    this.logger.debug(data,'SimpleAppService')
+
+    await this.hook(appuser, HookType.beforeCreate, data);
+
+    let isolationFilter: any = { ...appuser.getCreateFilter() };
+    isolationFilter = this.polishIsolationFilter(isolationFilter, data);
+
+    this.logger.debug('isolationFilter', 'SimpleAppService');
+    this.logger.debug(isolationFilter, 'SimpleAppService');
+    this.logger.debug('Create data before isolation', 'SimpleAppService');
+    this.logger.debug(data, 'SimpleAppService');
     Object.assign(data, isolationFilter);
-    this.reCalculateValue(data)
-    await this.validateData(appuser,data);
-    this.logger.debug("Create record",'SimpleAppService')
-    this.logger.debug(data,'SimpleAppService')
+    this.reCalculateValue(data);
+    await this.validateData(appuser, data);
+    this.logger.debug('Create record', 'SimpleAppService');
+    this.logger.debug(data, 'SimpleAppService');
 
-    this.applyNestedDateTime(appuser,data,'create')
+    this.applyNestedDateTime(appuser, data, 'create');
     const newdoc = new this.doc(data);
-    await this.identifyForeignKeys(appuser,data)
-    try{
-      result = await newdoc.save({session:dbsession})
-      appuser.addInsertedRecordId(this.documentName, result._id)
-    }catch(err){
-      this.logger.error(err)
-      throw new InternalServerErrorException(err)
+    await this.identifyForeignKeys(appuser, data);
+    try {
+      result = await newdoc.save({ session: dbsession });
+      appuser.addInsertedRecordId(this.documentName, result._id);
+    } catch (err) {
+      this.logger.error(err);
+      throw new InternalServerErrorException(err);
     }
-    
 
-    
     // this.doc.create(data)
     // this.doc
 
     // result = await newdoc.save()
-    await this.hook(appuser,HookType.afterCreate, result);
+    await this.hook(appuser, HookType.afterCreate, result);
 
     return result as T;
   }
-  
 
-  applyNestedDateTime=(appuser:UserContext,data:any,transtype:string)=>{  
-
-    const props = Object.getOwnPropertyNames(data)
-    for(let i=0;i<props.length;i++){
-      const key = props[i]
-      //need to apply nested 
-      if(Array.isArray(data[key]) && data[key].length>0 && typeof data[key][0] == 'object'){
-        for(let j=0;j<data[key].length;j++){
-          this.applyNestedDateTime(appuser,data[key][j],transtype)
+  applyNestedDateTime = (
+    appuser: UserContext,
+    data: any,
+    transtype: string,
+  ) => {
+    const props = Object.getOwnPropertyNames(data);
+    for (let i = 0; i < props.length; i++) {
+      const key = props[i];
+      //need to apply nested
+      if (
+        Array.isArray(data[key]) &&
+        data[key].length > 0 &&
+        typeof data[key][0] == 'object'
+      ) {
+        for (let j = 0; j < data[key].length; j++) {
+          this.applyNestedDateTime(appuser, data[key][j], transtype);
         }
-      }else if(key == 'created'){
-        data['created'] = (transtype == 'create'  || !data['created']) ? new Date() .toISOString() : data['created']
-      }else if(key == 'createdBy'){
-        data['createdBy'] = (transtype == 'create'  || !data['createdBy']) ? appuser.getUid() : data['createdBy']
-      }else if(key == 'updated'){
-        data['updated'] = new Date() .toISOString()      
-      }else if(key == 'updatedBy'){
-        data['updatedBy'] = appuser.getUid()
-      }            
+      } else if (key == 'created') {
+        data['created'] =
+          transtype == 'create' || !data['created']
+            ? new Date().toISOString()
+            : data['created'];
+      } else if (key == 'createdBy') {
+        data['createdBy'] =
+          transtype == 'create' || !data['createdBy']
+            ? appuser.getUid()
+            : data['createdBy'];
+      } else if (key == 'updated') {
+        data['updated'] = new Date().toISOString();
+      } else if (key == 'updatedBy') {
+        data['updatedBy'] = appuser.getUid();
+      }
     }
-
-  }
-  hook = async (appuser:UserContext,type: string, data?: any) => {
+  };
+  hook = async (appuser: UserContext, type: string, data?: any) => {
     return true;
   };
-  async validateData(appuser:UserContext,data: T) {
+  async validateData(appuser: UserContext, data: T) {
     const ajv = new Ajv({ allErrors: true, useDefaults: true });
     addFormats(ajv);
     addErrors(ajv);
@@ -351,19 +379,21 @@ export class SimpleAppService<T extends { _id?: string }> {
     ajv.addFormat('text', /.*$/);
     ajv.addFormat('html', /.*$/);
     ajv.addFormat('documentno', /.*$/);
-    
 
     ajv.addKeyword({ keyword: 'x-foreignkey', schemaType: 'string' });
-    ajv.addKeyword({ keyword: 'x-simpleapp-config', schemaType: 'object' });    
+    ajv.addKeyword({ keyword: 'x-simpleapp-config', schemaType: 'object' });
 
-    const issuccess = await this.hook(appuser,HookType.beforeValidation, data);
+    const issuccess = await this.hook(appuser, HookType.beforeValidation, data);
     if (!issuccess) {
       const errormsg: string[] = [];
       for (let i = 0; i < this.errorlist.length; i++) {
         errormsg.push(this.errorlist[i].message);
       }
       this.logger.log('run hook during validation');
-      throw new BadRequestException("Before validation hook failed",errormsg as HttpExceptionOptions);
+      throw new BadRequestException(
+        'Before validation hook failed',
+        errormsg as HttpExceptionOptions,
+      );
     }
 
     let validate;
@@ -373,81 +403,87 @@ export class SimpleAppService<T extends { _id?: string }> {
       this.logger.error('compile error', err);
       throw new ForbiddenException(err.message);
     }
-      const valid = validate(data);
-      if (!valid) {
-        this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
-        throw new BadRequestException("Data validation failed",validate.errors as HttpExceptionOptions);
-      }
-      await this.hook(appuser,HookType.afterValidation, data);
-    
+    const valid = validate(data);
+    if (!valid) {
+      this.logger.error(JSON.stringify(validate.errors), 'validate errors:');
+      throw new BadRequestException(
+        'Data validation failed',
+        validate.errors as HttpExceptionOptions,
+      );
+    }
+    await this.hook(appuser, HookType.afterValidation, data);
   }
 
-  polishIsolationFilter = (filterIsolation:any,data:any={}) =>{
-    if(this.isolationtype == 'none'){
-      delete filterIsolation['branchId']
-      delete filterIsolation['orgId']
-      delete filterIsolation['tenantId']
+  polishIsolationFilter = (filterIsolation: any, data: any = {}) => {
+    if (this.isolationtype == 'none') {
+      delete filterIsolation['branchId'];
+      delete filterIsolation['orgId'];
+      delete filterIsolation['tenantId'];
     }
-    if(this.isolationtype == 'tenant' && !this.strictIsolation){
+    if (this.isolationtype == 'tenant' && !this.strictIsolation) {
       // delete filterIsolation['tenantId']
-      if(data['tenantId']){
-        filterIsolation['tenantId']=data['tenantId']
+      if (data['tenantId']) {
+        filterIsolation['tenantId'] = data['tenantId'];
       }
-      delete filterIsolation['branchId']
-      delete filterIsolation['orgId']      
+      delete filterIsolation['branchId'];
+      delete filterIsolation['orgId'];
     }
-    if(this.isolationtype == 'org' && !this.strictIsolation){
-      // delete filterIsolation['tenantId']      
-      if(data['tenantId']){
-        filterIsolation['tenantId']=data['tenantId']
+    if (this.isolationtype == 'org' && !this.strictIsolation) {
+      // delete filterIsolation['tenantId']
+      if (data['tenantId']) {
+        filterIsolation['tenantId'] = data['tenantId'];
       }
-      if(data['orgId']){
-        filterIsolation['orgId']=data['orgId']
+      if (data['orgId']) {
+        filterIsolation['orgId'] = data['orgId'];
       }
-      // delete filterIsolation['orgId']      
-      delete filterIsolation['branchId']
+      // delete filterIsolation['orgId']
+      delete filterIsolation['branchId'];
     }
-    return filterIsolation
-  }
-  async findIdThenDelete(appuser:UserContext,id: string): Promise<any> {
-    const deletedata = await this.findById(appuser,id);    
-    if(!deletedata){
-      throw new NotFoundException(`${id} not found`,"not found")
+    return filterIsolation;
+  };
+  async findIdThenDelete(appuser: UserContext, id: string): Promise<any> {
+    const deletedata = await this.findById(appuser, id);
+    if (!deletedata) {
+      throw new NotFoundException(`${id} not found`, 'not found');
     }
-    const dbsession = appuser.getDBSession()
-    if(!dbsession.inTransaction()){
-      dbsession.startTransaction()
+    const dbsession = appuser.getDBSession();
+    if (!dbsession.inTransaction()) {
+      dbsession.startTransaction();
     }
 
-    let dependency
+    let dependency;
     try {
-      await this.hook(appuser,HookType.beforeDelete, id);
-      this.logger.debug('delete record',this.documentName, id);
+      await this.hook(appuser, HookType.beforeDelete, id);
+      this.logger.debug('delete record', this.documentName, id);
       dependency = await this.getRelatedRecords(id);
       //console.log('dependency', dependency);
       if (!dependency) {
         let filterIsolation = this.getIsolationFilter(appuser);
-        this.polishIsolationFilter(filterIsolation)        
-        
-        filterIsolation['_id'] =  id;
-        this.logger.debug('delete filter', filterIsolation);
-        const result = await this.doc.deleteOne(filterIsolation).session(dbsession);
+        this.polishIsolationFilter(filterIsolation);
 
-        appuser.addUpdatedRecordId(this.documentName, id)
-        const deleteresult = {result:result, data: deletedata}
-        this.logger.debug(deleteresult, " delete result" +this.doc.collection.name,)
+        filterIsolation['_id'] = id;
+        this.logger.debug('delete filter', filterIsolation);
+        const result = await this.doc
+          .deleteOne(filterIsolation)
+          .session(dbsession);
+
+        appuser.addUpdatedRecordId(this.documentName, id);
+        const deleteresult = { result: result, data: deletedata };
+        this.logger.debug(
+          deleteresult,
+          ' delete result' + this.doc.collection.name,
+        );
         // this.doc.findByIdAndDelete(id)
-        await this.hook(appuser,HookType.afterDelete, deleteresult);
-        
+        await this.hook(appuser, HookType.afterDelete, deleteresult);
+
         //this.doc.findByIdAndDelete(id);
         return deleteresult;
       } else {
         //console.log("reject query",dependency)
-        
-        throw new ForbiddenException('Foreignkey constraint',dependency)
+
+        throw new ForbiddenException('Foreignkey constraint', dependency);
       }
     } catch (err) {
-      
       throw new InternalServerErrorException(err);
       //JSON.stringify(dependency),JSON.stringify(dependency)
     }
@@ -457,38 +493,45 @@ export class SimpleAppService<T extends { _id?: string }> {
   //   this.doc.updateOne(data);
   // };
 
-  findIdThenUpdate = async (appuser:UserContext,id: string, data: T,session:mongo.ClientSession=undefined) => {
-    const existingdata = await this.findById(appuser,id);
-    if(!existingdata){
-      throw new NotFoundException(`${id} not found`,"not found")
+  findIdThenUpdate = async (
+    appuser: UserContext,
+    id: string,
+    data: T,
+    session: mongo.ClientSession = undefined,
+  ) => {
+    const existingdata = await this.findById(appuser, id);
+    if (!existingdata) {
+      throw new NotFoundException(`${id} not found`, 'not found');
     }
-    await this.hook(appuser,HookType.beforeUpdate, data);
+    await this.hook(appuser, HookType.beforeUpdate, data);
 
-    const dbsession = appuser.getDBSession()
-    if(!dbsession.inTransaction()){
-      dbsession.startTransaction()
+    const dbsession = appuser.getDBSession();
+    if (!dbsession.inTransaction()) {
+      dbsession.startTransaction();
     }
 
     // try {
     Object.assign(data, appuser.getUpdateFilter());
     Object.assign(existingdata, data);
-    delete data['_id']
+    delete data['_id'];
 
-    this.reCalculateValue(data)
+    this.reCalculateValue(data);
     // existingdata['_id']=''
     // console.log("newdata",data)
-    await this.validateData(appuser,data);
-    
-    const isolationFilter =  {...this.getIsolationFilter(appuser)}
-    this.polishIsolationFilter(isolationFilter)      
+    await this.validateData(appuser, data);
+
+    const isolationFilter = { ...this.getIsolationFilter(appuser) };
+    this.polishIsolationFilter(isolationFilter);
 
     isolationFilter['_id'] = id;
-    this.applyNestedDateTime(appuser,data,'update')
-    try{
-      const result = await this.doc.findOneAndUpdate(isolationFilter, data).session(dbsession);
-      appuser.addUpdatedRecordId(this.documentName, data._id)
-      await this.hook(appuser,HookType.afterUpdate, data);
-      return result;        
+    this.applyNestedDateTime(appuser, data, 'update');
+    try {
+      const result = await this.doc
+        .findOneAndUpdate(isolationFilter, data)
+        .session(dbsession);
+      appuser.addUpdatedRecordId(this.documentName, data._id);
+      await this.hook(appuser, HookType.afterUpdate, data);
+      return result;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
@@ -496,20 +539,19 @@ export class SimpleAppService<T extends { _id?: string }> {
 
   //find what foreign key constraint
   async getRelatedRecords(id: string) {
-    this.logger.debug("get foreignkey for delete:",id)
-    
-    
-    if(foreignkeys === undefined){
-      this.logger.error("foreignkeys object undetected")
-      throw new InternalServerErrorException("foreignkeys object undetected")
+    this.logger.debug('get foreignkey for delete:', id);
+
+    if (foreignkeys === undefined) {
+      this.logger.error('foreignkeys object undetected');
+      throw new InternalServerErrorException('foreignkeys object undetected');
     }
-    
+
     const foreignkeysettings = foreignkeys[this.documentName];
-    if(!foreignkeysettings){
-      return null
+    if (!foreignkeysettings) {
+      return null;
     }
     const propkeys = Object.getOwnPropertyNames(foreignkeysettings);
-    
+
     if (propkeys.length > 0) {
       //console.log('Have properties');
       for (let i = 0; i < propkeys.length; i++) {
@@ -519,14 +561,13 @@ export class SimpleAppService<T extends { _id?: string }> {
         const collection = this.doc.db.collection(collectionname);
         //single schema may have multiple foreign key link here, loop all
         for (let j = 0; j < fobjs.length; j++) {
-          const fkey = fobjs[j] 
-          let filter = {}
+          const fkey = fobjs[j];
+          let filter = {};
           filter[fkey] = id;
-         
-                    
-          const result = await collection.findOne(filter);          
+
+          const result = await collection.findOne(filter);
           if (result) {
-            this.logger.error(result,"related result found")
+            this.logger.error(result, 'related result found');
             return result;
           }
         }
@@ -547,109 +588,130 @@ export class SimpleAppService<T extends { _id?: string }> {
    * @param docstatus
    * @returns Promise
    */
-  async setDocumentStatus(appuser:UserContext,id: string, docstatus: string) {
+  async setDocumentStatus(appuser: UserContext, id: string, docstatus: string) {
     const partialdata: T = {} as T;
     partialdata['documentStatus'] = docstatus;
-    return this.findIdThenUpdate(appuser,id, partialdata);
+    return this.findIdThenUpdate(appuser, id, partialdata);
   }
 
-  async genNewDocNo(appuser:UserContext,data:T){
-    this.logger.debug("genNewDocNo")
-    const result = await this.docnogenerator.generateNextNumberFromDocument(appuser,this.documentType,data)
-    this.logger.debug(result,"genNewDocNo")
-    data[this.documentIdentityCode]=result    
+  startWorkflow(appuser:UserContext,processName:string,workflowData:any){
+    return this.eventEmitter.emit('workflow.start',appuser,'suspendcustomer',workflowData)
   }
 
+  async genNewDocNo(appuser: UserContext, data: T) {
+    this.logger.debug('genNewDocNo');
+    const result = await this.docnogenerator.generateNextNumberFromDocument(
+      appuser,
+      this.documentType,
+      data,
+    );
+    this.logger.debug(result, 'genNewDocNo');
+    data[this.documentIdentityCode] = result;
+  }
 
-  async identifyForeignKeys(appuser:UserContext,data:T){
-     /**
+  async identifyForeignKeys(appuser: UserContext, data: T) {
+    /**
      * 1. looping schemas identify what foreign key exists
-     * 2. loop through record obtain all foreign key value 
+     * 2. loop through record obtain all foreign key value
      * 3. get all unique key value in array {product:['xxxx','yyyy'],customer:['aaa']}
      */
-     const schema = this.jsonschema
+    const schema = this.jsonschema;
 
-     //get all foreign keys catalogue
-     const collections = Object.getOwnPropertyNames(this.foreignkeys)
-    
-     //obtain exists data in according foreign key
-     const pipelines :PipelineStage[] =[ {$match:{_id:false}}] //exclude data from current collection
-     const vdata = data//['_doc']
-     const keystore = {}
-     collections.forEach((collectionname)=>{
-       const fks:string[] = this.foreignkeys[collectionname]
-       let  results:string[] = []
-       fks.forEach(fieldpath=>{        
+    //get all foreign keys catalogue
+    const collections = Object.getOwnPropertyNames(this.foreignkeys);
+
+    //obtain exists data in according foreign key
+    const pipelines: PipelineStage[] = [{ $match: { _id: false } }]; //exclude data from current collection
+    const vdata = data; //['_doc']
+    const keystore = {};
+    collections.forEach((collectionname) => {
+      const fks: string[] = this.foreignkeys[collectionname];
+      let results: string[] = [];
+      fks.forEach((fieldpath) => {
         //console.log("fieldpath:",fieldpath,"vdata",data,vdata)
-         const tmp = jsonpath.query(vdata,fieldpath).filter((item:string)=>item!='')
+        const tmp = jsonpath
+          .query(vdata, fieldpath)
+          .filter((item: string) => item != '');
         // console.log("tmp",tmp)
-         
-         results = results.concat(tmp)        
-       })
-       
-       
- 
-       if(results.length>0){  
-         if(results.length>1){
-           results = uniq<string>(results)   
-         }
-         
-         keystore[collectionname]= results   
-         //console.log("keystorekeystore",keystore)
-         let addfield={$addFields:{collection:collectionname}}        
-         
-         const stagefilter:PipelineStage =  {
-           $unionWith: {coll:collectionname,pipeline: [{ $match: { _id: {$in:results}} },addfield,{$project:{collection:1}}, ]}          
-         }
-         pipelines.push(stagefilter)
-       }            
-     })
-     this.logger.log(pipelines,'identifyForeignKeys pipelines')
-     // this.doc.db.collection(collectionname);
-     const unionresult = await this.doc.aggregate(pipelines)
-     
-     if(!unionresult){
-      this.logger.error("foreign key control failed ",'identifyForeignKeys')
-       throw new InternalServerErrorException("Foreignkey check execution error",pipelines as HttpExceptionOptions)
-     }else{
-       let searchresult:any = {}
-       unionresult.forEach(item=>{
-         if(searchresult[item.collection]){
-           searchresult[item.collection].push(item._id)
-         }else{
-           searchresult[item.collection] = [item._id]
-         }
-       })
-       this.logger.log(unionresult,this.documentType+" search Result")
-       
-       //search is it all foreign key exists in db
-       for(let i=0; i<collections.length; i++){
-         const collectionname = collections[i]
-         const keys:string[] = keystore[collectionname]
-         if(!keys){
-           continue
-         }
-         for(let k=0;k<keys.length; k++){
-           const key = keys[k]
-           if(searchresult[collectionname] && searchresult[collectionname].includes(key)){
-            this.logger.debug(`foreignkey ${collectionname}->${key} exists`)
-           }
-           else if(appuser.searchInsertedRecordId(collectionname,key)){
-            this.logger.debug(`foreignkey ${collectionname} exists in user context which not yet commited`)
-           }
-           else{
-            this.logger.warn(`${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,'identifyForeignKeys')
-            this.logger.log(appuser.getModifieds,"appuser.getModifieds")
-            const errordata = {key:key,collection:collectionname}
-            throw new BadRequestException(`${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,JSON.stringify(errordata))
 
-           }
-         }
- 
-       }      
-       
-     }    
+        results = results.concat(tmp);
+      });
+
+      if (results.length > 0) {
+        if (results.length > 1) {
+          results = uniq<string>(results);
+        }
+
+        keystore[collectionname] = results;
+        //console.log("keystorekeystore",keystore)
+        let addfield = { $addFields: { collection: collectionname } };
+
+        const stagefilter: PipelineStage = {
+          $unionWith: {
+            coll: collectionname,
+            pipeline: [
+              { $match: { _id: { $in: results } } },
+              addfield,
+              { $project: { collection: 1 } },
+            ],
+          },
+        };
+        pipelines.push(stagefilter);
+      }
+    });
+    this.logger.log(pipelines, 'identifyForeignKeys pipelines');
+    // this.doc.db.collection(collectionname);
+    const unionresult = await this.doc.aggregate(pipelines);
+
+    if (!unionresult) {
+      this.logger.error('foreign key control failed ', 'identifyForeignKeys');
+      throw new InternalServerErrorException(
+        'Foreignkey check execution error',
+        pipelines as HttpExceptionOptions,
+      );
+    } else {
+      let searchresult: any = {};
+      unionresult.forEach((item) => {
+        if (searchresult[item.collection]) {
+          searchresult[item.collection].push(item._id);
+        } else {
+          searchresult[item.collection] = [item._id];
+        }
+      });
+      this.logger.log(unionresult, this.documentType + ' search Result');
+
+      //search is it all foreign key exists in db
+      for (let i = 0; i < collections.length; i++) {
+        const collectionname = collections[i];
+        const keys: string[] = keystore[collectionname];
+        if (!keys) {
+          continue;
+        }
+        for (let k = 0; k < keys.length; k++) {
+          const key = keys[k];
+          if (
+            searchresult[collectionname] &&
+            searchresult[collectionname].includes(key)
+          ) {
+            this.logger.debug(`foreignkey ${collectionname}->${key} exists`);
+          } else if (appuser.searchInsertedRecordId(collectionname, key)) {
+            this.logger.debug(
+              `foreignkey ${collectionname} exists in user context which not yet commited`,
+            );
+          } else {
+            this.logger.warn(
+              `${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,
+              'identifyForeignKeys',
+            );
+            this.logger.log(appuser.getModifieds, 'appuser.getModifieds');
+            const errordata = { key: key, collection: collectionname };
+            throw new BadRequestException(
+              `${this.documentType}: Foreignkey ${key} at collection ${collectionname} does not exist`,
+              JSON.stringify(errordata),
+            );
+          }
+        }
+      }
+    }
   }
-
-
 }

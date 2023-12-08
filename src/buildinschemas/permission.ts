@@ -11,7 +11,6 @@ export const permission:SchemaType ={
             entryPoint:"listuser",
             requiredRole:["SuperAdmin"],
             method:RESTMethods.get,
-            execute:"listUser",
             description:"Get current permissionlist lookup user info"
           }]
     },

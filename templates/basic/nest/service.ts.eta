@@ -8,7 +8,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserContext } from '../generate/commons/user.context';
-import { WorkflowService } from '../workflow/workflow.service';
 import { <%= it.typename %>Processor } from '../generate/processors/<%= it.doctype %>.processor';
 import { <%= it.typename %>} from '../generate/types/<%= it.doctype %>.type';
 export { <%= it.typename %>} from '../generate/types/<%= it.doctype %>.type';
@@ -18,8 +17,7 @@ export { <%= it.typename %>} from '../generate/types/<%= it.doctype %>.type';
 export class <%= it.typename %>Service extends <%= it.typename %>Processor {
 
     constructor(
-        @InjectModel('<%= it.typename %>')  mydoc: Model<<%= it.typename %>>,
-        private workflow:WorkflowService
+        @InjectModel('<%= it.typename %>')  mydoc: Model<<%= it.typename %>>
         ){
         super(mydoc)
     }
@@ -65,7 +63,7 @@ export class <%= it.typename %>Service extends <%= it.typename %>Processor {
 /***************************** begin x-document-api definations *****************************************/
 <% for(let i=0;i<it.apiSettings.length;i++){%>
 <% let api = it.apiSettings[i] %>
-  async run<%= capitalizeFirstLetter(api.execute??api.action) %>(
+  async run<%= capitalizeFirstLetter(api.action) %>(
     appuser: UserContext,    
     <% if(api.entryPoint && api.entryPoint.includes(':')) {%>
           <%let subpath = api.entryPoint.split('/')%>
@@ -87,8 +85,8 @@ export class <%= it.typename %>Service extends <%= it.typename %>Processor {
             data:any,
         <%}%>
          ){
-    <%if (api.workflowSetting && api.workflowSetting.bpmn){ %>
-      return await this.workflow.startWorkflow(appuser,'<%=api.workflowSetting.bpmn%>',data);       
+    <%if (api.workflowSetting && api.workflowSetting.bpmn){ %>      
+      return this.startWorkflow(appuser,'<%=api.workflowSetting.bpmn%>',data)
     <%} else {%>
        return "OK"
     <%}%>

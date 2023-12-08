@@ -22,6 +22,8 @@ export default {
     setting: 'Setting',
     mytasks: 'My Tasks',
     suspend: 'Suspend',
+    submit: 'Submit',
+    decision: 'Decision',
 
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>

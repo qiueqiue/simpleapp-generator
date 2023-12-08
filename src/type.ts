@@ -119,8 +119,7 @@ export type DocumentApi = {
   entryPoint:string   //api entry point example:':id', ':id/confirm'
   queryPara?:string[]   //what query parameter wish to accept, example:  ['description','date']
   requiredRole?: string[]   // what special user role wish to allow for this api, example: ['SuperUser']
-  method:RESTMethods
-  execute:string,   //what service class method name to execute, example: 'ping','getDocumentName'
+  method:RESTMethods  
   description:string //description of api
 }
 export enum IsolationType {"none"="none" , "tenant"="tenant","org"="org", "branch"="branch"}

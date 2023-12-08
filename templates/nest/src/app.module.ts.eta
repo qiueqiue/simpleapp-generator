@@ -28,10 +28,29 @@ import {GenerateModule} from './simpleapp/simpleapp.module'
 import { UserMongoSchema } from './simpleapp/generate/models/user.model';
 import { PermissionMongoSchema } from './simpleapp/generate/models/perm.model';
 import { ApiEventMongoSchema } from './simpleapp/generate/models/apievent.model';
+import { WorkflowModule } from './workflow/workflow.module'
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 @Module({
   
   imports: [
     ConfigModule.forRoot(),
+    EventEmitterModule.forRoot({
+  // set this to `true` to use wildcards
+  wildcard: false,
+  // the delimiter used to segment namespaces
+  delimiter: '.',
+  // set this to `true` if you want to emit the newListener event
+  newListener: false,
+  // set this to `true` if you want to emit the removeListener event
+  removeListener: false,
+  // the maximum amount of listeners that can be assigned to an event
+  maxListeners: 10,
+  // show event name in memory leak message when more than maximum amount of listeners is assigned
+  verboseMemoryLeak: false,
+  // disable throwing uncaughtException if an error event is emitted and it has no listeners
+  ignoreErrors: false,
+}),
     MongooseModule.forRoot(process.env.MONGO_DB_URL,{}),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public_html'),
@@ -45,12 +64,13 @@ import { ApiEventMongoSchema } from './simpleapp/generate/models/apievent.model'
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
       tokenValidation: TokenValidation.ONLINE,
     }),
-    GenerateModule,
+    GenerateModule,    
     MongooseModule.forFeature([
       { name: 'User', schema: UserMongoSchema },
       { name: 'Permission', schema: PermissionMongoSchema },
       { name: 'ApiEvent', schema: ApiEventMongoSchema },
-    ])
+    ]),
+    WorkflowModule,
       ],
   controllers: [AppController],
   providers: [

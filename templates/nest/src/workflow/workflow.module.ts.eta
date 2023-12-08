@@ -1,0 +1,21 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { PermissionMongoSchema } from '../simpleapp/generate/models/perm.model';
+import { UserMongoSchema } from '../simpleapp/generate/models/user.model';
+import { WorkflowController } from './workflow.controller';
+import { WorkflowDelegate } from './workflow.delegate';
+import { WorkflowConfig } from './workflow.config';
+import { WorkflowService } from './workflow.service';
+import { GenerateModule } from 'src/simpleapp/simpleapp.module';
+import {WorkflowDelegateService} from './workflow.delegateservice'
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: 'Permission', schema: PermissionMongoSchema },
+      { name: 'User', schema: UserMongoSchema },
+    ]),
+    GenerateModule],
+  controllers: [WorkflowController],
+  providers: [WorkflowDelegateService,WorkflowDelegate,WorkflowConfig,WorkflowService],
+})
+export class WorkflowModule {}

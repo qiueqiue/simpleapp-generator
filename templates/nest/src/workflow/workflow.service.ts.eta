@@ -1,3 +1,4 @@
+import { WorkflowConfig } from './workflow.config';
 /**
  * bpmn microservices
  * require endpoints
@@ -32,12 +33,13 @@ import {
   WorkflowProcess,
   WorkflowTask,
   UserTaskActors,
-  UserTaskType
+  UserTaskType,
 } from './workflow.type';
+import { OnEvent } from '@nestjs/event-emitter';
 import { BPMNServer, Logger as bpmnlogger } from 'bpmn-server';
-import { configuration } from './configuration';
-import { UserContext } from '../generate/commons/user.context';
-import * as formschemas from './formschema'
+// import { configuration } from './configuration';
+import { UserContext } from '../simpleapp/generate/commons/user.context';
+import * as formschemas from './formschema';
 export {
   WorkflowSettingApiSchema,
   WorkflowDataApiSchema,
@@ -47,8 +49,10 @@ export {
 export class WorkflowService {
   protected bpmnServer: BPMNServer;
   private readonly logger = new Logger();
-  constructor() {
-    this.bpmnServer = new BPMNServer(configuration);
+  constructor(
+    private workflowconfig:  WorkflowConfig
+  ) {
+    this.bpmnServer = new BPMNServer(this.workflowconfig.getConfig());
   }
 
   /**
@@ -67,27 +71,27 @@ export class WorkflowService {
         { 'items.candidateGroups': appuser.getGroup() },
       ],
     });
-    const result:UserTaskType[] = tmp.map((proc) => {
-      const subitem:UserTaskType = {
-      id: proc.instanceId,
-      taskId: proc.id,
-      elementId: proc.elementId,
-      name: proc.name,
-      processName: proc.processName,
-      assignee: proc.assignee,
-      candidateUsers: proc.candidateUsers,
-      candidateGroups: proc.candidateGroups,
-      data: proc.data,
-      vars: proc.vars,
-      startedAt: proc.startedAt,
-      followUpDate: proc.followUpDate,
-      dueDate: proc.dueDate,
-      priority: proc.priority,
-      type: proc.type,
-      userId: proc.userId,
-    }
-    return subitem
-  });
+    const result: UserTaskType[] = tmp.map((proc) => {
+      const subitem: UserTaskType = {
+        id: proc.instanceId,
+        taskId: proc.id,
+        elementId: proc.elementId,
+        name: proc.name,
+        processName: proc.processName,
+        assignee: proc.assignee,
+        candidateUsers: proc.candidateUsers,
+        candidateGroups: proc.candidateGroups,
+        data: proc.data,
+        vars: proc.vars,
+        startedAt: proc.startedAt,
+        followUpDate: proc.followUpDate,
+        dueDate: proc.dueDate,
+        priority: proc.priority,
+        type: proc.type,
+        userId: proc.userId,
+      };
+      return subitem;
+    });
     return result;
     // throw new BadRequestException(`getActorUserTask is not supported yet`)
   }
@@ -289,23 +293,26 @@ export class WorkflowService {
   }
 
   /**
-   * initialise new workflow process
+   * initialise new workflow process, also listening event 'workflow.start'
    * status: done
    * @param appuser
    * @param workflowName
    * @param data
    * @returns workflowsummary
    */
+  @OnEvent('workflow.start')
   async startWorkflow(appuser: UserContext, workflowName: string, data?: any) {
     try {
+      console.log("startWorkflow started: " ,workflowName)
       data.tenantId = appuser.getTenantId();
       data.orgId = appuser.getOrgId();
       data.branchId = appuser.getBranchId();
       const result = await this.bpmnServer.engine.start(
         workflowName,
         data,
-        null,
+        undefined,
         appuser.getUid(),
+        appuser.getBranchFilter(),
       );
       return {
         id: result.id,
@@ -366,38 +373,39 @@ export class WorkflowService {
     processName: string,
     elementId: string,
   ) {
-    try{
-
-    
-    let definition = await this.bpmnServer.definitions.load(processName);
-    let node = definition.getNodeById(elementId);
-    if(node){
-       const formKey = node.def.formKey
-        let schema:string =''
-      if(formKey.includes('jsonschema://')){
-          const keyname = formKey.replace('jsonschema://','')          
-          schema = formschemas[keyname]
-        }else if(formKey.includes('custom://')){
-          schema=formKey
-        }else{
+    try {
+      let definition = await this.bpmnServer.definitions.load(processName);
+      let node = definition.getNodeById(elementId);
+      if (node) {
+        const formKey = node.def.formKey;
+        let schema: string = '';
+        if (formKey.includes('jsonschema://')) {
+          const keyname = formKey.replace('jsonschema://', '');
+          schema = formschemas[keyname];
+        } else if (formKey.includes('custom://')) {
+          schema = formKey;
+        } else {
           //others implementation like http://, https:// and etc
         }
 
-        if(schema){
+        if (schema) {
           return {
             processName: processName,
             elementId: elementId,
-            schema: schema
-          }
-        }else{
-          throw new InternalServerErrorException(`Cannot resolve schema from invalid formKey '${formKey}', example: 'jsonschema://SimpleApproveReject' or 'custom://your-custom-key'`)
+            schema: schema,
+          };
+        } else {
+          throw new InternalServerErrorException(
+            `Cannot resolve schema from invalid formKey '${formKey}', example: 'jsonschema://SimpleApproveReject' or 'custom://your-custom-key'`,
+          );
         }
-    }else{
-      throw new NotFoundException(`Element ${elementId} not found in process ${processName}`)
-    }
-   
-    }catch(e){
-      throw new InternalServerErrorException(e)
+      } else {
+        throw new NotFoundException(
+          `Element ${elementId} not found in process ${processName}`,
+        );
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e);
     }
   }
 

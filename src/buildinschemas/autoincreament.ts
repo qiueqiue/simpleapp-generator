@@ -8,11 +8,10 @@ export const autoincreament:SchemaType = {
       isolationType:IsolationType.none,
       pageType:"crud",      
       additionalApis:[{
-        action:"genNextNumber",
+        action:"generateNextNo",
         entryPoint:"gennextno/:collection/:field",
         requiredRole:["User"],
-        method:RESTMethods.get, 
-        execute:"generateNextNo",        
+        method:RESTMethods.get,         
         description:"Get next no and trigger increase nextno"
       }],
     },        

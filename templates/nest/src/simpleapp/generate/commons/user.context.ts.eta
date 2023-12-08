@@ -58,7 +58,7 @@ export class UserContext {
   protected lastActivity: string = new Date().toISOString();
   protected invites: any[] = []; //User + field tenant:Tenant[]
   protected roles: string[] = [];
-  private dbsession: ClientSession
+  private dbsession: ClientSession;
   protected modifiedRecords: ModifiedRecords = {
     createds: {},
     updateds: {},
@@ -70,9 +70,11 @@ export class UserContext {
     private readonly permmodel: Model<Permission>,
     // private dbsession: ClientSession,
   ) {}
-  
-  setDBSession = (dbsession:ClientSession) =>  {this.dbsession =  dbsession}
-  getDBSession = (): ClientSession => this.dbsession;
+
+  setDBSession = (dbsession: ClientSession) => {
+    this.dbsession = dbsession;
+  };
+  getDBSession = (): ClientSession => this.dbsession;  
   getId = () => this._id;
   getUid = () => this.uid;
   getUname = () => this.uname;
@@ -326,6 +328,11 @@ export class UserContext {
       updated: new Date().toISOString(),
     };
   };
+  setCurrentTenant(tenantId:number, orgId:number,branchId:number){
+    this.tenantId = tenantId;
+    this.orgId = orgId;
+    this.branchId = branchId;
+  }
   setXorg = (xorg) => {
     try {
       const decodedText: string = Base64URL.decodeText(xorg);
@@ -604,4 +611,16 @@ export class UserContext {
     }
     return results;
   }
+
+  setAsStaticUser = (uid:string,uname:string,name:string,email:string) => {
+    //define token info
+    this.token = '';
+    this.uid = uid;
+    this.email = email;
+    this.uname = uname;
+    this.fullname = name;
+    this.ssoACL = '';
+    this.roles = [Role.Everyone, Role.User];        
+  };
+  
 }

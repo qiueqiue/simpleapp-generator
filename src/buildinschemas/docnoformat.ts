@@ -15,7 +15,6 @@ export const docnoformat:SchemaType ={
                 "entryPoint":"/listdocformats/:doctype",
                 "requiredRole":["User"],
                 "method":RESTMethods.get, 
-                "execute":"listDocFormats",
                 "description":"get list of document format for 1 doctype"
               } ]
         },        
