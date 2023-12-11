@@ -59,10 +59,16 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     const file = files[j]
     // log.warn(file)
     const fullfilename = `${configs.jsonschemaFolder}/${file}`
-    const jsoncontent = readFileSync(fullfilename, 'utf-8');      
-    // log.debug(jsoncontent)
-    const jsonschema = JSON.parse(jsoncontent)
-    await processSchema(file.replace('.json',''),jsonschema)    
+    try{
+      const jsoncontent = readFileSync(fullfilename, 'utf-8');      
+      // log.debug(jsoncontent)
+      const jsonschema = JSON.parse(jsoncontent)
+      await processSchema(file.replace('.json',''),jsonschema)   
+    }
+    catch(e:any){
+      log.error('\nFile : '+fullfilename+'\n');
+      throw e;
+    } 
   }
   // //generate groups
   const systemgroups = readdirSync(`${groupFolder}`)
