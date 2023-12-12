@@ -4,7 +4,6 @@
         (subtype? `type="${subtype}"`:'') +' ' + 
         (hidelabel? ':hidelabel="true"':'') +
         (instancepath ?  `:instancepath="\`${instancepath}\`"` : '') + '/>' %>
-
 <template>    
     
     <SimpleAppForm #default="o" :document="doc" :readonly="isReadOnly">

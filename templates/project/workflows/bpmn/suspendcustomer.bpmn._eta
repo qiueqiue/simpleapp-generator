@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn:process id="Process_1" name="approve1" isExecutable="false">
+  <bpmn:process id="process1" name="Suspend Customer" isExecutable="false">
     <bpmn:extensionElements />
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_1a63g0z</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0qpgd23">
-      <bpmn:incoming>Flow_0z1jec8</bpmn:incoming>
+      <bpmn:incoming>Flow_1g3iygg</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1x9zeai" sourceRef="approve1" targetRef="set-customer-inactive" />
+    <bpmn:sequenceFlow id="Flow_1x9zeai" sourceRef="approve1" targetRef="Activity_0pu51x5" />
     <bpmn:sequenceFlow id="Flow_1a63g0z" sourceRef="StartEvent_1" targetRef="approve1" />
-    <bpmn:userTask id="approve1" name="approve by supervisor" camunda:formKey="jsonschema://SimpleApproveReject" camunda:assignee="kstan">
+    <bpmn:userTask id="approve1" name="approve by supervisor" camunda:formKey="form://simpleapprove" camunda:assignee="kstan">
       <bpmn:extensionElements />
       <bpmn:incoming>Flow_1a63g0z</bpmn:incoming>
       <bpmn:outgoing>Flow_1x9zeai</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_0ds03ms" sourceRef="set-customer-inactive" targetRef="Gateway_0dip88q" />
-    <bpmn:serviceTask id="set-customer-inactive" name="set customer inactive" camunda:delegateExpression="suspendCustomer">
-      <bpmn:extensionElements />
+    <bpmn:sequenceFlow id="Flow_1g3iygg" sourceRef="Activity_0pu51x5" targetRef="Event_0qpgd23" />
+    <bpmn:serviceTask id="Activity_0pu51x5" name="hello" camunda:delegateExpression="system.hello">
       <bpmn:incoming>Flow_1x9zeai</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ds03ms</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1g3iygg</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:exclusiveGateway id="Gateway_0dip88q">
-      <bpmn:incoming>Flow_0ds03ms</bpmn:incoming>
-      <bpmn:outgoing>Flow_0z1jec8</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0z1jec8" sourceRef="Gateway_0dip88q" targetRef="Event_0qpgd23" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process1">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="122" y="202" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -39,26 +33,19 @@
         <dc:Bounds x="200" y="180" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_03pdbkx_di" bpmnElement="set-customer-inactive">
-        <dc:Bounds x="390" y="180" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0dip88q_di" bpmnElement="Gateway_0dip88q" isMarkerVisible="true">
-        <dc:Bounds x="515" y="195" width="50" height="50" />
+      <bpmndi:BPMNShape id="Activity_1tksj2t_di" bpmnElement="Activity_0pu51x5">
+        <dc:Bounds x="520" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1x9zeai_di" bpmnElement="Flow_1x9zeai">
         <di:waypoint x="300" y="220" />
-        <di:waypoint x="390" y="220" />
+        <di:waypoint x="520" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1a63g0z_di" bpmnElement="Flow_1a63g0z">
         <di:waypoint x="158" y="220" />
         <di:waypoint x="200" y="220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ds03ms_di" bpmnElement="Flow_0ds03ms">
-        <di:waypoint x="490" y="220" />
-        <di:waypoint x="515" y="220" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0z1jec8_di" bpmnElement="Flow_0z1jec8">
-        <di:waypoint x="565" y="220" />
+      <bpmndi:BPMNEdge id="Flow_1g3iygg_di" bpmnElement="Flow_1g3iygg">
+        <di:waypoint x="620" y="220" />
         <di:waypoint x="672" y="220" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>

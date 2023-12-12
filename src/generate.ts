@@ -1,5 +1,6 @@
 import * as constants from './constant'
 import {readJsonSchemaBuilder} from './processors/jsonschemabuilder'
+import {generateWorkflows} from './processors/bpmnbuilder'
 import {allforeignkeys,allfields} from './storage'
 import {TypeGenerateDocumentVariable,ChildModels,ModuleObject, SchemaType, SchemaConfig } from './type'
 import { Logger, ILogObj } from "tslog";
@@ -65,6 +66,7 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     await processSchema(file.replace('.json',''),jsonschema)    
   }
   // //generate groups
+  //prepare group/roles
   const systemgroups = readdirSync(`${groupFolder}`)
   for(let g = 0; g< systemgroups.length;g++){
     const groupfile = systemgroups[g]
@@ -74,9 +76,12 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     const roles = prepareRoles(groupdata)
     allroles[documentname]=roles
   }
-  finalize(activatemodules)
+
+  generateSystemFiles(activatemodules)
+  await generateWorkflows(configs)
   callback()
 }
+
 
 // const processSchema=async (file:string,defFolder:string)=>{
 const processSchema= async (schemaname:string,jsondata:JSONSchema7)=>{
@@ -325,7 +330,7 @@ const generateSchema = ( docname: string,
 }
 
 
-const finalize=(modules:ModuleObject[])=>{  
+const generateSystemFiles=(modules:ModuleObject[])=>{  
   const renderProperties = {
     configs:configs,
     modules:modules,

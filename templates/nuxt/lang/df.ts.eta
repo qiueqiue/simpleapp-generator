@@ -24,6 +24,7 @@ export default {
     suspend: 'Suspend',
     submit: 'Submit',
     decision: 'Decision',
+    simpleApproveMessage: 'Approve or reject',
 
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>

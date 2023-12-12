@@ -1,5 +1,0 @@
-export const hello = async (a,b)=>{
-    console.log("Send Hello-------------------aaaaa",a)
-}
-
-

@@ -1,0 +1,41 @@
+<template>
+    <SimpleAppJsonSchemaForm :schema="SimpleApproveJsonSchema" v-model="modelValue"  #default="o" >                                                        
+        <Card>
+            <template #header>{{ t(processName)}} - {{ t(taskName) }}</template>
+            <template #content>
+                <div>
+                    <h1>{{t('simpleApproveMessage')}}</h1>
+                </div>
+                <div >                                                                   
+                    <SimpleAppInput :setting="o.getField(`#/properties/decision`)" 
+                            :input-type="SimpleAppInputType.select"
+                            v-model="modelValue['decision']" />                                         
+                    <SimpleAppInput :setting="o.getField(`#/properties/description`)" 
+                            :input-type="SimpleAppInputType.textarea"
+                            v-model="modelValue['description']" />                 
+                </div>                                
+            </template>
+            <template #footer>
+                <Button class="btn-primary" @click="o.validate(validateCallBack)">{{ t('submit') }}</Button>
+                
+            </template>
+        </Card> 
+    </SimpleAppJsonSchemaForm> 
+</template>
+<script lang="ts" setup>
+import {UserTaskType,SimpleAppInputType} from '~/types'
+import {simpleapprove} from './'
+const props = defineProps<{
+    processName:string
+    taskName:string
+    data:any
+}>()
+const modelValue = defineModel<{decision:string,description:string}>()
+const emit = defineEmit('submit')
+const validateCallBack = async (errors:any)=>{
+    // console.log("After validate",result)
+    if(!errors){
+        emit('submit',modelValue)
+    }
+}
+</script>

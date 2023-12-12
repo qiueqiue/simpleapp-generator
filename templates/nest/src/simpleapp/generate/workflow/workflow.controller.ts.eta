@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { WorkflowService } from './workflow.service';
 import { UserTaskActors } from './workflow.type';
-import { Roles } from '../simpleapp/generate/commons/roles/roles.decorator';
-import { Role } from '../simpleapp/generate/commons/roles/roles.enum';
+import { Roles } from '../commons/roles/roles.decorator';
+import { Role } from '../commons/roles/roles.enum';
 import {
   WorkflowDataApiSchema,
   WorkflowProcessApiSchema,
@@ -21,8 +21,8 @@ import {
   UserTaskApiSchema,
 } from './workflow.apischema';
 import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { AppUser } from '../simpleapp/generate/commons/decorators/appuser.decorator';
-import { UserContext } from '../simpleapp/generate/commons/user.context';
+import { AppUser } from '../commons/decorators/appuser.decorator';
+import { UserContext } from '../commons/user.context';
 @ApiTags('workflow')
 @Controller('workflow')
 export class WorkflowController {

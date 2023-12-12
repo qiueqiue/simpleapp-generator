@@ -1,8 +1,0 @@
-export const suspendCustomer = async (vars, context) => {
-  console.log(
-    'suspendInvoicesuspendInvoicesuspendInvoice instance data',
-    context.instance.data,
-    ' item vars: ',
-    context.item.vars,
-  );
-};

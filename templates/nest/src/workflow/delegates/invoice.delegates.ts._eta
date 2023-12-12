@@ -1,9 +1,0 @@
-    import { Injectable } from "@nestjs/common";
-
-    @Injectable()
-    export class InvoiceDelegates{
-        constructor(){}
-        confirmInvoice(inputs:any){
-            console.log("Confirm Invoice Delegates",inputs)
-        }
-    }

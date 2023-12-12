@@ -8,7 +8,7 @@ const log: Logger<ILogObj> = new Logger();
 
 let config = {
     "jsonschemaFolder":"./jsonschemas",
-    "bpmnFolder":"./bpmn",
+    "bpmnFolder":"./workflows/bpmn",
     "backendFolder":"./backend", 
     "groupFolder":"./groups",
     "backendPort":"8000",

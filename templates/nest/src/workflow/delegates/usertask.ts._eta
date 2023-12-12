@@ -1,3 +1,0 @@
-export const userTaskMessage = (a,b,c) =>{
-    console.log("AAA",'BBB','CCC')
-}

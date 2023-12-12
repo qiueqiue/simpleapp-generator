@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { IExecution, Item, NODE_ACTION, FLOW_ACTION, IAppDelegate , IDefinition,BPMNServer} from "bpmn-server";
-import { moddleOptions} from 'bpmn-server/src/elements/js-bpmn-moddle';
+import { IExecution, Item, NODE_ACTION, FLOW_ACTION, IAppDelegate , IDefinition,BPMNServer} from "./bpmn-server";
+import { moddleOptions} from './bpmn-server/src/elements/js-bpmn-moddle';
 import {WorkflowDelegateService} from './workflow.delegateservice'
 // import * as dservice from './delegates'
 @Injectable()
