@@ -26,7 +26,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { BPMNServer, Logger as bpmnlogger } from './bpmn-server';
 // import { configuration } from './configuration';
 import { UserContext } from '../commons/user.context';
-import * as formschemas from '../../workflow/formschema';
+//import * as formschemas from '../../workflow/formschema';
 export {
   WorkflowSettingApiSchema,
   WorkflowDataApiSchema,
@@ -365,15 +365,7 @@ export class WorkflowService {
       let node = definition.getNodeById(elementId);
       if (node) {
         const formKey = node.def.formKey;
-        let schema: string = '';
-        if (formKey.includes('jsonschema://')) {
-          const keyname = formKey.replace('jsonschema://', '');
-          schema = formschemas[keyname];
-        } else if (formKey.includes('custom://')) {
-          schema = formKey;
-        } else {
-          //others implementation like http://, https:// and etc
-        }
+        let schema: string = node.def.formKey;
 
         if (schema) {
           return {
@@ -383,7 +375,7 @@ export class WorkflowService {
           };
         } else {
           throw new InternalServerErrorException(
-            `Cannot resolve schema from invalid formKey '${formKey}', example: 'jsonschema://SimpleApproveReject' or 'custom://your-custom-key'`,
+            `Cannot resolve schema from invalid formKey '${schema}', example: 'jsonschema://SimpleApproveReject' or 'custom://your-custom-key'`,
           );
         }
       } else {

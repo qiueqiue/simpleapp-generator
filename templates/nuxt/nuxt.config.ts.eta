@@ -83,7 +83,7 @@ tailwindcss: {
       exclude: ['chart']
     }, 
     directives: {
-      include: ['Ripple', 'Tooltip']
+      include: ['Ripple', 'Tooltip','BadgeDirective']
     },
     cssLayerOrder: 'tailwind-base, primevue, tailwind-utilities',
     importPT: { as: 'SimpleAppPT', from:  path.resolve(__dirname,'./assets/primevue/passthrough.ts') },

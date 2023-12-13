@@ -25,6 +25,7 @@
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.5.0",
+    "bpmn-moddle": "^8.0.1",
     "child_process": "^1.0.2",
     "cli-color": "^2.0.3",
     "commander": "^11.0.0",
@@ -34,6 +35,7 @@
     "json-schema": "^0.4.0",
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
+    "moddle-xml": "^10.1.0",
     "path": "^0.12.7",
     "tslog": "^4.9.1"
   },

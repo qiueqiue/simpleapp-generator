@@ -22,7 +22,10 @@ import { WorkflowController } from './generate/workflow/workflow.controller';
 import { WorkflowDelegate } from './generate/workflow/workflow.delegate';
 import { WorkflowConfig } from './generate/workflow/workflow.config';
 import { WorkflowService } from './generate/workflow/workflow.service';
-import {WorkflowDelegateService} from './generate/workflow/workflow.delegateservice'
+<%for(let i=0; i<it.allbpmn.length;i++){%>
+<%let bpmn = it.allbpmn[i]%>
+import { <%=capitalizeFirstLetter(bpmn)%>DelegateService } from 'src/simpleapp/workflows/delegates/<%=bpmn%>.delegate';
+<%}%>
 // import {ServiceModule} from  "../services/service.module"
 //import { <%= it.typename %>Service } from '../../generate/<%= it.doctype %>/<%= it.doctype %>.service';
 
@@ -40,7 +43,13 @@ import {WorkflowDelegateService} from './generate/workflow/workflow.delegateserv
       ]),
   ],
   controllers: [<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Controller,<%}%> ProfileController,WorkflowController],
-  providers: [AuditTrail,DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,WorkflowDelegateService,WorkflowDelegate,WorkflowConfig,WorkflowService],
-  exports:[AuditTrail,DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,WorkflowDelegateService,WorkflowDelegate,WorkflowConfig,WorkflowService]
+  providers: [
+    AuditTrail,DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,WorkflowDelegate,WorkflowConfig,WorkflowService,
+     <%for(let i=0; i<it.allbpmn.length;i++){%>
+        <%let bpmn = it.allbpmn[i]%>
+        <%=capitalizeFirstLetter(bpmn)%>DelegateService,
+    <%}%>
+  ],
+  exports:[AuditTrail,DocNumberFormatGenerator,<% for(let i=0;i<it.modules.length; i++){ %><%= it.modules[i].docname %>Service,<%}%> ProfileService,WorkflowDelegate,WorkflowConfig,WorkflowService]
 })
 export class GenerateModule {}

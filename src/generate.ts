@@ -28,6 +28,7 @@ let frontendFolder=''
 let backendFolder=''
 let frontendpagefolder=''
 const allroles:any={}
+let allbpmn:any = {}
 let activatemodules:ModuleObject[]=[]
 let generateTypes:any = {}
 
@@ -82,9 +83,14 @@ export const run =  async (paraconfigs:any,genFor:string[],callback:Function) =>
     const roles = prepareRoles(groupdata)
     allroles[documentname]=roles
   }
-
-  generateSystemFiles(activatemodules)
-  await generateWorkflows(configs)
+  
+  
+  if(configs.bpmnFolder){
+    allbpmn = await generateWorkflows(configs,genFor)
+  }
+  
+  generateSystemFiles(activatemodules,allbpmn)
+  
   callback()
 }
 
@@ -336,13 +342,14 @@ const generateSchema = ( docname: string,
 }
 
 
-const generateSystemFiles=(modules:ModuleObject[])=>{  
+const generateSystemFiles=(modules:ModuleObject[],allbpmn)=>{  
   const renderProperties = {
     configs:configs,
     modules:modules,
     allroles:allroles,
     foreignkeys:allforeignkeys,
-    allfields:allfields
+    allfields:allfields,
+    allbpmn: allbpmn
   }
   
   

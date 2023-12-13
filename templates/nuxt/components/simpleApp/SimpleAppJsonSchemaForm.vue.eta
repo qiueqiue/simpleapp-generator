@@ -10,11 +10,11 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 import _ from 'lodash'
-const modelValue = defineModel()
+
     const props = defineProps<{
         title?:string,
         schema:JSONSchema7,
-        // data:any,
+        data:any,
         // document: SimpleAppClient<any,any>
         readonly?:boolean
     }>()
@@ -37,9 +37,7 @@ const modelValue = defineModel()
         } //as SimpleAppFieldSetting
     }
 
-    const getModelValue=(data:any,path:string)=>{
-
-    }
+    
     const getIsRequired=(schema:any,path:string)=>{
         if(!path){
             console.error('unknown path')
@@ -142,7 +140,8 @@ const modelValue = defineModel()
     // this.errorlist.value = {};
     // this.hook('pre-validation', this.data.value);
     const validate = ajv.compile(props.schema);
-    const valid = validate(modelValue.value);
+    console.log("validate data",props.data)
+    const valid = validate(props.data);
     if (!valid) {
       const errors = validate.errors;
       const tmp: { [key: string]: any } = {};

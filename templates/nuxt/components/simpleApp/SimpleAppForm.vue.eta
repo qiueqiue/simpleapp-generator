@@ -21,7 +21,7 @@ import _ from 'lodash'
     const getField = (path:string)=>{
         // console.log("simpleform topath",path)
         const data = props.document.getData()
-        const schema = props.document.getSchema()
+        const schema = props.document.getSchema() as JSONSchema7 //force type for compatibility
         const fieldsetting = getPathObject(schema,path)
         // console.log("setting",fieldsetting)
         

@@ -1,0 +1,10 @@
+import dynamicfield from './dynamicfield.vue'
+import simpleapprove from './simpleapprove.vue'
+
+const forms: {[key:string]:Component}={
+    dynamicfield:dynamicfield,
+    simpleapprove:simpleapprove
+}
+
+export const getFormComponent =(formkey:string)=> forms[formkey] ?? forms['dynamicfield']
+export {dynamicfield,simpleapprove}

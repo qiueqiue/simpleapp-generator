@@ -25,7 +25,9 @@ export default {
     submit: 'Submit',
     decision: 'Decision',
     simpleApproveMessage: 'Approve or reject',
-
+    suspendcustomer:"Suspend Customer",
+    formKeyNotFound:'Formkey not found "{formKey}"',
+    
     //auto generate from schema
     <% for(let i=0; i< it.allfields.length; i++){ %>
     <% let f = it.allfields[i] %>

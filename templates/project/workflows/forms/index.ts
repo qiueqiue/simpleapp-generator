@@ -1,1 +1,0 @@
-export simpleapprove from './simpleapprove'
