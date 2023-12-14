@@ -7,7 +7,7 @@ import {
   NoCacheManager,
   CacheManager,
   BPMNServer,
-} from './bpmn-server';
+} from 'bpmn-server';
 import { WorkflowDelegate } from './workflow.delegate';
 
 let _this:WorkflowConfig  //we need another variable to access WorkflowConfig 

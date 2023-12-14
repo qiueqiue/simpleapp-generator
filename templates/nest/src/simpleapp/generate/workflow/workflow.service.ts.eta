@@ -23,7 +23,7 @@ import {
   UserTaskType,
 } from './workflow.type';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BPMNServer, Logger as bpmnlogger } from './bpmn-server';
+import { BPMNServer, Logger as bpmnlogger } from 'bpmn-server';
 // import { configuration } from './configuration';
 import { UserContext } from '../commons/user.context';
 //import * as formschemas from '../../workflow/formschema';

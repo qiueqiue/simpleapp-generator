@@ -1,8 +1,9 @@
 # Nuxt dev/build outputs
-/composables/*.generate.ts
-/simpleapp/generate
-/server/api/[xorg]
-/server/api/auth
+composables/*.generate.ts
+simpleapp/generate
+simpleapp/workflows/bpmn
+server/api/[xorg]
+server/api/auth
 .output
 .data
 .nuxt
