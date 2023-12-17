@@ -9,6 +9,7 @@ import {
   Controller,
   Get,
   Put,
+  Patch,
   Post,
   Delete,
   Body,
@@ -189,7 +190,7 @@ export class <%= it.typename %>Controller extends SimpleAppAbstractController<
               <%= api['queryPara'][q] %>,              
             <%}%>
         <%}%>
-        <%if(['post','put'].includes(api.method.toLowerCase())){%>
+        <%if(['post','put','patch'].includes(api.method.toLowerCase())){%>
           data,
         <%}%>
         )

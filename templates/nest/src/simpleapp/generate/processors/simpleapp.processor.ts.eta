@@ -595,7 +595,7 @@ export class SimpleAppService<T extends { _id?: string }> {
   }
 
   startWorkflow(appuser:UserContext,processName:string,workflowData:any){
-    return this.eventEmitter.emit('workflow.start',appuser,'suspendcustomer',workflowData)
+    return this.eventEmitter.emit('workflow.start',appuser,processName,workflowData)
   }
 
   async genNewDocNo(appuser: UserContext, data: T) {

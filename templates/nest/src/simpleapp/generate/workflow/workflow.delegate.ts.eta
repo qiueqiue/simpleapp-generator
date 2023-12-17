@@ -1,4 +1,8 @@
-import { Injectable,Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import {
   IExecution,
   Item,
@@ -7,41 +11,37 @@ import {
   IAppDelegate,
   IDefinition,
   BPMNServer,
+  Execution,
 } from 'bpmn-server';
-import { moddleOptions } from 'bpmn-server/src/elements/js-bpmn-moddle';
-
-<%for(let i=0; i<it.allbpmn.length;i++){%><%let bpmn = it.allbpmn[i]%>
-import { <%=capitalizeFirstLetter(bpmn)%>DelegateService } from 'src/simpleapp/workflows/delegates/<%=bpmn%>.delegate';
-<%}%>
-// import * as dservice from './delegates'
+import { moddleOptions } from 'bpmn-server/dist/elements/js-bpmn-moddle';
+let mydelegate: WorkflowDelegate;
 @Injectable()
 export class WorkflowDelegate implements IAppDelegate {
   protected logger = new Logger();
   server: BPMNServer;
-  servicesProvider: any;
-  constructor(
-    <%for(let i=0; i<it.allbpmn.length;i++){%>
-        <%let bpmn = it.allbpmn[i]%>
-        private <%=bpmn%>DelegateService: <%=capitalizeFirstLetter(bpmn)%>DelegateService,
-    <%}%>
-  ) {
-    this.servicesProvider = {
-           <%for(let i=0; i<it.allbpmn.length;i++){%>
-            <%let bpmn = it.allbpmn[i]%>
-            <%= bpmn%>: this.<%=bpmn%>DelegateService,
-           <%}%>
-    }
-  }
+  servicesProvider: any = () => new Object();
+  constructor() {}
+  getServicesProvider = (execution: Execution) => this.servicesProvider;
+
   //config will use setServer to define bpmnserver
   setServer(server: BPMNServer) {
+    mydelegate = this;
     this.server = server;
-    let self = this;
-    server.listener.on('all', async function ({ context, event }) {
-      await self.executionEvent(context, event);
-    });
+    return mydelegate;
   }
 
-  startUp(options) {}
+  async startUp(options) {
+    //  mydelegate.startUp(options);
+    // if (options['cron'] == false) {
+    // 	return;
+    // }
+    //     console.log('myserver started');
+    //     var query = { "items.status": "start" };
+    //     var list = await this.server.dataStore.findItems(query);
+    //     if (list.length > 0) {
+    //         this.server.logger.log("** There are " + list.length," items that seems to be hung");
+    //     }
+  }
   sendEmail(to, msg, body) {
     throw Error('sendEmail must be implemented by AppDelegate');
   }
@@ -90,24 +90,61 @@ export class WorkflowDelegate implements IAppDelegate {
       );
     } else await this.issueSignal(signalId, data);
   }
-  
-  async serviceCalled(delegateServiceName:string, inputdata, item: Item) {   
-    const processName = item['instance']['name']
-    const data = item['instance']['data']
-    const vars = item['instance']['vars']
-    const props = {
-      processName: processName,
-      delegateName: delegateServiceName,
-      inputData: inputdata,
-      vars: vars,
-      data: data
-    }    
-    if (this.servicesProvider[processName] &&  this.servicesProvider[processName][delegateServiceName]) {
-      this.servicesProvider[processName][delegateServiceName](props,item);
-    }else{
-        this.logger.error(`Undefined delegate service "${processName}":"${delegateServiceName}"`,props)
+
+  consoleKeyTypes = (obj1) => {
+    const keys = Object.getOwnPropertyNames(obj1);
+    console.log('consoleKeyTypesconsoleKeyTypesconsoleKeyTypes', keys);
+    for (let k = 0; k < keys.length; k++) {
+      const key = keys[k];
+
+      if (!obj1[key]) {
+        console.log(key, 'empty ');
+      } else if (typeof obj1[key] == 'object') {
+        console.log(key, typeof obj1[key], Object.keys(obj1[key]));
+      } else {
+        console.log(key, typeof obj1[key], obj1[key]);
+      }
     }
-    
+  };
+  async serviceCalled(inputdata, item: Item) {
+    // try{
+    //server
+    //uids
+    //instance
+    //definition
+    //process  =>[ '$type', 'id', 'isExecutable', 'flowElements' ]
+    //Item => cant get
+    //state
+    // this.logger.error('EXECUTING serviceCalled');
+    //   const delegateServiceName = item['item']['element']['def']['delegateExpression']
+    //   this.logger.error("EXECUTING serviceCalled",delegateServiceName)
+    //   const processName = item['instance']['name'];
+    //   const data = item['instance']['data'];
+    //   const vars = item['instance']['vars'];
+    //   const props = {
+    //     processName: processName,
+    //     delegateName: delegateServiceName,
+    //     inputData: inputdata,
+    //     vars: vars,
+    //     data: data,
+    //   };
+    // if (
+    //   this.servicesProvider[processName] &&
+    //   this.servicesProvider[processName][delegateServiceName]
+    // ) {
+    //   this.servicesProvider[processName][delegateServiceName](props, item);
+    // } else {
+    //   this.logger.error(
+    //     `Undefined delegate service "${processName}":"${delegateServiceName}"`,
+    //     props,
+    //   );
+    // }
+    // }catch(e){
+    //   this.logger.error(
+    //     `Unknown error delegate service `,
+    //     Object.keys(item)
+    //   );
+    // }
   }
 
   scopeEval(scope, script) {

@@ -21,9 +21,13 @@ import {
   WorkflowTask,
   UserTaskActors,
   UserTaskType,
+  ServiceTaskData,
+  UserTaskData,
+  UserTaskEventType,
+  ServiceTaskEventType
 } from './workflow.type';
-import { OnEvent } from '@nestjs/event-emitter';
-import { BPMNServer, Logger as bpmnlogger } from 'bpmn-server';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { BPMNServer, Logger as bpmnlogger ,BPMN_TYPE, EXECUTION_EVENT} from 'bpmn-server';
 // import { configuration } from './configuration';
 import { UserContext } from '../commons/user.context';
 //import * as formschemas from '../../workflow/formschema';
@@ -37,9 +41,11 @@ export class WorkflowService {
   protected bpmnServer: BPMNServer;
   private readonly logger = new Logger();
   constructor(
-    private workflowconfig:  WorkflowConfig
-  ) {
+    private workflowconfig: WorkflowConfig,
+    private eventEmitter: EventEmitter2
+    ) {
     this.bpmnServer = new BPMNServer(this.workflowconfig.getConfig());
+    this.bpmnServer.listener.on('all',async (event)=>await this.applyEventListener(event))
   }
 
   /**
@@ -48,6 +54,7 @@ export class WorkflowService {
    * @returns array of usertask
    */
   async getActorUserTask(appuser: UserContext, uid: string) {
+    
     const tmp: any[] = await this.bpmnServer.dataStore.findItems({
       'items.status': 'wait',
       'data.tenantId': appuser.getTenantId(),
@@ -204,7 +211,7 @@ export class WorkflowService {
     appuser: UserContext,
     id: string,
     taskId: string,
-    data: UserTaskActors,
+    assignmentdata: UserTaskActors,
   ) {
     try {
       const result = await this.bpmnServer.dataStore.findInstance(
@@ -216,9 +223,10 @@ export class WorkflowService {
       if (usertask) {
         const result = await this.bpmnServer.engine.assign(
           { id: id, 'items.id': taskId },
-          { newData: 1 },
+          { newData: 1 }, //some data want to put in
+          assignmentdata,
           appuser.getUid(),
-          data,
+          {}, //options
         );
         return 'OK'; //Object.keys(result)
       } else {
@@ -290,7 +298,7 @@ export class WorkflowService {
   @OnEvent('workflow.start')
   async startWorkflow(appuser: UserContext, workflowName: string, data?: any) {
     try {
-      console.log("startWorkflow started: " ,workflowName)
+      console.log('startWorkflow started: ', workflowName);
       data.tenantId = appuser.getTenantId();
       data.orgId = appuser.getOrgId();
       data.branchId = appuser.getBranchId();
@@ -299,13 +307,15 @@ export class WorkflowService {
         data,
         undefined,
         appuser.getUid(),
-        appuser.getBranchFilter(),
+        // appuser.getBranchFilter(),
       );
+
+      // console.log("startWorkflowstartWorkflowstartWorkflow",result)
       return {
         id: result.id,
         name: result.name,
         status: result.status,
-        userId: result.userId,
+        userId: result.userName,
         startedAt: result.item.startedAt,
       };
     } catch (e) {
@@ -411,7 +421,67 @@ export class WorkflowService {
           type: item.type,
         })),
     };
-
     return result;
+  }  
+
+
+  /**
+   * listen all events in bpmn-server engine, inclduded task and execution instances
+   * @param event bpmn-server event instance
+   */
+  async applyEventListener(event){         
+
+    if(event.context.item){
+      const workflowName:string = event.context.instance.name      
+      const eventType:EXECUTION_EVENT = event.event
+      const elementType:BPMN_TYPE = event.context.item.element.type
+      const elementId:string = event.context.item.element.id
+      const elementName:string = event.context.item.element.name
+      const elementProps = event.context.item.element.def
+      const usertaskinput =  event.context.item.input ?? null
+      const data =  event.context.instance.data      
+      switch(elementType){
+        case BPMN_TYPE.UserTask:
+          let usertaskeventtype: UserTaskEventType
+          if(eventType==EXECUTION_EVENT.node_start) usertaskeventtype='start'
+          else if(eventType==EXECUTION_EVENT.node_assign) usertaskeventtype='assign'
+          else if(eventType==EXECUTION_EVENT.node_end) usertaskeventtype='end'
+          else if(eventType==EXECUTION_EVENT.transform_input) usertaskeventtype='invoke'
+          else if(eventType==EXECUTION_EVENT.node_wait) usertaskeventtype='wait'
+          if(usertaskeventtype){
+            const props:UserTaskData = {
+              workflowName: workflowName,
+              eventType: usertaskeventtype,
+              elementType:'bpmn:UserTask',
+              elementId: elementId,
+              elementName: elementName,
+              elementProps: elementProps,
+              usertaskinput: usertaskinput,
+              data: data,
+            }
+            this.eventEmitter.emit(`${workflowName}.${elementId}.${eventType}`,props)      
+          }          
+          break;
+        case BPMN_TYPE.ServiceTask:
+          let servicetaskeventtype: ServiceTaskEventType
+          if(eventType==EXECUTION_EVENT.node_start) servicetaskeventtype='start'
+          else if(eventType==EXECUTION_EVENT.node_end) servicetaskeventtype='end'
+          if(servicetaskeventtype){
+            const props:ServiceTaskData = {
+              workflowName: workflowName,
+              eventType: servicetaskeventtype,
+              elementType:'bpmn:ServiceTask',
+              elementId: elementId,
+              elementName: elementName,
+              elementProps: elementProps,
+              data: data,
+            }
+            this.eventEmitter.emit(`${workflowName}.${elementId}.${eventType}`,props)      
+          }
+          break;
+        default://do nothing at the moment
+        break;
+      }                
+    }    
   }
 }

@@ -13,7 +13,7 @@ import { User } from "src/simpleapp/services/user.service";
 import { Permission } from "src/simpleapp/services/perm.service";
 
 @Injectable()
-export class SimpleAppDelegateService {
+export class SimpleAppListenerService {
     logger = new Logger()
     @InjectModel('User') private readonly usermodel: Model<User>
     @InjectModel('Permission') private readonly permmodel: Model<Permission>

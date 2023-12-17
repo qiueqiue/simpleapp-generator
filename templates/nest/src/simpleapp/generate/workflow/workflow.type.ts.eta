@@ -58,3 +58,26 @@ export type UserTaskType = {
   type: string;
   userId: string;
 };
+
+export type UserTaskEventType = 'start'|'wait'|'invoke'|'end'|'assign'
+export type UserTaskData ={
+  workflowName: string
+  eventType: 'start'|'wait'|'invoke'|'end'|'assign' //assign = modify properties but not change state
+  elementType: 'bpmn:UserTask'
+  elementId: string
+  elementName: string
+  elementProps: any
+  usertaskinput: any
+  data: any
+}
+export type ServiceTaskEventType = 'start'|'end'
+export type ServiceTaskData ={
+  workflowName: string
+  eventType: 'start'|'end'
+  elementType: 'bpmn:ServiceTask'
+  elementId: string
+  elementName: string
+  elementProps: any,  
+  data: any,
+}
+

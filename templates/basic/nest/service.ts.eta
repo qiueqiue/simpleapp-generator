@@ -81,7 +81,7 @@ export class <%= it.typename %>Service extends <%= it.typename %>Processor {
               <%=qp%>: string,
             <%}%>
         <%}%>
-        <%if(['post','put'].includes(api.method.toLowerCase())){%>
+        <%if(['post','put','patch'].includes(api.method.toLowerCase())){%>
             data:any,
         <%}%>
          ){
