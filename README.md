@@ -20,14 +20,19 @@ SimpleApp generator is a typescript code generator for convert jsonschemas becom
   e. openapi interface [x]
   f. pdf document []
   g. document uploads[]
-  h. workflow integration[]
+8. BPMN workflow integration
+  a. streamline business flow with BPMN
+  b. implement philosophy of bpmn documentation is source code
+  c. fill in minimal source code in generated listener to run whole bpmn process
+  d. build in integrate between both frontend and backend
+  e. declare workflow in jsonschema
 
 # Documentation
 1. [jsonschemas](./docs/jsonschema.md)
 2. [backend walk through](./docs/backend.md)
 3. [frontend walk through](./docs/frontend.md)
 4. [End to End test](./docs/test.md)
-
+5. [BPMN walk through](./docs/bpmn.md)
 
 # Quick start
 1. Simpleapp implement database transaction, and require mongodb cluster, below setup 3 nodes
