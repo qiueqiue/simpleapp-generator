@@ -58,10 +58,9 @@ export type MoreProjectionType = {
 };
 @Injectable()
 export class SimpleAppService<T extends { _id?: string }> {
-  
   @Inject(EventEmitter2)
-  protected eventEmitter: EventEmitter2
-  
+  protected eventEmitter: EventEmitter2;
+
   protected logger = new Logger();
   protected strictIsolation = true;
   protected jsonschema = { type: 'object', properties: {}, required: [] };
@@ -298,7 +297,15 @@ export class SimpleAppService<T extends { _id?: string }> {
       await this.genNewDocNo(appuser, data);
     }
 
-    await this.hook(appuser, HookType.beforeCreate, data);
+    let befCreateResult = await this.hook(appuser, HookType.beforeCreate, data);
+      let errormsg: string = '';
+      if(!befCreateResult){
+        errormsg='Fail to Create';
+        throw new BadRequestException(
+          'Before create hook failed',
+          errormsg as HttpExceptionOptions,
+        );
+      }
 
     let isolationFilter: any = { ...appuser.getCreateFilter() };
     isolationFilter = this.polishIsolationFilter(isolationFilter, data);
@@ -453,7 +460,16 @@ export class SimpleAppService<T extends { _id?: string }> {
 
     let dependency;
     try {
-      await this.hook(appuser, HookType.beforeDelete, id);
+      let befDelResult = await this.hook(appuser, HookType.beforeDelete, id);
+      let errormsg: string = '';
+      if(!befDelResult){
+        errormsg='Fail to delete';
+        throw new BadRequestException(
+          'Before Delete hook failed',
+          errormsg as HttpExceptionOptions,
+        );
+      }
+
       this.logger.debug('delete record', this.documentName, id);
       dependency = await this.getRelatedRecords(id);
       //console.log('dependency', dependency);
@@ -503,7 +519,16 @@ export class SimpleAppService<T extends { _id?: string }> {
     if (!existingdata) {
       throw new NotFoundException(`${id} not found`, 'not found');
     }
-    await this.hook(appuser, HookType.beforeUpdate, data);
+    
+    let befUpdateResult = await this.hook(appuser, HookType.beforeUpdate, data);
+      let errormsg: string = '';
+      if(!befUpdateResult){
+        errormsg='Fail to Update';
+        throw new BadRequestException(
+          'Before update hook failed',
+          errormsg as HttpExceptionOptions,
+        );
+      }
 
     const dbsession = appuser.getDBSession();
     if (!dbsession.inTransaction()) {
