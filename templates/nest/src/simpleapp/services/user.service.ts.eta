@@ -63,4 +63,119 @@ export class UserService extends UserProcessor {
     }
     return true;
   };
+
+  /***************************** begin x-document-api definations *****************************************/
+  async runMoredata(appuser: UserContext, data: any) {
+    let catlist = [];
+
+    if (!data.filter) {
+      data.filter = {};
+    }
+    if (!data.sort) {
+      data.sort = {};
+    }
+    if (!data.fields) {
+      data.fields = {};
+    }
+    if (!data.sort) {
+      data.sort = {};
+    }
+
+    catlist = await this.search(appuser, data.filter, data.fields, data.sort);
+    catlist = this.processdata(appuser, catlist);
+
+    return catlist;
+  }
+
+  processdata = <T>(appuser, objects: T[]): any[] => {
+    const newobjarr: any[] = [];
+    objects.map((obj) => {
+      let opportunitycount = 0;
+      let clientcount = 0;
+      let activitycount = 0;
+
+      // Assuming obj has an 'activity' array property
+      const opportunityArray = (obj as any).opportunity as any[];
+
+      opportunityArray.forEach((act) => {
+        opportunitycount++;
+      });
+
+      const clientArray = (obj as any).client as any[];
+
+      clientArray.forEach((act) => {
+        clientcount++;
+      });
+      const activityArray = (obj as any).activity as any[];
+
+      activityArray.forEach((act) => {
+        activitycount++;
+      });
+
+      let newObj: any = {}; // Initialize newObj as an empty object
+      // const newObj: any = { ...obj };
+      Object.keys(obj).forEach((key) => {
+        if (key === '_doc') {
+          // Loop through the keys inside _doc and add them to newObj
+          Object.keys(obj[key]).forEach((docKey) => {
+            newObj[docKey] = obj[key][docKey].toString();
+          });
+        } else {
+          newObj[key] = obj[key].toString();
+        }
+      });
+      newObj['opportunityCount'] = opportunitycount.toString();
+      newObj['clientCount'] = clientcount.toString();
+      newObj['activityCount'] = activitycount.toString();
+      // newObj['subtext']='Opportunity: ' + opportunitycount.toString()
+      // newObj['clienttext']='Client: ' + clientcount.toString()
+      // newObj['activitytext']='Act.: ' + clientcount.toString()
+
+      newobjarr.push(newObj);
+      this.findIdThenUpdate(appuser, newObj['_id'], newObj);
+    });
+    return newobjarr;
+  };
+
+  async runSearchCertainValue(appuser: UserContext, data: any) {
+    /*
+       data 
+       {
+         value: xxx,
+         fields:[
+         "",
+         ""
+         ]
+       }
+   */
+
+    if (!data || !data.value || !data.fields || !Array.isArray(data.fields)) {
+      return this.runMoredata(appuser, {});
+    }
+
+    try {
+      // Initialize newfilters as an empty object
+      const newfilters: Record<string, any> = {};
+      const orConditions: any[] = [];
+
+      // Convert values to regular expressions for "contains" search
+      data.fields.forEach((field: string) => {
+        const regex = new RegExp(`${data.value}`, 'i');
+        newfilters[field] = { $regex: regex };
+
+        const orCondition: any = {};
+        orCondition[field] = { $regex: regex };
+        orConditions.push(orCondition);
+      });
+
+      const products = await this.doc.find({ $or: orConditions });
+
+      const productlist = products.map((p: any) => p);
+      return productlist;
+    } catch (err) {
+      throw new BadRequestException();
+    }
+  }
+
+  /***************************** end x-document-api definitions *****************************************/
 }
